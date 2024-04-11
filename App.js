@@ -26,7 +26,7 @@ import {
 } from 'react-native/Libraries/NewAppScreen';
 import LoginScreen from './src/Screen/LoginScreen';
 import { NavigationContainer } from '@react-navigation/native';
-import New from './src/Screen/New';
+import MyTabs from './src/Component/createBattomTab';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
  const Stack = createNativeStackNavigator();
@@ -45,8 +45,8 @@ function App() {
   return (
        <NavigationContainer>
         <Stack.Navigator>
-         <Stack.Screen name="LoginScreen" component={LoginScreen} />
-         <Stack.Screen name="New" component={New} />
+         <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown:false}} />
+         <Stack.Screen name="MyTabs" component={MyTabs} />
         </Stack.Navigator>
        </NavigationContainer>
    

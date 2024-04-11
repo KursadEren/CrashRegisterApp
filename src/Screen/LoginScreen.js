@@ -11,7 +11,7 @@ function LoginScreen({navigation}) {
 
     const LoginButton = () =>{
         
-        navigation.navigate("New");
+        navigation.navigate("MyTabs");
     }
 
   return (
