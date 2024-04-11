@@ -1,11 +1,12 @@
 import { View, Text } from 'react-native'
-import React from 'react'
-import MyDataTable from '../Component/MyDataTable'
 
+import MyDataTable from '../Component/MyDataTable'
+import MyFlatlist from '../Component/MyFlatlist'
+import React, { useEffect, useState } from 'react';
 export default function Home() {
-  return (
+  return(
     <View>
-      <MyDataTable/>
+      
     </View>
-  )
+  );
 }

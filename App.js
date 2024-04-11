@@ -5,29 +5,30 @@
  * @format
  */
 
-import React from 'react';
+import React,{ReactDOM} from 'react';
 
 import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
+  
   StyleSheet,
-  Text,
+  
   useColorScheme,
-  View,
+ 
 } from 'react-native';
 
 import {
   Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
+  
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 import LoginScreen from './src/Screen/LoginScreen';
 import { NavigationContainer } from '@react-navigation/native';
 import MyTabs from './src/Component/createBattomTab';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+
+import { makeServer } from './src/MockAPI/Server'; // Mirage sunucusunu içe aktarıyoruz
+
+
+
 
  const Stack = createNativeStackNavigator();
 
