@@ -21,7 +21,7 @@ import { TextInput } from 'react-native-paper'
      <TextInput
       label={label1}
       value={text}
-      secureTextEntry={isSecureTextEntry}
+     secureTextEntry={label1 === "password" ? isSecureTextEntry : false}
       onChangeText={handleTextChange}
       right={
         icon ? (

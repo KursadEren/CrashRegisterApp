@@ -1,49 +1,92 @@
-import { View,  StyleSheet, Alert,  } from 'react-native'
-import React from 'react';
+import React, { useState } from 'react';
+import { View, StyleSheet, Alert } from 'react-native';
+import axios from 'axios';
 
-import MyTextınput from '../Component/MyTextınput';
+import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
 
-function LoginScreen({navigation}) {
-    const [text, setText] = React.useState("");
-    const [Id, setId] = React.useState("");
-    const [password, setPassword] = React.useState("");
+const API_URL = 'http://localhost:3000';
 
-    const LoginButton = () =>{
-        
-        navigation.navigate("MyTabs");
-    }
+function LoginScreen({ navigation }) {
+    const [username, setUsername] = useState("");
+    const [password, setPassword] = useState("");
+    
 
-  return (
-    <View style={style.Container}>
-        
-        <View style={style.TextInputContainer} >
-            <MyTextınput onChangeText={setId} label1="Id"  />
-            </View>
-            <View style={style.TextInputContainer} >
-            <MyTextınput onChangeText={setPassword} label1="password"  />
-        </View>
-        <View style={style.TextInputContainer}>
-            <MyButton iconname={"login"} OnChangeButton={LoginButton} text={"Giriş"}/>
-        </View>
 
-       
-       
-    </View>
-  )
+    
   
+    const handleLogin = async () => {
+        if (!username || !password) {
+            console.error('Kullanıcı adı veya şifre boş olamaz.');
+            return;
+        }
+    
+        try {
+            // Sunucudan kullanıcıları al
+            const response = await axios.get(`${API_URL}/data1`);
+    
+            // Kullanıcılar başarıyla alındıysa
+            if (response.status === 200) {
+                // Kullanıcıları JSON formatında al
+                const users = response.data;
+                 
+                // Kullanıcı adını içeren bir kullanıcı bul
+                const foundUser = users.find(user => user.username === username);
+                console.log(foundUser);
+                // Kullanıcı bulunduysa
+                if (foundUser) {
+                    // Şifre kontrolü
+                    if (foundUser.password === password) {
+                        // Giriş başarılı, istediğiniz işlemi yapabilirsiniz
+                        navigation.navigate("MyTabs");
+                        return;
+                    } else {
+                        // Yanlış şifre
+                        Alert.alert("Hata", "Kullanıcı adı veya şifre yanlış.");
+                    }
+                } else {
+                    // Kullanıcı bulunamadı
+                    Alert.alert("Hata", "Kullanıcı bulunamadı.");
+                }
+            } else {
+                // Sunucudan beklenmeyen bir cevap geldi
+                console.error('Beklenmeyen bir cevap:', response);
+            }
+        } catch (error) {
+            // İstek sırasında bir hata oluştu
+            console.error('İstek sırasında hata:', error);
+        }
+    }; 
+    
+    
+
+    
+
+    return (
+        <View style={styles.container}>
+            <View style={styles.textInputContainer}>
+                <MyTextInput onChangeText={setUsername} label1="Name" />
+            </View>
+            <View style={styles.textInputContainer}>
+                <MyTextInput onChangeText={setPassword} label1="password" secureTextEntry />
+            </View>
+            <View style={styles.textInputContainer}>
+                <MyButton iconname="login" OnChangeButton={handleLogin} text="Giriş Yap" />
+            </View>
+        </View>
+    );
 }
-const style =StyleSheet.create({
-    Container:{
-        flex:1,
-        borderWidth:1,
-        justifyContent:"center",
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        borderWidth: 1,
+        justifyContent: "center",
     },
-
-    TextInputContainer:{
-    paddingHorizontal:10,
-    paddingVertical:30,
+    textInputContainer: {
+        paddingHorizontal: 10,
+        paddingVertical: 30,
     }
-})
+});
+
 export default LoginScreen;

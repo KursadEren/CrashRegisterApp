@@ -21,7 +21,7 @@ export default function BasketScreen() {
     <View style={{flex:1}}>
       <MyDataTable/>
       <MyFlatlist/>
-      <View>
+      <View style={{flex:1}}>
       <Text>User List</Text>
       <Text>
         {users.map(user => (

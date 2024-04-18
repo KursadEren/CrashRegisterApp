@@ -1,7 +1,5 @@
-
-import React from 'react'
+import React, { useState } from 'react';
 import {
-  SafeAreaView,
   View,
   FlatList,
   StyleSheet,
@@ -10,6 +8,14 @@ import {
 } from 'react-native';
 
 const DATA = [
+  {
+    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+    title: 'First Item',
+  },
+  {
+    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
+    title: 'First Item',
+  },
   {
     id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
     title: 'First Item',
@@ -24,39 +30,51 @@ const DATA = [
   },
 ];
 
-const Item = ({title}) => (
-  <View style={styles.item}>
-    <Text style={styles.title}>{title}</Text>
-    <Text style={styles.title}></Text>
-    <Text style={styles.title}></Text>
-  </View>
-);
-
 const MyFlatlist = () => {
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={DATA}
-        renderItem={({item}) => <Item title={item.title} />}
-        keyExtractor={item => item.id}
-      />
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  const handleScroll = (event) => {
+    const contentOffset = event.nativeEvent.contentOffset.x;
+    const viewSize = event.nativeEvent.layoutMeasurement.width;
+    const index = Math.floor(contentOffset / viewSize);
+    setCurrentIndex(index);
+  };
+
+  const Item = ({title}) => (
+    <View style={styles.item}>
+      <Text style={styles.title}>{title}</Text>
     </View>
+  );
+
+  return (
+    <FlatList
+      data={DATA}
+      renderItem={({item}) => <Item title={item.title} />}
+      keyExtractor={item => item.id}
+      style={styles.container}
+      
+      onScroll={handleScroll}
+      showsHorizontalScrollIndicator={false}
+    />
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    borderWidth:1,
-    flex: 1,
+    margin:5,
+    borderBottomWidth:0.25,
+    marginVertical:10,
+    height: 150,
     marginTop: StatusBar.currentHeight || 0,
   },
   item: {
+    margin:10,
     backgroundColor: '#f9c2ff',
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 16,
-    justifyContent:"space-between",
-    flexDirection:"row"
+    justifyContent: 'space-between',
+    flexDirection: 'row',
   },
   title: {
     fontSize: 16,
