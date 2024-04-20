@@ -2,12 +2,13 @@ import { View, Text,TouchableOpacity } from 'react-native'
 import React from 'react'
 import { Card } from 'react-native-paper'
 
-export default function MyCard({CardName,CardColor}) {
+export default function MyCard({CardName,CardColor,CardPage,navigation}) {
 
     const onPressCard = () => {
         // Burada başka bir sayfaya geçiş yapmak için navigation.navigate() fonksiyonunu kullanabilirsiniz.
         // Örneğin, "Details" adında bir sayfaya geçmek için:
-        navigation.navigate('Details', { cardName: CardName }); // Details, hedef sayfanın adı, cardName ise göndermek istediğiniz veri
+        navigation.navigate(CardPage);
+ // Details, hedef sayfanın adı, cardName ise göndermek istediğiniz veri
       }
       return(
    

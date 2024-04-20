@@ -1,83 +1,112 @@
-import React, { useState } from 'react';
-import {
-  View,
-  FlatList,
-  StyleSheet,
-  Text,
-  StatusBar,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput } from 'react-native';
 
-const DATA = [
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: 'bd7acbea-c1b1-46c2-aed5-3ad53abb28ba',
-    title: 'First Item',
-  },
-  {
-    id: '3ac68afc-c605-48d3-a4f8-fbd91aa97f63',
-    title: 'Second Item',
-  },
-  {
-    id: '58694a0f-3da1-471f-bd96-145571e29d72',
-    title: 'Third Item',
-  },
-];
-
-const MyFlatlist = () => {
+const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [groupedData, setGroupedData] = useState([]);
 
-  const handleScroll = (event) => {
+  useEffect(() => {
+    handleSearch(searchQuery);
+  }, [searchQuery, data]);
+
+  useEffect(() => {
+    groupData(data);
+  }, [data]);
+
+  const groupData = (data) => {
+    const grouped = data.reduce((acc, item) => {
+      const existingItem = acc.find(group => group.id === item.id);
+      if (existingItem) {
+        existingItem.count++;
+      } else {
+        acc.push({ ...item, count: 1 });
+      }
+      return acc;
+    }, []);
+    setGroupedData(grouped);
+  };
+
+  const handleScroll = event => {
     const contentOffset = event.nativeEvent.contentOffset.x;
     const viewSize = event.nativeEvent.layoutMeasurement.width;
     const index = Math.floor(contentOffset / viewSize);
     setCurrentIndex(index);
   };
 
-  const Item = ({title}) => (
-    <View style={styles.item}>
-      <Text style={styles.title}>{title}</Text>
-    </View>
-  );
+  const handleSearch = query => {
+    setSearchQuery(query);
+    const filtered = groupedData.filter(item =>
+      item.title.toLowerCase().includes(query.toLowerCase())
+    );
+    setGroupedData(filtered);
+  };
+
+  const handleItemSelect = item => {
+    onItemSelect(item);
+  };
+
+  const handleItemRemove = item => {
+    onItemRemove(item);
+  };
+
+  const renderItem = ({ item }) => {
+    return (
+      <TouchableOpacity onPress={() => handleItemSelect(item)}>
+        <View style={styles.item}>
+          <Text style={styles.title}>{item.title} {item.count > 1 ? `x${item.count}` : ''}</Text>
+        </View>
+      </TouchableOpacity>
+    );
+  };
 
   return (
-    <FlatList
-      data={DATA}
-      renderItem={({item}) => <Item title={item.title} />}
-      keyExtractor={item => item.id}
-      style={styles.container}
-      
-      onScroll={handleScroll}
-      showsHorizontalScrollIndicator={false}
-    />
+    <View style={styles.container}>
+      {showSearchInput && (
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Search..."
+          value={searchQuery}
+          onChangeText={handleSearch}
+        />
+      )}
+      <FlatList
+        data={groupedData}
+        renderItem={renderItem}
+        keyExtractor={item => item.id}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+      />
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    margin:5,
-    borderBottomWidth:0.25,
-    marginVertical:10,
-    height: 150,
-    marginTop: StatusBar.currentHeight || 0,
+    margin: 5,
+    borderBottomWidth: 0.25,
+    marginVertical: 10,
+    height: 200,
   },
   item: {
-    margin:10,
     backgroundColor: '#f9c2ff',
     padding: 20,
     marginVertical: 8,
     marginHorizontal: 16,
-    justifyContent: 'space-between',
-    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   title: {
     fontSize: 16,
+  },
+  searchInput: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
   },
 });
 

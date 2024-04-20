@@ -13,10 +13,7 @@ app.get('/data1', (req, res) => {
     res.json(JSON.parse(data));
   });
 });
-// users data post 
-app.post('/data1', (req,res)=>{
 
-});
 
 // Endpoint for data2
 app.get('/data2', (req, res) => {

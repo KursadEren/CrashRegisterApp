@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import MyCard from '../Component/MyCard';
-export default function Home() {
+export default function Home({  navigation}) {
   const [loading, setLoading] = useState(false);
 
   const fetchData = () => {
@@ -23,20 +23,20 @@ export default function Home() {
       </View>
       <View style={styles.content}>
         <View style={styles.row}>
-          <MyCard CardName={"Satış"} CardColor="green" />
-          <MyCard CardName={"Fiyat Gör"} CardColor="green" />
+          <MyCard navigation={navigation} CardName={"Satış"} CardPage={"Sales"} CardColor="green" />
+          <MyCard navigation={navigation} CardName={"Fiyat Gör"} CardPage={"Deneme"} CardColor="green" />
         </View>
         <View style={styles.row}>
-          <MyCard CardName={"İade İşlemi"} CardColor="red" />
-          <MyCard CardName={"Tahsilatlar"} CardColor="yellow" />
+          <MyCard CardName={"İade İşlemi"} CardPage={"Return"} CardColor="red" />
+          <MyCard CardName={"Tahsilatlar"} CardPage={"Collections"} CardColor="yellow" />
         </View>
         <View style={styles.row}>
-          <MyCard  CardName={"Raporlar"} CardColor="blue"/>
-          <MyCard CardName={"Diğer İşlemler"} CardColor="green"/>
+          <MyCard  CardName={"Raporlar"} CardPage={"Reports"} CardColor="blue"/>
+          <MyCard CardName={"Diğer İşlemler"} CardPage={"OtherOp"} CardColor="green"/>
         </View>
         <View style={styles.row}>
-          <MyCard CardName={"Direkt Ürün Girişi"} CardColor="green"/>
-          <MyCard CardName={"www"} CardColor="green"/>
+          <MyCard CardName={"Direkt Ürün Girişi"} CardPage={"Product"} CardColor="green"/>
+          <MyCard CardName={"www"}  CardColor="green"/>
         </View>
       </View>
       <View style={{height:30,width:30,borderWidth:1,borderColor:"red", left:3}}>
