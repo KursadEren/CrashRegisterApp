@@ -26,6 +26,13 @@ import MyTabs from './src/Component/createBattomTab';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import { makeServer } from './src/MockAPI/Server'; // Mirage sunucusunu içe aktarıyoruz
+import Product from './src/Screen/Product';
+import Reports from './src/Screen/Reports';
+import OtherOp from './src/Screen/OtherOp';
+import Sales from './src/Screen/Sales';
+import SeePrice from './src/Screen/SeePrice';
+import Collections from './src/Screen/Collections';
+import Deneme from './src/Screen/Deneme';
 
 
 
@@ -48,6 +55,13 @@ function App() {
         <Stack.Navigator>
          <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown:false}} />
          <Stack.Screen name="MyTabs" component={MyTabs} />
+         <Stack.Screen name="Product" component={Product} />
+         <Stack.Screen name="Reports" component={Reports} />
+         <Stack.Screen name="Other Operations" component={OtherOp} />
+         <Stack.Screen name="Sales" component={Sales} />
+         <Stack.Screen name="Price" component={SeePrice} />
+         <Stack.Screen name="Collections" component={Collections} />
+         <Stack.Screen name="Deneme" component={Deneme} />
         </Stack.Navigator>
        </NavigationContainer>
    

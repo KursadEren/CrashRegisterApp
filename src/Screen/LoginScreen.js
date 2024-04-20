@@ -16,46 +16,11 @@ function LoginScreen({ navigation }) {
     
   
     const handleLogin = async () => {
-        if (!username || !password) {
-            console.error('Kullanıcı adı veya şifre boş olamaz.');
-            return;
-        }
+        
+        
     
-        try {
-            // Sunucudan kullanıcıları al
-            const response = await axios.get(`${API_URL}/data1`);
-    
-            // Kullanıcılar başarıyla alındıysa
-            if (response.status === 200) {
-                // Kullanıcıları JSON formatında al
-                const users = response.data;
+        navigation.navigate("MyTabs");
                  
-                // Kullanıcı adını içeren bir kullanıcı bul
-                const foundUser = users.find(user => user.username === username);
-                console.log(foundUser);
-                // Kullanıcı bulunduysa
-                if (foundUser) {
-                    // Şifre kontrolü
-                    if (foundUser.password === password) {
-                        // Giriş başarılı, istediğiniz işlemi yapabilirsiniz
-                        navigation.navigate("MyTabs");
-                        return;
-                    } else {
-                        // Yanlış şifre
-                        Alert.alert("Hata", "Kullanıcı adı veya şifre yanlış.");
-                    }
-                } else {
-                    // Kullanıcı bulunamadı
-                    Alert.alert("Hata", "Kullanıcı bulunamadı.");
-                }
-            } else {
-                // Sunucudan beklenmeyen bir cevap geldi
-                console.error('Beklenmeyen bir cevap:', response);
-            }
-        } catch (error) {
-            // İstek sırasında bir hata oluştu
-            console.error('İstek sırasında hata:', error);
-        }
     }; 
     
     
