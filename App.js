@@ -32,7 +32,6 @@ import OtherOp from './src/Screen/OtherOp';
 import Sales from './src/Screen/Sales';
 import SeePrice from './src/Screen/SeePrice';
 import Collections from './src/Screen/Collections';
-import Deneme from './src/Screen/Deneme';
 
 
 
