@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput } from 'react-native';
 
-const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, information }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [groupedData, setGroupedData] = useState([]);
-
-  useEffect(() => {
-    handleSearch(searchQuery);
-  }, [searchQuery, data]);
 
   useEffect(() => {
     groupData(data);
@@ -27,19 +22,12 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove }) => {
     setGroupedData(grouped);
   };
 
-  const handleScroll = event => {
-    const contentOffset = event.nativeEvent.contentOffset.x;
-    const viewSize = event.nativeEvent.layoutMeasurement.width;
-    const index = Math.floor(contentOffset / viewSize);
-    setCurrentIndex(index);
-  };
-
   const handleSearch = query => {
     setSearchQuery(query);
-    const filtered = groupedData.filter(item =>
+    const filtered = data.filter(item =>
       item.title.toLowerCase().includes(query.toLowerCase())
     );
-    setGroupedData(filtered);
+    groupData(filtered);
   };
 
   const handleItemSelect = item => {
@@ -47,15 +35,32 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove }) => {
   };
 
   const handleItemRemove = item => {
-    onItemRemove(item);
+    const updatedData = groupedData.map(dataItem => {
+      if (dataItem.id === item.id) {
+        if (dataItem.count > 1) {
+          return { ...dataItem, count: dataItem.count - 1 };
+        }
+      }
+      return dataItem;
+    }).filter(dataItem => dataItem.count !== 0); // Sayısı 0 olanları filtrele
+    setGroupedData(updatedData);
+    if (onItemRemove && item.count === 1) {
+      onItemRemove(item);
+    }
   };
 
   const renderItem = ({ item }) => {
     return (
-      <TouchableOpacity onPress={() => handleItemSelect(item)}>
+      <TouchableOpacity onPress={() => {
+        if (information == ('remove')) {
+          handleItemRemove(item);
+        } else {
+          handleItemSelect(item);
+        }
+      }}>
         <View style={styles.item}>
           <Text style={styles.title}>{item.title} {item.count > 1 ? `x${item.count}` : ''}</Text>
-        </View>
+           </View>
       </TouchableOpacity>
     );
   };
@@ -76,7 +81,6 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove }) => {
         keyExtractor={item => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
       />
     </View>
   );
@@ -96,9 +100,15 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',
+    flexDirection: 'row',
   },
   title: {
     fontSize: 16,
+    marginRight: 5,
+  },
+  removeButton: {
+    fontSize: 16,
+    color: 'red',
   },
   searchInput: {
     height: 40,
