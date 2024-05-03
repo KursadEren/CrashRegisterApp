@@ -1,3 +1,5 @@
+// Sales.js
+
 import React, { useState } from 'react';
 import { View } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
@@ -41,6 +43,24 @@ export default function Sales() {
     });
   };
   
+  const handleItemRemove = (item) => {
+    setData2List((prevData2List) => {
+      const updatedData2List = prevData2List.map(dataItem => {
+        if (dataItem.id === item.id) {
+          // Öğenin sayısı 1'den fazlaysa 1 azalt
+          if (dataItem.count > 1) {
+            return { ...dataItem, count: dataItem.count - 1 };
+          } else {
+            return null; // Öğeyi tamamen kaldır
+          }
+        }
+        return dataItem;
+      }).filter(item => item !== null); // null olanları filtrele
+      return updatedData2List;
+    });
+  };
+  
+  
   
   return (
     <View style={{ flex: 1 }}>
@@ -51,12 +71,15 @@ export default function Sales() {
         data={data1List}
         showSearchInput={true}
         onItemSelect={handleItemSelect}
+        information={"removedeğil"}
       />
       {/* MyFlatlist component with updated data */}
       <MyFlatlist
         data={data2List}
         showSearchInput={false}
         onItemSelect={() => {}} // No need to pass any function here
+        onItemRemove={handleItemRemove} // onItemRemove prop'unu ekledik
+        information={"remove"}
       />
     </View>
   );
