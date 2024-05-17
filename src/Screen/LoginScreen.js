@@ -36,7 +36,7 @@ function LoginScreen({ navigation }) {
                 <MyTextInput onChangeText={setPassword} label1="password" secureTextEntry />
             </View>
             <View style={styles.textInputContainer}>
-                <MyButton iconname="login" OnChangeButton={handleLogin} text="Giriş Yap" />
+                <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text="Giriş Yap" />
             </View>
         </View>
     );
