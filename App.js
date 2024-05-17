@@ -34,6 +34,7 @@ import SeePrice from './src/Screen/SeePrice';
 import Collections from './src/Screen/Collections';
 import Deneme from './src/Screen/Deneme';
 import Receipt from './src/Screen/Receipt';
+import ReceiptPrint from './src/Screen/ReceiptPrint';
 
 
 
@@ -61,6 +62,7 @@ function App() {
          <Stack.Screen name="Other Operations" component={OtherOp} />
          <Stack.Screen name="Sales" component={Sales} />
          <Stack.Screen name="Receipt" component={Receipt} />
+         <Stack.Screen name="ReceiptPrint" component={ReceiptPrint} />
          <Stack.Screen name="Price" component={SeePrice} />
          <Stack.Screen name="Collections" component={Collections} />
          <Stack.Screen name="Deneme" component={Deneme} />
