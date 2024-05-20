@@ -25,6 +25,7 @@ const Sales = ({ navigation }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get("http://localhost:3001/product");
+      console.log(response.data); // Veriyi konsola yazdırarak kontrol edin
       setData1List(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -43,7 +44,7 @@ const Sales = ({ navigation }) => {
       setSelectedProduct(null);
     }
   };
-  
+
   const handleQuantityUpdate = () => {
     if (selectedProduct) {
       const updatedData2List = [...data2List];
@@ -58,15 +59,16 @@ const Sales = ({ navigation }) => {
     }
     setQuantityModalVisible(false);
   };
-  
+
   const handleCancel = () => {
     setQuantityModalVisible(false);
     setQuantityInput('');
   };
-  
-  const HandleRouteReceipt = () =>{
+
+  const HandleRouteReceipt = () => {
     navigation.navigate("Receipt", { data2List: data2List });
-  }
+  };
+
   const handleQuantityChange = (text) => {
     setQuantityInput(text);
   };
@@ -114,15 +116,13 @@ const Sales = ({ navigation }) => {
         </View>
       </Modal>
 
-     
-        <View style={{ marginTop: 20 }}>
-          <MyButton
+      <View style={{ marginTop: 20 }}>
+        <MyButton
           visible={!isItemListEmpty}
-            OnChangeButton={HandleRouteReceipt}
-            text="Go Receipt"
-          />
-        </View>
-    
+          OnChangeButton={HandleRouteReceipt}
+          text="Go Receipt"
+        />
+      </View>
     </ScrollView>
   );
 };

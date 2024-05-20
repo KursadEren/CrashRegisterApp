@@ -24,7 +24,7 @@ export default function Home({  navigation}) {
       <View style={styles.content}>
         <View style={styles.row}>
           <MyCard navigation={navigation} CardName={"Satış"} CardPage={"Sales"} CardColor="green" />
-          <MyCard navigation={navigation} CardName={"Fiyat Gör"} CardPage={"Deneme"} CardColor="green" />
+          <MyCard navigation={navigation} CardName={"Fiyat Gör"} CardPage={"Product"} CardColor="green" />
         </View>
         <View style={styles.row}>
           <MyCard CardName={"İade İşlemi"} CardPage={"Return"} CardColor="red" />

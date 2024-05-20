@@ -25,11 +25,15 @@ const Receipt = ({ route }) => {
   const { subtotal, total } = calculateTotals();
 
   const handlePayment = () => {
+    const currentDate = new Date();
+const options = { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
+
+
     let totalPaid = parseFloat(cashAmount || 0) + parseFloat(cardAmount || 0);
     if (totalPaid >= total) {
       setChange(totalPaid - total);
       const paymentDetails = {
-        date: new Date().toISOString(),
+        date: currentDate.toLocaleString('tr-TR', options),
         items: data2List,
         subtotal: subtotal,
         total: total,

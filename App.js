@@ -35,6 +35,7 @@ import Collections from './src/Screen/Collections';
 import Deneme from './src/Screen/Deneme';
 import Receipt from './src/Screen/Receipt';
 import ReceiptPrint from './src/Screen/ReceiptPrint';
+import { AppProvider } from './src/Context/AppProvider';
 
 
 
@@ -53,6 +54,7 @@ function App() {
  
 
   return (
+    
        <NavigationContainer>
         <Stack.Navigator>
          <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown:false}} />
@@ -68,7 +70,7 @@ function App() {
          <Stack.Screen name="Deneme" component={Deneme} />
         </Stack.Navigator>
        </NavigationContainer>
-   
+      
   );
 }
 const styles = StyleSheet.create({
