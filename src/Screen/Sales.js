@@ -25,7 +25,7 @@ const Sales = ({ navigation }) => {
   const fetchData = async () => {
     try {
       const response = await axios.get("http://localhost:3001/product");
-      console.log(response.data); // Veriyi konsola yazdırarak kontrol edin
+   // Veriyi konsola yazdırarak kontrol edin
       setData1List(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);

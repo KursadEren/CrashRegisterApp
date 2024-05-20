@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Alert } from 'react-native';
-import axios from 'axios';
-
+import { View, StyleSheet, Image } from 'react-native';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
 
@@ -11,24 +9,13 @@ function LoginScreen({ navigation }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     
-
-
-    
-  
     const handleLogin = async () => {
-        
-        
-    
         navigation.navigate("MyTabs");
-                 
-    }; 
-    
-    
-
-    
+    };
 
     return (
         <View style={styles.container}>
+            <Image source={require('../../Image/logo.png')} style={styles.logo} />
             <View style={styles.textInputContainer}>
                 <MyTextInput onChangeText={setUsername} label1="Name" />
             </View>
@@ -45,12 +32,19 @@ function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        borderWidth: 1,
+        backgroundColor: '#1a1a1a',
         justifyContent: "center",
+        padding: 20,
+    },
+    logo: {
+        width: 100,
+        height: 100,
+        alignSelf: 'center',
+        marginBottom: 40,
     },
     textInputContainer: {
         paddingHorizontal: 10,
-        paddingVertical: 30,
+        paddingVertical: 15,
     }
 });
 
