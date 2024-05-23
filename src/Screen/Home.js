@@ -1,13 +1,22 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
 import MyCard from '../Component/MyCard';
-export default function Home({  navigation}) {
+
+export default function Home({ navigation }) {
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.goBack();
+      return true;
+    });
+
+    return () => backHandler.remove();
+  }, []);
 
   const fetchData = () => {
     setLoading(prevLoading => !prevLoading);
     // Servis çağrısını burada yapabilirsiniz
-    // Örneğin:
   };
 
   return (
@@ -23,24 +32,21 @@ export default function Home({  navigation}) {
       </View>
       <View style={styles.content}>
         <View style={styles.row}>
-          <MyCard navigation={navigation} CardName={"Satış"} CardPage={"Sales"} CardColor="green" />
-          <MyCard navigation={navigation} CardName={"Fiyat Gör"} CardPage={"Product"} CardColor="green" />
+          <MyCard navigation={navigation} CardName="Satış" CardPage="Sales" CardColor="#4CAF50" />
+          <MyCard navigation={navigation} CardName="Fiyat Gör" CardPage="Product" CardColor="#4CAF50" />
         </View>
         <View style={styles.row}>
-          <MyCard CardName={"İade İşlemi"} CardPage={"Return"} CardColor="red" />
-          <MyCard CardName={"Tahsilatlar"} CardPage={"Collections"} CardColor="yellow" />
+          <MyCard navigation={navigation} CardName="İade İşlemi" CardPage="Return" CardColor="#F44336" />
+          <MyCard navigation={navigation} CardName="Tahsilatlar" CardPage="Collections" CardColor="#FFEB3B" />
         </View>
         <View style={styles.row}>
-          <MyCard  CardName={"Raporlar"} CardPage={"Reports"} CardColor="blue"/>
-          <MyCard CardName={"Diğer İşlemler"} CardPage={"OtherOp"} CardColor="green"/>
+          <MyCard navigation={navigation} CardName="Raporlar" CardPage="Reports" CardColor="#2196F3" />
+          <MyCard navigation={navigation} CardName="Diğer İşlemler" CardPage="OtherOp" CardColor="#4CAF50" />
         </View>
         <View style={styles.row}>
-          <MyCard CardName={"Direkt Ürün Girişi"} CardPage={"Product"} CardColor="green"/>
-          <MyCard CardName={"www"}  CardColor="green"/>
+          <MyCard navigation={navigation} CardName="Direkt Ürün Girişi" CardPage="Product" CardColor="#4CAF50" />
+          <MyCard navigation={navigation} CardName="www" CardColor="#4CAF50" />
         </View>
-      </View>
-      <View style={{height:30,width:30,borderWidth:1,borderColor:"red", left:3}}>
-
       </View>
     </View>
   );
@@ -49,13 +55,14 @@ export default function Home({  navigation}) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    flexDirection: 'column',
+    backgroundColor: '#1a1a1a',
+    padding: 10,
   },
   topBar: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 10,
+    marginBottom: 20,
   },
   dot: {
     width: 10,
@@ -71,7 +78,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 18,
-    marginRight: 'auto',
+    color: '#fff',
   },
   loadingText: {
     color: 'red',
@@ -91,7 +98,6 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    padding: 10,
   },
   row: {
     flexDirection: 'row',

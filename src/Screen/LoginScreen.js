@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
+import { View, StyleSheet, Image, BackHandler } from 'react-native';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
 
@@ -9,6 +9,15 @@ function LoginScreen({ navigation }) {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
     
+    React.useEffect(() => {
+        const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+            navigation.goBack();
+            return true;
+        });
+
+        return () => backHandler.remove();
+    }, []);
+
     const handleLogin = async () => {
         navigation.navigate("MyTabs");
     };
