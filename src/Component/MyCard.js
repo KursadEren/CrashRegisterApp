@@ -1,25 +1,41 @@
-import { View, Text,TouchableOpacity } from 'react-native'
-import React from 'react'
-import { Card } from 'react-native-paper'
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { Card } from 'react-native-paper';
 
-export default function MyCard({CardName,CardColor,CardPage,navigation}) {
+export default function MyCard({ CardName, CardColor, CardPage, navigation }) {
+  const onPressCard = () => {
+    if (navigation) {
+      navigation.navigate(CardPage);
+    }
+  };
 
-    const onPressCard = () => {
-        // Burada başka bir sayfaya geçiş yapmak için navigation.navigate() fonksiyonunu kullanabilirsiniz.
-        // Örneğin, "Details" adında bir sayfaya geçmek için:
-        navigation.navigate(CardPage);
- // Details, hedef sayfanın adı, cardName ise göndermek istediğiniz veri
-      }
-      return(
-   
-    <TouchableOpacity  onPress={onPressCard} style={{flex:1, marginHorizontal:10,backgroundColor:`${CardColor}`, width:30, height:100 ,alignItems:"center", justifyContent:"center",
-    borderRadius:10, borderWidth:0.2
-     }}
-      >
-        <Text>
-            {CardName}
-        </Text>
+  return (
+    <TouchableOpacity onPress={onPressCard} style={[styles.card, { backgroundColor: CardColor }]}>
+      <View style={styles.cardContent}>
+        <Text style={styles.cardText}>{CardName}</Text>
+      </View>
     </TouchableOpacity>
-  
-  )
+  );
 }
+
+const styles = StyleSheet.create({
+  card: {
+    flex: 1,
+    marginHorizontal: 10,
+    marginVertical: 5,
+    height: 100,
+    borderRadius: 10,
+    borderWidth: 0.2,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardContent: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cardText: {
+    color: '#fff',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+});

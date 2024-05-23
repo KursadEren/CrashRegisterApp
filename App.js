@@ -1,6 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { View, Text, StyleSheet } from 'react-native';
 import LoginScreen from './src/Screen/LoginScreen';
 import MyTabs from './src/Component/createBattomTab';
 import Product from './src/Screen/Product';
@@ -17,26 +18,48 @@ import { AppProvider } from './src/Context/AppProvider';
 
 const Stack = createNativeStackNavigator();
 
+function CustomHeader({ title }) {
+  return (
+    <View style={styles.headerContainer}>
+      <Text style={styles.headerText}>{title}</Text>
+    </View>
+  );
+}
+
 function App() {
   return (
     <AppProvider>
       <NavigationContainer>
         <Stack.Navigator initialRouteName="LoginScreen">
           <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="MyTabs" component={MyTabs} />
-          <Stack.Screen name="Product" component={Product} />
-          <Stack.Screen name="Reports" component={Reports} />
-          <Stack.Screen name="Other Operations" component={OtherOp} />
-          <Stack.Screen name="Sales" component={Sales} />
-          <Stack.Screen name="Receipt" component={Receipt} />
-          <Stack.Screen name="ReceiptPrint" component={ReceiptPrint} />
-          <Stack.Screen name="Price" component={SeePrice} />
-          <Stack.Screen name="Collections" component={Collections} />
-          <Stack.Screen name="Deneme" component={Deneme} />
+          <Stack.Screen name="MyTabs" component={MyTabs} options={{ header: () => <CustomHeader title="MyTabs" /> }} />
+          <Stack.Screen name="Product" component={Product} options={{ header: () => <CustomHeader title="Product" /> }} />
+          <Stack.Screen name="Reports" component={Reports} options={{ header: () => <CustomHeader title="Reports" /> }} />
+          <Stack.Screen name="Other Operations" component={OtherOp} options={{ header: () => <CustomHeader title="Other Operations" /> }} />
+          <Stack.Screen name="Sales" component={Sales} options={{ header: () => <CustomHeader title="Sales" /> }} />
+          <Stack.Screen name="Receipt" component={Receipt} options={{ header: () => <CustomHeader title="Receipt" /> }} />
+          <Stack.Screen name="ReceiptPrint" component={ReceiptPrint} options={{ header: () => <CustomHeader title="ReceiptPrint" /> }} />
+          <Stack.Screen name="Price" component={SeePrice} options={{ header: () => <CustomHeader title="Price" /> }} />
+          <Stack.Screen name="Collections" component={Collections} options={{ header: () => <CustomHeader title="Collections" /> }} />
+          <Stack.Screen name="Deneme" component={Deneme} options={{ header: () => <CustomHeader title="Deneme" /> }} />
         </Stack.Navigator>
       </NavigationContainer>
     </AppProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  headerContainer: {
+    backgroundColor: '#1a1a1a',
+    padding: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  headerText: {
+    color: '#ff6600',
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+});
 
 export default App;

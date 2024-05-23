@@ -28,7 +28,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, informa
 
   const renderItem = ({ item }) => {
     return (
-      <View style={{ width: "auto", height: "auto" }}>
+      <View style={styles.card}>
         <TouchableOpacity style={styles.touch} onPress={() => {
           if (information === 'update') {
             onItemRemove(item);
@@ -39,23 +39,24 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, informa
           <View style={styles.item}>
             <View style={styles.textContainer}>
               <Image source={{ uri: item.image }} resizeMode="contain" style={styles.image} />
-              <Text style={styles.name}> {item.name}</Text>
+              <Text style={styles.name}>{item.name}</Text>
             </View>
           </View>
           <Text style={styles.price}>Price: ${item.price}</Text>
           {information === 'update' && (
-            <View style={{ marginHorizontal: 15 }}>
-              <View style={{ flexDirection: "row" }}>
-                <Text>Adet: </Text>
+            <View style={styles.updateContainer}>
+              <View style={styles.quantityContainer}>
+                <Text style={styles.label}>Quantity: </Text>
                 <TextInput
                   style={styles.quantityInput}
                   keyboardType="numeric"
                   placeholder="Quantity"
                   value={item.count ? item.count.toString() : ''}
                   onChangeText={text => handleQuantityChange(item, text)}
+                  placeholderTextColor="#aaa"
                 />
               </View>
-              <Text>Total: ${calculateTotal(item)}</Text>
+              <Text style={styles.total}>Total: ${calculateTotal(item)}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -71,6 +72,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, informa
           placeholder="Search..."
           value={searchQuery}
           onChangeText={handleSearch}
+          placeholderTextColor="#aaa"
         />
       )}
       <FlatList
@@ -79,6 +81,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, informa
         keyExtractor={item => item.id.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.flatListContent}
       />
     </View>
   );
@@ -90,12 +93,11 @@ const styles = StyleSheet.create({
     height: "auto",
   },
   item: {
-    backgroundColor: "white",
+    backgroundColor: "#333",
     width: 200,
-    height: 200,
+    height: 190,
     padding: 20,
     marginVertical: 8,
-    marginHorizontal: 16,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',
@@ -116,14 +118,15 @@ const styles = StyleSheet.create({
   name: {
     alignItems: "center",
     width: 180,
-    fontSize: 11,
+    fontSize: 14,
     fontWeight: 'bold',
+    color: '#fff',
   },
   price: {
     fontSize: 16,
     marginTop: 5,
-    color: 'rgb(75,217,32)',
-    backgroundColor: "black",
+    color: '#4bc91a',
+    backgroundColor: "#000",
     paddingLeft: 20,
     marginHorizontal: 15,
   },
@@ -135,19 +138,47 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     height: 40,
-    borderColor: 'gray',
+    borderColor: '#555',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
+    color: '#fff',
+    backgroundColor: '#444',
   },
   quantityInput: {
+    borderColor: '#555',
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginBottom: 10,
+    color: '#fff',
+    backgroundColor: '#444',
+  },
+  updateContainer: {
+    marginHorizontal: 15,
+  },
+  quantityContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  label: {
+    color: '#fff',
+  },
+  total: {
+    color: '#fff',
    
-    borderColor: 'gray',
-   
-   
-   
-  }
+  },
+  card: {
+    backgroundColor: '#333',
+    borderRadius: 10,
+    padding: 10,
+    marginVertical: 0,
+    marginHorizontal: 5,
+  },
+  flatListContent: {
+    paddingHorizontal: 10,
+  },
 });
 
 export default MyFlatlist;

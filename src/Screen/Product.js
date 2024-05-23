@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, ScrollView } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, ScrollView, BackHandler } from 'react-native';
 import axios from 'axios';
 import MyFlatlist from '../Component/MyFlatlist';
 
-const Product = () => {
+const Product = ({ navigation }) => {
   const [productList, setProductList] = useState([]);
   const [favoriteList, setFavoriteList] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -11,6 +11,13 @@ const Product = () => {
 
   useEffect(() => {
     fetchProducts();
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.goBack();
+      return true;
+    });
+
+    return () => backHandler.remove();
   }, []);
 
   const fetchProducts = async () => {
@@ -40,7 +47,7 @@ const Product = () => {
   if (loading) {
     return (
       <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#0000ff" />
+        <ActivityIndicator size="large" color="#ff6600" />
       </View>
     );
   }
@@ -48,7 +55,7 @@ const Product = () => {
   if (error) {
     return (
       <View style={styles.centered}>
-        <Text>Error loading products</Text>
+        <Text style={styles.errorText}>Error loading products</Text>
       </View>
     );
   }
@@ -78,16 +85,22 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
+    backgroundColor: '#1a1a1a',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 10,
+    color: '#ff6600',
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: '#1a1a1a',
+  },
+  errorText: {
+    color: 'red',
   },
 });
 
