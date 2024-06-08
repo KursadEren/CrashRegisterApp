@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { Button } from 'react-native-paper';
+import { useLandscape } from '../Context/LandSpaceProvider'; // Yolun doğru olduğuna dikkat edin
 
 export default function MyButton({ OnChangeButton, iconname, text, visible }) {
+  const isLandscape = useLandscape();
+
   const onPress = () => {
     OnChangeButton();
   };
@@ -12,7 +15,7 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
   }
 
   return (
-    <View style={styles.buttonContainer}>
+    <View style={[styles.buttonContainer, isLandscape ? styles.buttonContainerLandscape : styles.buttonContainerPortrait]}>
       <Button
         mode="contained"
         onPress={onPress}
@@ -27,12 +30,18 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
 
 const styles = StyleSheet.create({
   buttonContainer: {
-    marginVertical: 10,
+    
+  },
+  buttonContainerPortrait: {
+    width: '100%',
+  },
+  buttonContainerLandscape: {
+    width: '100%',
   },
   button: {
     backgroundColor: '#ff6600',
     borderRadius: 5,
-    padding: 10,
+   
   },
   buttonText: {
     color: '#fff',
