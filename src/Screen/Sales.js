@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Modal, TextInput, StyleSheet, Text, ScrollView, BackHandler } from 'react-native';
+import { View, Modal, TextInput, StyleSheet, Text, ScrollView, BackHandler, Dimensions } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
 import axios from "axios";
 import MyButton from '../Component/MyButton';
 import { API_URL } from '../GroceryData/Constant';
 
+const { width, height } = Dimensions.get('window');
 const DATA2 = [];
 
 const Sales = ({ navigation }) => {
@@ -32,13 +33,15 @@ const Sales = ({ navigation }) => {
 
   const fetchData = async () => {
     try {
+      console.log('Fetched data:');
       const response = await axios.get(`${API_URL}/product/product`);
+       // Verileri konsola yazdırın
       setData1List(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
-
+  
   const handleItemSelect = (item) => {
     setSelectedProduct({ ...item, quantityInput: quantityInput });
     setQuantityModalVisible(true);
@@ -81,7 +84,7 @@ const Sales = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#1a1a1a' }}>
+    <ScrollView style={styles.scrollView}>
       <MyFlatlist
         data={data1List}
         showSearchInput={true}
@@ -125,7 +128,7 @@ const Sales = ({ navigation }) => {
         </View>
       </Modal>
 
-      <View style={{ marginTop: 20 }}>
+      <View style={styles.buttonContainer}>
         <MyButton
           visible={!isItemListEmpty}
           OnChangeButton={HandleRouteReceipt}
@@ -137,6 +140,11 @@ const Sales = ({ navigation }) => {
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+    padding: width * 0.05,
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -166,6 +174,9 @@ const styles = StyleSheet.create({
   modalButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+  },
+  buttonContainer: {
+    marginTop: 20,
   },
 });
 
