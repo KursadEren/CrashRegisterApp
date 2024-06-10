@@ -1,8 +1,10 @@
-import React from 'react';
-import { ScrollView, View, Text, StyleSheet, Button, Alert } from 'react-native';
+import React,{useState} from 'react';
+import { ScrollView, View, Text, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import MyButton from '../Component/MyButton'; // MyButton bileşenini ekliyoruz
+import { useWindowDimensions } from 'react-native';
 
 const ReceiptContent = ({ paymentDetails }) => (
   <View style={styles.receiptContainer}>
@@ -37,6 +39,8 @@ const ReceiptPrint = () => {
   const route = useRoute();
   const navigation = useNavigation();
   const { paymentDetails } = route.params;
+  const { width, height } = useWindowDimensions('window');
+  const isLandscape = width > height;
 
   const handlePrint = async () => {
     try {
@@ -99,6 +103,7 @@ const ReceiptPrint = () => {
       const file = await RNHTMLtoPDF.convert(options);
       console.log('Dosya kaydedildi: ', file.filePath);
       Alert.alert('Başarılı', `PDF dosyası başarıyla kaydedildi!\n\nDosya Yolu: ${file.filePath}`, [{ text: 'Tamam' }]);
+      navigation.navigate("Home");
     } catch (error) {
       console.error('Yazdırma başarısız oldu: ', error);
       Alert.alert('Hata', 'PDF dosyası kaydedilemedi.', [{ text: 'Tamam' }]);
@@ -106,10 +111,12 @@ const ReceiptPrint = () => {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { paddingTop: height * 0.05, paddingBottom: height * 0.05 }]}>
       <ReceiptContent paymentDetails={paymentDetails} />
-      <Button title="Yazdır" onPress={handlePrint} />
-      <Button title="Ana Sayfa" onPress={() => navigation.navigate('Home')} />
+      <View style={styles.buttonContainer}>
+        <MyButton visible={true} OnChangeButton={handlePrint} text="Yazdır" />
+        <MyButton visible={true} OnChangeButton={() => navigation.navigate('Home')} text="Ana Sayfa" />
+      </View>
     </ScrollView>
   );
 };
@@ -158,6 +165,11 @@ const styles = StyleSheet.create({
   tableData: {
     textAlign: 'center',
     flex: 1,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingBottom:40,
   },
 });
 

@@ -1,14 +1,13 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { TextInput } from 'react-native-paper';
 
-function MyTextınput({ label1, icon, onChangeText }) {
-  const [text, setText] = React.useState("");
-  const [isSecureTextEntry, setIsSecureTextEntry] = React.useState(false);
+function MyTextInput({ label1, icon, onChangeText, value }) {
+  const [text, setText] = useState(value || '');
+  const [isSecureTextEntry, setIsSecureTextEntry] = useState(false);
 
-  // label1 "password" ise, isSecureTextEntry özelliğini true yap
-  React.useEffect(() => {
-    setIsSecureTextEntry(label1 === "password");
+  useEffect(() => {
+    setIsSecureTextEntry(label1.toLowerCase() === 'password');
   }, [label1]);
 
   const handleTextChange = (text) => {
@@ -21,7 +20,7 @@ function MyTextınput({ label1, icon, onChangeText }) {
       <TextInput
         label={label1}
         value={text}
-        secureTextEntry={label1 === "password" ? isSecureTextEntry : false}
+        secureTextEntry={isSecureTextEntry}
         onChangeText={handleTextChange}
         right={icon ? <TextInput.Icon icon={icon} /> : null}
         style={styles.input}
@@ -42,4 +41,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default MyTextınput;
+export default MyTextInput;
