@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { TextInput, useTheme, Provider as PaperProvider } from 'react-native-paper';
 
 function MyTextInput({ label1, icon, onChangeText, value }) {
   const [text, setText] = useState(value || '');
   const [isSecureTextEntry, setIsSecureTextEntry] = useState(false);
 
   useEffect(() => {
-    setIsSecureTextEntry(label1.toLowerCase() === 'password');
+    setIsSecureTextEntry(label1.toLowerCase() === 'password' || label1.toLowerCase() === 'confirm password');
   }, [label1]);
 
   const handleTextChange = (text) => {
@@ -15,16 +15,25 @@ function MyTextInput({ label1, icon, onChangeText, value }) {
     onChangeText(text);
   };
 
+  const theme = {
+    colors: {
+      text: 'white', // Label rengi
+      placeholder: 'white', // Placeholder rengi
+    },
+  };
+
   return (
     <View style={styles.inputContainer}>
       <TextInput
         label={label1}
         value={text}
+        textColor='white'
         secureTextEntry={isSecureTextEntry}
         onChangeText={handleTextChange}
         right={icon ? <TextInput.Icon icon={icon} /> : null}
         style={styles.input}
-        placeholderTextColor="#aaa"
+        theme={theme}
+        placeholderTextColor="#FFF"
       />
     </View>
   );
@@ -36,7 +45,7 @@ const styles = StyleSheet.create({
   },
   input: {
     backgroundColor: '#333',
-    color: '#fff',
+    color: "white",
     borderRadius: 5,
   },
 });

@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, Image, BackHandler, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
-import { useLandscape } from '../Context/LandSpaceProvider';
+import { useLandscape } from '../Context/LandSpaceProvider'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-function LoginScreen({ navigation }) {
+const RegisterScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const isLandscape = useLandscape();
 
   useEffect(() => {
@@ -19,19 +20,39 @@ function LoginScreen({ navigation }) {
     return () => backHandler.remove();
   }, []);
 
-  const handleLogin = async () => {
-    try {
-      const storedPassword = await AsyncStorage.getItem('@user_' + username);
-      console.log('Stored password:', storedPassword);
+  const isValidPassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
 
-      if (storedPassword === password) {
-        navigation.navigate("MyTabs");
-      } else {
-        Alert.alert('Error', 'Invalid username or password');
+  const handleRegister = async () => {
+    if (!username || !password || !confirmPassword) {
+      Alert.alert('Error', 'Please fill in all fields');
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert('Error', 'Passwords do not match');
+      return;
+    }
+
+    if (!isValidPassword(password)) {
+      Alert.alert('Error', 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.');
+      return;
+    }
+
+    try {
+      const existingUser = await AsyncStorage.getItem('@user_' + username);
+      if (existingUser) {
+        Alert.alert('Error', 'User with this username already exists');
+        return;
       }
+
+      await AsyncStorage.setItem('@user_' + username, password);
+      Alert.alert('Success', 'User registered successfully');
+      navigation.navigate("LoginScreen");
     } catch (e) {
-      console.log('Error:', e);
-      Alert.alert('Error', 'Failed to login');
+      Alert.alert('Error', 'Failed to register user');
     }
   };
 
@@ -45,10 +66,10 @@ function LoginScreen({ navigation }) {
         <MyTextInput onChangeText={setPassword} label1="Password" secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text="Giriş Yap" />
+        <MyTextInput onChangeText={setConfirmPassword} label1="Confirm Password" secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="register" OnChangeButton={() => navigation.navigate('Register')} text="Kayıt Ol" />
+        <MyButton visible={true} iconname="account-plus" OnChangeButton={handleRegister} text="Kayıt Ol" />
       </View>
     </View>
   );
@@ -81,4 +102,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default LoginScreen;
+export default RegisterScreen;
