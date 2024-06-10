@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { View, Modal, TextInput, StyleSheet, Text, ScrollView } from 'react-native';
+import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
 import axios from "axios";
 import MyButton from '../Component/MyButton';
+import MyTextInput from '../Component/MyTextınput'; // MyTextInput bileşenini ekliyoruz
+import { API_URL } from '../GroceryData/Constant';
 
 const DATA2 = [];
 
@@ -14,8 +16,18 @@ const Sales = ({ navigation }) => {
   const [quantityInput, setQuantityInput] = useState('');
   const [isItemListEmpty, setIsItemListEmpty] = useState(true);
 
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
+
   useEffect(() => {
     fetchData();
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      navigation.goBack();
+      return true;
+    });
+
+    return () => backHandler.remove();
   }, []);
 
   useEffect(() => {
@@ -24,13 +36,14 @@ const Sales = ({ navigation }) => {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get("http://localhost:3001/product");
+      console.log('Fetched data:');
+      const response = await axios.get(`${API_URL}/product/product`);
       setData1List(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
-
+  
   const handleItemSelect = (item) => {
     setSelectedProduct({ ...item, quantityInput: quantityInput });
     setQuantityModalVisible(true);
@@ -43,7 +56,7 @@ const Sales = ({ navigation }) => {
       setSelectedProduct(null);
     }
   };
-  
+
   const handleQuantityUpdate = () => {
     if (selectedProduct) {
       const updatedData2List = [...data2List];
@@ -58,21 +71,22 @@ const Sales = ({ navigation }) => {
     }
     setQuantityModalVisible(false);
   };
-  
+
   const handleCancel = () => {
     setQuantityModalVisible(false);
     setQuantityInput('');
   };
-  
-  const HandleRouteReceipt = () =>{
+
+  const HandleRouteReceipt = () => {
     navigation.navigate("Receipt", { data2List: data2List });
-  }
+  };
+
   const handleQuantityChange = (text) => {
     setQuantityInput(text);
   };
 
   return (
-    <ScrollView style={{ flex: 1 }}>
+    <ScrollView style={[styles.scrollView, { padding: width * 0.05 }]}>
       <MyFlatlist
         data={data1List}
         showSearchInput={true}
@@ -97,37 +111,42 @@ const Sales = ({ navigation }) => {
         transparent={true}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text>Enter Quantity:</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType={'number-pad'}
+          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait]}>
+            <Text style={styles.modalText}>Enter Quantity:</Text>
+            <MyTextInput
+              label1="Quantity"
               onChangeText={handleQuantityChange}
               value={quantityInput}
             />
 
-            <View style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
-              <MyButton visible={true} OnChangeButton={handleQuantityUpdate} text="Update" />
-              <MyButton visible={true} OnChangeButton={handleCancel} text="Cancel" />
+            <View style={styles.modalButtonContainer}>
+              <View>
+                <MyButton visible={true} OnChangeButton={handleQuantityUpdate} text="Update" />
+              </View>
+              <View>
+                <MyButton visible={true} OnChangeButton={handleCancel} text="Cancel" />
+              </View>
             </View>
           </View>
         </View>
       </Modal>
 
-     
-        <View style={{ marginTop: 20 }}>
-          <MyButton
+      <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
+        <MyButton
           visible={!isItemListEmpty}
-            OnChangeButton={HandleRouteReceipt}
-            text="Go Receipt"
-          />
-        </View>
-    
+          OnChangeButton={HandleRouteReceipt}
+          text="Go Receipt"
+        />
+      </View>
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
+  scrollView: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -135,17 +154,33 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: 'white',
+    backgroundColor: '#333',
     padding: 20,
     borderRadius: 10,
+    width: '80%',
   },
-  input: {
-    height: 40,
-    borderColor: 'gray',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
+  modalContentPortrait: {
+    height: '40%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContentLandscape: {
+    height: '60%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalText: {
+    color: '#fff',
     marginBottom: 10,
+  },
+  modalButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+  },
+  buttonContainer: {
+    marginTop: 20,
+    alignItems: 'center',
   },
 });
 
