@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, Modal, TextInput, StyleSheet, Text, ScrollView, BackHandler, Dimensions } from 'react-native';
+import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
 import axios from "axios";
 import MyButton from '../Component/MyButton';
+import MyTextInput from '../Component/MyTextınput'; // MyTextInput bileşenini ekliyoruz
 import { API_URL } from '../GroceryData/Constant';
 
-const { width, height } = Dimensions.get('window');
 const DATA2 = [];
 
 const Sales = ({ navigation }) => {
@@ -15,6 +15,9 @@ const Sales = ({ navigation }) => {
   const [quantityModalVisible, setQuantityModalVisible] = useState(false);
   const [quantityInput, setQuantityInput] = useState('');
   const [isItemListEmpty, setIsItemListEmpty] = useState(true);
+
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   useEffect(() => {
     fetchData();
@@ -35,7 +38,6 @@ const Sales = ({ navigation }) => {
     try {
       console.log('Fetched data:');
       const response = await axios.get(`${API_URL}/product/product`);
-       // Verileri konsola yazdırın
       setData1List(response.data);
     } catch (error) {
       console.error('Error fetching data:', error);
@@ -84,7 +86,7 @@ const Sales = ({ navigation }) => {
   };
 
   return (
-    <ScrollView style={styles.scrollView}>
+    <ScrollView style={[styles.scrollView, { padding: width * 0.05 }]}>
       <MyFlatlist
         data={data1List}
         showSearchInput={true}
@@ -109,26 +111,27 @@ const Sales = ({ navigation }) => {
         transparent={true}
       >
         <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
+          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait]}>
             <Text style={styles.modalText}>Enter Quantity:</Text>
-            <TextInput
-              style={styles.input}
-              keyboardType={'number-pad'}
+            <MyTextInput
+              label1="Quantity"
               onChangeText={handleQuantityChange}
               value={quantityInput}
-              placeholder="Quantity"
-              placeholderTextColor="#aaa"
             />
 
             <View style={styles.modalButtonContainer}>
-              <MyButton visible={true} OnChangeButton={handleQuantityUpdate} text="Update" />
-              <MyButton visible={true} OnChangeButton={handleCancel} text="Cancel" />
+              <View>
+                <MyButton visible={true} OnChangeButton={handleQuantityUpdate} text="Update" />
+              </View>
+              <View>
+                <MyButton visible={true} OnChangeButton={handleCancel} text="Cancel" />
+              </View>
             </View>
           </View>
         </View>
       </Modal>
 
-      <View style={styles.buttonContainer}>
+      <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
         <MyButton
           visible={!isItemListEmpty}
           OnChangeButton={HandleRouteReceipt}
@@ -143,7 +146,6 @@ const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
     backgroundColor: '#1a1a1a',
-    padding: width * 0.05,
   },
   modalContainer: {
     flex: 1,
@@ -157,26 +159,28 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: '80%',
   },
+  modalContentPortrait: {
+    height: '40%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContentLandscape: {
+    height: '60%',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalText: {
     color: '#fff',
     marginBottom: 10,
   },
-  input: {
-    height: 40,
-    borderColor: '#555',
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 10,
-    color: '#fff',
-    backgroundColor: '#444',
-  },
   modalButtonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    width: '100%',
   },
   buttonContainer: {
     marginTop: 20,
+    alignItems: 'center',
   },
 });
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, BackHandler } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView } from 'react-native';
 import MyCard from '../Component/MyCard';
 
 export default function Home({ navigation }) {
@@ -20,7 +20,7 @@ export default function Home({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView style={styles.container}>
       <View style={styles.topBar}>
         <View style={[styles.dot, loading ? styles.dotRed : styles.dotGreen]} />
         <Text style={[styles.statusText, loading ? styles.loadingText : styles.readyText]}>
@@ -48,7 +48,7 @@ export default function Home({ navigation }) {
           <MyCard navigation={navigation} CardName="www" CardColor="#4CAF50" />
         </View>
       </View>
-    </View>
+    </ScrollView>
   );
 }
 

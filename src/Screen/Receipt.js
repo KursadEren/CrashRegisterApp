@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, TextInput, BackHandler } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, TextInput, BackHandler, useWindowDimensions, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 const Receipt = ({ route }) => {
@@ -10,6 +10,9 @@ const Receipt = ({ route }) => {
   const [cardAmount, setCardAmount] = useState('');
   const [change, setChange] = useState(0);
   const navigation = useNavigation();
+
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -110,55 +113,35 @@ const Receipt = ({ route }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Ödeme Yöntemi Seç</Text>
+        <View style={[styles.modalContainer, { paddingVertical: height * 0.05 },{ height: isLandscape ? '100%' : '100%' }]}>
+          <ScrollView contentContainerStyle={[styles.scrollViewContent,{paddingVertical: height * 0.1}]}>
+            <View style={[styles.modalContent, {height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%' }]}>
+              <Text style={styles.modalTitle}>Ödeme Yöntemi Seç</Text>
 
-            <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'cash' && styles.selectedButton]}
-              onPress={() => setPaymentType('cash')}
-            >
-              <Text style={styles.modalButtonText}>Nakit</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, paymentType === 'cash' && styles.selectedButton]}
+                onPress={() => setPaymentType('cash')}
+              >
+                <Text style={styles.modalButtonText}>Nakit</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'card' && styles.selectedButton]}
-              onPress={() => setPaymentType('card')}
-            >
-              <Text style={styles.modalButtonText}>Kart</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, paymentType === 'card' && styles.selectedButton]}
+                onPress={() => setPaymentType('card')}
+              >
+                <Text style={styles.modalButtonText}>Kart</Text>
+              </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'both' && styles.selectedButton]}
-              onPress={() => setPaymentType('both')}
-            >
-              <Text style={styles.modalButtonText}>Hem Kart Hem Nakit</Text>
-            </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButton, paymentType === 'both' && styles.selectedButton]}
+                onPress={() => setPaymentType('both')}
+              >
+                <Text style={styles.modalButtonText}>Hem Kart Hem Nakit</Text>
+              </TouchableOpacity>
 
-            {paymentType !== '' && (
-              <View>
-                {paymentType === 'cash' && (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Nakit Miktarı"
-                    keyboardType="numeric"
-                    value={cashAmount}
-                    onChangeText={setCashAmount}
-                    placeholderTextColor="#aaa"
-                  />
-                )}
-                {paymentType === 'card' && (
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Kart Miktarı"
-                    keyboardType="numeric"
-                    value={cardAmount}
-                    onChangeText={setCardAmount}
-                    placeholderTextColor="#aaa"
-                  />
-                )}
-                {paymentType === 'both' && (
-                  <View>
+              {paymentType !== '' && (
+                <View>
+                  {paymentType === 'cash' && (
                     <TextInput
                       style={styles.input}
                       placeholder="Nakit Miktarı"
@@ -167,6 +150,8 @@ const Receipt = ({ route }) => {
                       onChangeText={setCashAmount}
                       placeholderTextColor="#aaa"
                     />
+                  )}
+                  {paymentType === 'card' && (
                     <TextInput
                       style={styles.input}
                       placeholder="Kart Miktarı"
@@ -175,17 +160,37 @@ const Receipt = ({ route }) => {
                       onChangeText={setCardAmount}
                       placeholderTextColor="#aaa"
                     />
-                  </View>
-                )}
-                <TouchableOpacity
-                  style={styles.submitButton}
-                  onPress={handlePayment}
-                >
-                  <Text style={styles.submitButtonText}>Ödeme Yap</Text>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
+                  )}
+                  {paymentType === 'both' && (
+                    <View>
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Nakit Miktarı"
+                        keyboardType="numeric"
+                        value={cashAmount}
+                        onChangeText={setCashAmount}
+                        placeholderTextColor="#aaa"
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Kart Miktarı"
+                        keyboardType="numeric"
+                        value={cardAmount}
+                        onChangeText={setCardAmount}
+                        placeholderTextColor="#aaa"
+                      />
+                    </View>
+                  )}
+                  <TouchableOpacity
+                    style={styles.submitButton}
+                    onPress={handlePayment}
+                  >
+                    <Text style={styles.submitButtonText}>Ödeme Yap</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          </ScrollView>
         </View>
       </Modal>
     </View>
@@ -236,7 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#333',
   },
   totalText: {
-    fontSize: 20,
+    fontSize: 22,
     color: '#fff',
   },
   paymentButton: {
@@ -248,7 +253,7 @@ const styles = StyleSheet.create({
   },
   paymentButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 20,
   },
   modalContainer: {
     flex: 1,
@@ -256,21 +261,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
+  scrollViewContent: {
+    flexGrow: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   modalContent: {
-    width: 300,
-    padding: 20,
+    padding: 30,
     backgroundColor: "#333",
     borderRadius: 10,
     alignItems: "center",
   },
   modalTitle: {
-    fontSize: 24,
+    fontSize: 26,
     marginBottom: 20,
     color: '#fff',
   },
   modalButton: {
-    padding: 15,
-    marginTop: 10,
+    padding: 20,
+    marginTop: 15,
     backgroundColor: "#444",
     width: "100%",
     alignItems: "center",
@@ -281,20 +290,22 @@ const styles = StyleSheet.create({
   },
   modalButtonText: {
     color: '#fff',
+    fontSize: 18,
   },
   input: {
     width: "100%",
-    padding: 10,
+    padding: 15,
     borderWidth: 1,
     borderColor: "#555",
-    marginTop: 10,
+    marginTop: 15,
     borderRadius: 5,
     color: '#fff',
     backgroundColor: '#444',
+    fontSize: 18,
   },
   submitButton: {
     marginTop: 20,
-    padding: 15,
+    padding: 20,
     backgroundColor: "#444",
     width: "100%",
     alignItems: "center",
@@ -302,7 +313,7 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: "white",
-    fontSize: 18,
+    fontSize: 20,
   },
 });
 
