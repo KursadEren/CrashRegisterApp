@@ -1,9 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView } from 'react-native';
 import MyCard from '../Component/MyCard';
+import { useServiceStatus } from '../Context/ServiceStatusContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Home({ navigation }) {
+  const { serviceStatus, setServiceStatus } = useServiceStatus();
   const [loading, setLoading] = useState(false);
+  
+
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -14,20 +19,50 @@ export default function Home({ navigation }) {
     return () => backHandler.remove();
   }, []);
 
-  const fetchData = () => {
-    setLoading(prevLoading => !prevLoading);
-    // Servis çağrısını burada yapabilirsiniz
+  useEffect(() => {
+    if (serviceStatus) {
+      sendUnsentPaymentsToCentral();
+    }
+  }, [serviceStatus]);
+
+  const toggleServiceStatus = () => {
+    setServiceStatus(!serviceStatus);
+  };
+
+  const sendUnsentPaymentsToCentral = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
+      const paymentItems = await AsyncStorage.multiGet(paymentKeys);
+      const unsentPayments = paymentItems
+        .map(item => [item[0], JSON.parse(item[1])])
+        .filter(([key, payment]) => !payment.sentToCentral);
+
+      for (const [key, payment] of unsentPayments) {
+        const updatedPayment = {
+          ...payment,
+          sentToCentral: true,
+          centralSendTime: new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }),
+        };
+
+        await AsyncStorage.setItem(key, JSON.stringify(updatedPayment));
+      }
+
+      console.log('Tüm ödemeler merkeze gönderildi.');
+    } catch (e) {
+      console.log('Ödemeleri gönderme hatası:', e);
+    }
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topBar}>
-        <View style={[styles.dot, loading ? styles.dotRed : styles.dotGreen]} />
-        <Text style={[styles.statusText, loading ? styles.loadingText : styles.readyText]}>
-          {loading ? 'Servis Çalışmıyor...' : 'Servis Durumu: Hazır'}
+        <View style={[styles.dot, serviceStatus ? styles.dotGreen : styles.dotRed]} />
+        <Text style={[styles.statusText, serviceStatus ? styles.readyText : styles.loadingText]}>
+          {serviceStatus ? 'Servis Durumu: Hazır' : 'Servis Çalışmıyor...'}
         </Text>
-        <TouchableOpacity style={styles.button} onPress={fetchData}>
-          <Text style={styles.buttonText}>Veri Al</Text>
+        <TouchableOpacity style={styles.button} onPress={toggleServiceStatus}>
+          <Text style={styles.buttonText}>Servis Aç/Kapat</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.content}>

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, TextInput, BackHandler, useWindowDimensions, ScrollView } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
+import { useServiceStatus } from '../Context/ServiceStatusContext';
 
 const Receipt = ({ route }) => {
   const { data2List } = route.params;
@@ -10,6 +12,8 @@ const Receipt = ({ route }) => {
   const [cardAmount, setCardAmount] = useState('');
   const [change, setChange] = useState(0);
   const navigation = useNavigation();
+
+  const { serviceStatus } = useServiceStatus();
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -36,10 +40,10 @@ const Receipt = ({ route }) => {
 
   const { subtotal, total } = calculateTotals();
 
-  const handlePayment = () => {
+  const handlePayment = async () => {
     const currentDate = new Date();
     const options = { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
-
+  
     let totalPaid = parseFloat(cashAmount || 0) + parseFloat(cardAmount || 0);
     if (totalPaid >= total) {
       setChange(totalPaid - total);
@@ -52,15 +56,29 @@ const Receipt = ({ route }) => {
         cashAmount: parseFloat(cashAmount || 0),
         cardAmount: parseFloat(cardAmount || 0),
         change: totalPaid - total,
+        saleDate: currentDate.toLocaleString('tr-TR', options), // Satılma tarihi
+        centralSendTime: serviceStatus ? currentDate.toLocaleString('tr-TR', options) : null,
+        sentToCentral: serviceStatus // Merkeze gönderildi durumu
       };
-
+  
+      try {
+        await AsyncStorage.setItem('@payment_' + currentDate.getTime(), JSON.stringify(paymentDetails));
+        if (!serviceStatus) {
+          // Servis durumu çevrim içi olduğunda güncellemek için AsyncStorage'da kaydet
+          await AsyncStorage.setItem('@pendingPayment', JSON.stringify(paymentDetails));
+        }
+      } catch (e) {
+        console.log('Error saving payment details:', e);
+      }
+  
       setModalVisible(false);
       navigation.navigate('ReceiptPrint', { paymentDetails });
     } else {
       alert("Ödenen miktar toplamdan az olamaz");
     }
   };
-
+  
+ 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -113,9 +131,9 @@ const Receipt = ({ route }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={[styles.modalContainer, { paddingVertical: height * 0.05 },{ height: isLandscape ? '100%' : '100%' }]}>
-          <ScrollView contentContainerStyle={[styles.scrollViewContent,{paddingVertical: height * 0.1}]}>
-            <View style={[styles.modalContent, {height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%' }]}>
+        <View style={[styles.modalContainer, { paddingVertical: height * 0.05 }, { height: isLandscape ? '100%' : '100%' }]}>
+          <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingVertical: height * 0.1 }]}>
+            <View style={[styles.modalContent, { height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%' }]}>
               <Text style={styles.modalTitle}>Ödeme Yöntemi Seç</Text>
 
               <TouchableOpacity

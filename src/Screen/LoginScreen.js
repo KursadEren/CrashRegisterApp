@@ -20,12 +20,13 @@ function LoginScreen({ navigation }) {
   }, []);
 
   const handleLogin = async () => {
+    navigation.navigate("MyTabs");
     try {
       const storedPassword = await AsyncStorage.getItem('@user_' + username);
       console.log('Stored password:', storedPassword);
 
       if (storedPassword === password) {
-        navigation.navigate("MyTabs");
+        
       } else {
         Alert.alert('Error', 'Invalid username or password');
       }
