@@ -1,13 +1,16 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useLandscape } from '../Context/LandSpaceProvider'; // Yolun doğru olduğuna dikkat edin
 
 export default function MyButton({ OnChangeButton, iconname, text, visible }) {
+  const [loading, setLoading] = useState(false);
   const isLandscape = useLandscape();
 
-  const onPress = () => {
-    OnChangeButton();
+  const onPress = async () => {
+    setLoading(true);
+    await OnChangeButton();
+    setLoading(false);
   };
 
   if (!visible) {
@@ -21,8 +24,9 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
         onPress={onPress}
         style={styles.button}
         labelStyle={styles.buttonText}
+        disabled={loading}
       >
-        {text}
+        {loading ? <ActivityIndicator color="#fff" /> : text}
       </Button>
     </View>
   );
