@@ -3,8 +3,8 @@ import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimens
 import MyFlatlist from '../Component/MyFlatlist';
 import axios from "axios";
 import MyButton from '../Component/MyButton';
-import MyTextInput from '../Component/MyTextınput'; // MyTextInput bileşenini ekliyoruz
-import { API_URL } from '../GroceryData/Constant';
+import MyTextInput from '../Component/MyTextınput'; 
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const DATA2 = [];
 
@@ -20,7 +20,18 @@ const Sales = ({ navigation }) => {
   const isLandscape = width > height;
 
   useEffect(() => {
-    fetchData();
+    const fetchDataFromAsyncStorage = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('@productData');
+        if (storedData) {
+          setData1List(JSON.parse(storedData));
+        }
+      } catch (error) {
+        console.error('AsyncStorage\'den veri alınırken hata:', error);
+      }
+    };
+
+    fetchDataFromAsyncStorage();
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
@@ -34,33 +45,23 @@ const Sales = ({ navigation }) => {
     setIsItemListEmpty(data2List.length === 0);
   }, [data2List]);
 
-  
-  
   const handleItemSelect = (item) => {
     setSelectedProduct({ ...item, quantityInput: quantityInput });
     setQuantityModalVisible(true);
   };
 
   const handleItemRemove = (item) => {
-    const updatedData2List = data2List.filter((product) => product.id !== item.id);
+    const updatedData2List = data2List.filter((product) => product.objectID !== item.objectID);
     setData2List(updatedData2List);
-    if (selectedProduct && selectedProduct.id === item.id) {
+    if (selectedProduct && selectedProduct.objectID === item.objectID) {
       setSelectedProduct(null);
     }
   };
-  const fetchData = async () => {
-    try {
-      console.log('Fetched data:');
-      const response = await axios.get(`${API_URL}/product/product`);
-      setData1List(response.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+
   const handleQuantityUpdate = () => {
     if (selectedProduct) {
       const updatedData2List = [...data2List];
-      const selectedItemIndex = updatedData2List.findIndex((item) => item.id === selectedProduct.id);
+      const selectedItemIndex = updatedData2List.findIndex((item) => item.objectID === selectedProduct.objectID);
       if (selectedItemIndex !== -1) {
         updatedData2List[selectedItemIndex].count = parseInt(quantityInput, 10) || 0;
       } else {

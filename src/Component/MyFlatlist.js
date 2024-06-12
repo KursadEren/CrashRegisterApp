@@ -78,7 +78,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, informa
       <FlatList
         data={filteredData}
         renderItem={renderItem}
-        keyExtractor={item => item.id.toString()}
+        keyExtractor={item => item.objectID.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.flatListContent}
@@ -167,7 +167,6 @@ const styles = StyleSheet.create({
   },
   total: {
     color: '#fff',
-   
   },
   card: {
     backgroundColor: '#333',

@@ -3,12 +3,12 @@ import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView } fro
 import MyCard from '../Component/MyCard';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_URL } from '../GroceryData/Constant';
 
 export default function Home({ navigation }) {
   const { serviceStatus, setServiceStatus } = useServiceStatus();
   const [loading, setLoading] = useState(false);
-  
-
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -24,6 +24,33 @@ export default function Home({ navigation }) {
       sendUnsentPaymentsToCentral();
     }
   }, [serviceStatus]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const storedData = await AsyncStorage.getItem('@productData');
+        if (!storedData) {
+          console.log('Veri alınıyor:');
+          const response = await axios.get(`${API_URL}/product/product`);
+          const filteredData = response.data.map(item => ({
+            objectID: item.objectID,
+            name: item.name,
+            image: item.image,
+            price: item.price,
+            categories: item.categories
+          }));
+          await AsyncStorage.setItem('@productData', JSON.stringify(filteredData));
+          console.log('Veri AsyncStorage\'e kaydedildi.');
+        } else {
+          console.log('Veriler zaten mevcut.');
+        }
+      } catch (error) {
+        console.error('Veri alınırken hata:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const toggleServiceStatus = () => {
     setServiceStatus(!serviceStatus);
