@@ -34,15 +34,7 @@ const Sales = ({ navigation }) => {
     setIsItemListEmpty(data2List.length === 0);
   }, [data2List]);
 
-  const fetchData = async () => {
-    try {
-      console.log('Fetched data:');
-      const response = await axios.get(`${API_URL}/product/product`);
-      setData1List(response.data);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    }
-  };
+  
   
   const handleItemSelect = (item) => {
     setSelectedProduct({ ...item, quantityInput: quantityInput });
@@ -56,7 +48,15 @@ const Sales = ({ navigation }) => {
       setSelectedProduct(null);
     }
   };
-
+  const fetchData = async () => {
+    try {
+      console.log('Fetched data:');
+      const response = await axios.get(`${API_URL}/product/product`);
+      setData1List(response.data);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
   const handleQuantityUpdate = () => {
     if (selectedProduct) {
       const updatedData2List = [...data2List];
