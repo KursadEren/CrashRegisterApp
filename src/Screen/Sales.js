@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
-import axios from "axios";
 import MyButton from '../Component/MyButton';
 import MyTextInput from '../Component/MyTextınput'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';

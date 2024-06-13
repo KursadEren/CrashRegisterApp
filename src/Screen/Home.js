@@ -31,7 +31,7 @@ export default function Home({ navigation }) {
         const storedData = await AsyncStorage.getItem('@productData');
         if (!storedData) {
           console.log('Veri alınıyor:');
-          const response = await axios.get(`${API_URL}/product/product`);
+          const response = await axios.get(`${API_URL}/products/`);
           const filteredData = response.data.map(item => ({
             objectID: item.objectID,
             name: item.name,

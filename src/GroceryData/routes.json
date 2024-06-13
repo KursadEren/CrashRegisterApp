@@ -1,3 +1,4 @@
 {
-  "/products/:id": "/:id"
+  "/products": "/e-commerce-data-set.json",
+  "/users": "/users.json"
 }

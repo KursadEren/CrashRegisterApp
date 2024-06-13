@@ -4,6 +4,9 @@ import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
 import { useLandscape } from '../Context/LandSpaceProvider'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_URL } from '../GroceryData/Constant';
+
 
 const RegisterScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -42,16 +45,26 @@ const RegisterScreen = ({ navigation }) => {
     }
 
     try {
-      const existingUser = await AsyncStorage.getItem('@user_' + username);
-      if (existingUser) {
-        Alert.alert('Error', 'User with this username already exists');
+      // Mock servise kullanıcı kaydetme isteği gönder
+      const response = await axios.post(`${API_URL}/users`, {
+        username,
+        password
+      });
+
+      console.log('Mock servis yanıtı:', response);
+
+      if (response.status !== 201) {
+        Alert.alert('Error', `User registration failed with status ${response.status}`);
         return;
       }
 
+      // Kullanıcı verilerini AsyncStorage'a kaydet
       await AsyncStorage.setItem('@user_' + username, password);
+
       Alert.alert('Success', 'User registered successfully');
       navigation.navigate("LoginScreen");
     } catch (e) {
+      console.log('Kayıt hatası:', e);
       Alert.alert('Error', 'Failed to register user');
     }
   };
