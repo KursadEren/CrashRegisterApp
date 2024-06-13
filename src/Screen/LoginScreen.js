@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, BackHandler, Alert } from 'react-native';
+import { View, StyleSheet, Image, BackHandler, Alert, Text } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
 import { useLandscape } from '../Context/LandSpaceProvider';
+import { API_URL } from '../GroceryData/Constant';
+
 
 function LoginScreen({ navigation }) {
   const [username, setUsername] = useState("");
@@ -21,11 +24,27 @@ function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
+      // Önce AsyncStorage'den kontrol et
       const storedPassword = await AsyncStorage.getItem('@user_' + username);
-      console.log('Stored password:', storedPassword);
-
       if (storedPassword === password) {
         navigation.navigate("MyTabs");
+        return;
+      }
+
+      // AsyncStorage'de yoksa mock servisten kontrol et
+      const response = await axios.get(`${API_URL}/users`, {
+        params: { username, password }
+      });
+
+      if (response.status === 200 && response.data.length > 0) {
+        const user = response.data[0];
+        if (user.password === password) {
+          // Giriş başarılıysa, kullanıcı verisini AsyncStorage'a kaydet
+          await AsyncStorage.setItem('@user_' + username, password);
+          navigation.navigate("MyTabs");
+        } else {
+          Alert.alert('Error', 'Invalid username or password');
+        }
       } else {
         Alert.alert('Error', 'Invalid username or password');
       }
@@ -82,4 +101,3 @@ const styles = StyleSheet.create({
 });
 
 export default LoginScreen;
-
