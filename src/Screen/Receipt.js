@@ -29,16 +29,20 @@ const Receipt = ({ route }) => {
 
   const calculateTotals = () => {
     let subtotal = 0;
+    let totalItems = 0;
+   
     data2List.forEach(item => {
       subtotal += item.price * item.count;
+      totalItems += item.count;
     });
     return {
       subtotal,
       total: subtotal,
+      totalItems,
     };
   };
 
-  const { subtotal, total } = calculateTotals();
+  const { subtotal, total, totalItems } = calculateTotals();
 
   const handlePayment = async () => {
     const currentDate = new Date();
@@ -52,6 +56,7 @@ const Receipt = ({ route }) => {
         items: data2List,
         subtotal: subtotal,
         total: total,
+        totalItems: totalItems,
         paymentType: paymentType,
         cashAmount: parseFloat(cashAmount || 0),
         cardAmount: parseFloat(cardAmount || 0),
@@ -65,7 +70,7 @@ const Receipt = ({ route }) => {
         await AsyncStorage.setItem('@payment_' + currentDate.getTime(), JSON.stringify(paymentDetails));
         if (!serviceStatus) {
           // Servis durumu çevrim içi olduğunda güncellemek için AsyncStorage'da kaydet
-          await AsyncStorage.setItem('@pendingPayment', JSON.stringify(paymentDetails));
+          await AsyncStorage.setItem('@pendingPayment_' + currentDate.getTime(), JSON.stringify(paymentDetails));
         }
       } catch (e) {
         console.log('Error saving payment details:', e);
@@ -78,7 +83,6 @@ const Receipt = ({ route }) => {
     }
   };
   
- 
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -115,6 +119,7 @@ const Receipt = ({ route }) => {
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Ara Toplam: {subtotal.toFixed(2)}</Text>
         <Text style={styles.totalText}>Toplam: {total.toFixed(2)}</Text>
+        <Text style={styles.totalText}>Toplam Ürün Sayısı: {totalItems}</Text>
         <Text style={styles.totalText}>Para Üstü: {change.toFixed(2)}</Text>
       </View>
 

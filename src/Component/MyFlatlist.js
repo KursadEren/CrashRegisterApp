@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image } from 'react-native';
+import Icon from 'react-native-vector-icons/FontAwesome';
 
-const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, information }) => {
+const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState(data);
 
@@ -40,9 +41,23 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, informa
             <View style={styles.textContainer}>
               <Image source={{ uri: item.image }} resizeMode="contain" style={styles.image} />
               <Text style={styles.name}>{item.name}</Text>
+              {isProductList && (
+                <TouchableOpacity onPress={() => onItemSelect(item)}>
+                  <Icon
+                    name={favoriteList && favoriteList.some(fav => fav.id === item.id) ? 'star' : 'star-o'}
+                    size={24}
+                    color="#ffcc00"
+                  />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
           <Text style={styles.price}>Price: ${item.price}</Text>
+          {isProductList && (
+            <TouchableOpacity onPress={() => onAddToCart(item)}>
+              <Icon name="shopping-cart" size={24} color="#ffcc00" />
+            </TouchableOpacity>
+          )}
           {information === 'update' && (
             <View style={styles.updateContainer}>
               <View style={styles.quantityContainer}>
