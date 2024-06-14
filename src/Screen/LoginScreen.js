@@ -32,19 +32,15 @@ function LoginScreen({ navigation }) {
       }
 
       // AsyncStorage'de yoksa mock servisten kontrol et
-      const response = await axios.get(`${API_URL}/users`, {
-        params: { username, password }
+      const response = await axios.post(`${API_URL}/`, {
+        username,
+        password
       });
 
-      if (response.status === 200 && response.data.length > 0) {
-        const user = response.data[0];
-        if (user.password === password) {
-          // Giriş başarılıysa, kullanıcı verisini AsyncStorage'a kaydet
-          await AsyncStorage.setItem('@user_' + username, password);
-          navigation.navigate("MyTabs");
-        } else {
-          Alert.alert('Error', 'Invalid username or password');
-        }
+      if (response.status === 200) {
+        // Giriş başarılıysa, kullanıcı verisini AsyncStorage'a kaydet
+        await AsyncStorage.setItem('@user_' + username, password);
+        navigation.navigate("MyTabs");
       } else {
         Alert.alert('Error', 'Invalid username or password');
       }

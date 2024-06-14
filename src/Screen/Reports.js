@@ -35,6 +35,7 @@ export default function Reports() {
             <Text>Ara Toplam: {item.subtotal.toFixed(2)}</Text>
             <Text>Toplam: {item.total.toFixed(2)}</Text>
             <Text>Satılma Tarihi: {item.saleDate}</Text>
+            <Text>Adet: {item.totalItems}</Text>
             <Text>Merkeze Gönderilme Tarihi: {item.centralSendTime}</Text>
             <Text>Merkeze Gönderildi: {item.sentToCentral ? 'Evet' : 'Hayır'}</Text>
             <FlatList
