@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,9 +28,34 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
     setFilteredData([...filteredData]);
   };
 
+  const toggleFavorite = async (item) => {
+    const updatedData = filteredData.map(product => {
+      if (product.objectID === item.objectID) {
+        const updatedProduct = { ...product, favori: product.favori === 0 ? 1 : 0 };
+        AsyncStorage.getItem('@productData').then(storedData => {
+          const parsedData = JSON.parse(storedData);
+          const updatedStoredData = parsedData.map(p => p.objectID === item.objectID ? updatedProduct : p);
+          AsyncStorage.setItem('@productData', JSON.stringify(updatedStoredData));
+        });
+        return updatedProduct;
+      }
+      return product;
+    });
+    setFilteredData(updatedData);
+  };
+
   const renderItem = ({ item }) => {
     return (
-      <View style={styles.card}>
+      <View style={[styles.card, isProductList && styles.cardLarge]}>
+        {isProductList && (
+          <TouchableOpacity style={styles.favoriteIcon} onPress={() => toggleFavorite(item)}>
+            <Icon
+              name={item.favori === 1 ? 'star' : 'star-o'}
+              size={24}
+              color="#ffcc00"
+            />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity style={styles.touch} onPress={() => {
           if (information === 'update') {
             onItemRemove(item);
@@ -39,25 +65,11 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
         }}>
           <View style={styles.item}>
             <View style={styles.textContainer}>
-              <Image source={{ uri: item.image }} resizeMode="contain" style={styles.image} />
-              <Text style={styles.name}>{item.name}</Text>
-              {isProductList && (
-                <TouchableOpacity onPress={() => onItemSelect(item)}>
-                  <Icon
-                    name={favoriteList && favoriteList.some(fav => fav.id === item.id) ? 'star' : 'star-o'}
-                    size={24}
-                    color="#ffcc00"
-                  />
-                </TouchableOpacity>
-              )}
+              <Image source={{ uri: item.image }} resizeMode="contain" style={[styles.image, isProductList && styles.imageLarge]} />
+              <Text style={[styles.name, isProductList && styles.nameLarge]}>{item.name}</Text>
             </View>
           </View>
-          <Text style={styles.price}>Price: ${item.price}</Text>
-          {isProductList && (
-            <TouchableOpacity onPress={() => onAddToCart(item)}>
-              <Icon name="shopping-cart" size={24} color="#ffcc00" />
-            </TouchableOpacity>
-          )}
+          <Text style={[styles.price, isProductList && styles.priceLarge]}>Price: ${item.price}</Text>
           {information === 'update' && (
             <View style={styles.updateContainer}>
               <View style={styles.quantityContainer}>
@@ -80,7 +92,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
   };
 
   return (
-    <View style={styles.container}>
+    <View style={isProductList ? styles.FovoriContainer : styles.container}>
       {showSearchInput && (
         <TextInput
           style={styles.searchInput}
@@ -118,10 +130,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     borderRadius: 10,
   },
+  itemLarge: {
+    width: 250,
+    height: 250,
+  },
   image: {
     width: 130,
     height: 80,
     borderRadius: 10,
+  },
+  imageLarge: {
+    width: 150,
+    height: 100,
   },
   textContainer: {
     flexDirection: "column",
@@ -137,6 +157,9 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
   },
+  nameLarge: {
+    fontSize: 16,
+  },
   price: {
     fontSize: 16,
     marginTop: 5,
@@ -144,6 +167,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     paddingLeft: 20,
     marginHorizontal: 15,
+  },
+  priceLarge: {
+    fontSize: 18,
   },
   container: {
     margin: 5,
@@ -190,9 +216,24 @@ const styles = StyleSheet.create({
     marginVertical: 0,
     marginHorizontal: 5,
   },
+  cardLarge: {
+    width: 250,
+    height: 250,
+  },
   flatListContent: {
     paddingHorizontal: 10,
   },
+  favoriteIcon: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+  },
+  FovoriContainer:{
+    flex:1,
+    height:500,
+    borderBottomWidth:1
+    
+  }
 });
 
 export default MyFlatlist;

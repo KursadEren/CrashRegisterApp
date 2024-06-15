@@ -5,7 +5,7 @@ import MyCard from '../Component/MyCard';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL } from '../GroceryData/Constant';
+import { API_URL , API_URL2 } from '../GroceryData/Constant';
 
 export default function Home({ navigation }) {
   const { serviceStatus, setServiceStatus } = useServiceStatus();
@@ -13,6 +13,7 @@ export default function Home({ navigation }) {
   const [pendingPayments, setPendingPayments] = useState([]);
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
   const [toastVisible, setToastVisible] = useState(false);
+  const [productData, setProductData] = useState([]);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -33,7 +34,7 @@ export default function Home({ navigation }) {
     const fetchPendingPayments = async () => {
       try {
         const keys = await AsyncStorage.getAllKeys();
-        const paymentKeys = keys.filter(key => key.startsWith('@pendingPayment_'));
+        const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
         const paymentItems = await AsyncStorage.multiGet(paymentKeys);
 
         const parsedData = paymentItems.map(item => JSON.parse(item[1]));
@@ -71,6 +72,31 @@ export default function Home({ navigation }) {
       });
     }
   }, [pendingPayments]);
+
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        const response = await axios.get(`${API_URL2}/products/product`);
+        if (response.status === 200) {
+          const products = response.data.map(product => ({
+            objectID: product.objectID, // objectID alanını ekleyin
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            categories: product.categories,
+            favori: 0
+          }));
+          
+          await AsyncStorage.setItem('@productData', JSON.stringify(products));
+          setProductData(products);
+        }
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+      }
+    };
+
+    fetchProductData();
+  }, []);
 
   const toggleServiceStatus = () => {
     setServiceStatus(!serviceStatus);
@@ -242,5 +268,3 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
-
-

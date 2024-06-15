@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, BackHandler, Alert, Text } from 'react-native';
+import { View, StyleSheet, Image, BackHandler, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
 import { useLandscape } from '../Context/LandSpaceProvider';
-import { API_URL } from '../GroceryData/Constant';
-
+import { API_URL ,API_URL2} from '../GroceryData/Constant';
 
 function LoginScreen({ navigation }) {
   const [username, setUsername] = useState("");
@@ -16,6 +15,7 @@ function LoginScreen({ navigation }) {
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
+     
       return true;
     });
 
@@ -32,12 +32,12 @@ function LoginScreen({ navigation }) {
       }
 
       // AsyncStorage'de yoksa mock servisten kontrol et
-      const response = await axios.post(`${API_URL}/`, {
+      const response = await axios.post(`${API_URL2}/users/users`, {
         username,
         password
       });
 
-      if (response.status === 200) {
+      if (response.status === 200 && response.data) {
         // Giriş başarılıysa, kullanıcı verisini AsyncStorage'a kaydet
         await AsyncStorage.setItem('@user_' + username, password);
         navigation.navigate("MyTabs");
