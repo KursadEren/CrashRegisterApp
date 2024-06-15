@@ -1,9 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView, Dimensions, Modal } from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 import MyCard from '../Component/MyCard';
+import { useServiceStatus } from '../Context/ServiceStatusContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
+import { API_URL , API_URL2 } from '../GroceryData/Constant';
 
 export default function Home({ navigation }) {
+  const { serviceStatus, setServiceStatus } = useServiceStatus();
   const [loading, setLoading] = useState(false);
+  const [pendingPayments, setPendingPayments] = useState([]);
+  const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
+  const [toastVisible, setToastVisible] = useState(false);
+  const [productData, setProductData] = useState([]);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -14,22 +24,148 @@ export default function Home({ navigation }) {
     return () => backHandler.remove();
   }, []);
 
-  const fetchData = () => {
-    setLoading(prevLoading => !prevLoading);
-    // Servis çağrısını burada yapabilirsiniz
+  useEffect(() => {
+    if (serviceStatus) {
+      sendUnsentPaymentsToCentral();
+    }
+  }, [serviceStatus]);
+
+  useEffect(() => {
+    const fetchPendingPayments = async () => {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
+        const paymentItems = await AsyncStorage.multiGet(paymentKeys);
+
+        const parsedData = paymentItems.map(item => JSON.parse(item[1]));
+        console.log('Pending Payments:', parsedData); // Veri kontrolü için log
+        setPendingPayments(parsedData);
+      } catch (error) {
+        console.error('Error fetching pending payments:', error);
+      }
+    };
+
+    fetchPendingPayments();
+  }, []);
+
+  useEffect(() => {
+    if (pendingPayments.length > 0) {
+      const aggregateSales = {};
+
+      pendingPayments.forEach(payment => {
+        const dateTime = payment.saleDate.split(' ')[0]; // Sadece tarih kısmını al
+        const totalItems = payment.items.reduce((total, item) => total + item.count, 0);
+        
+        if (aggregateSales[dateTime]) {
+          aggregateSales[dateTime] += totalItems;
+        } else {
+          aggregateSales[dateTime] = totalItems;
+        }
+      });
+
+      const sortedDateTimes = Object.keys(aggregateSales).sort();
+      const data = sortedDateTimes.map(dateTime => aggregateSales[dateTime]);
+
+      setChartData({
+        labels: sortedDateTimes,
+        datasets: [{ data }]
+      });
+    }
+  }, [pendingPayments]);
+
+  useEffect(() => {
+    const fetchProductData = async () => {
+      try {
+        const response = await axios.get(`${API_URL2}/products/product`);
+        if (response.status === 200) {
+          const products = response.data.map(product => ({
+            objectID: product.objectID, // objectID alanını ekleyin
+            name: product.name,
+            price: product.price,
+            image: product.image,
+            categories: product.categories,
+            favori: 0
+          }));
+          
+          await AsyncStorage.setItem('@productData', JSON.stringify(products));
+          setProductData(products);
+        }
+      } catch (error) {
+        console.error('Error fetching product data:', error);
+      }
+    };
+
+    fetchProductData();
+  }, []);
+
+  const toggleServiceStatus = () => {
+    setServiceStatus(!serviceStatus);
+  };
+
+  const sendUnsentPaymentsToCentral = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
+      const paymentItems = await AsyncStorage.multiGet(paymentKeys);
+      const unsentPayments = paymentItems
+        .map(item => [item[0], JSON.parse(item[1])])
+        .filter(([key, payment]) => !payment.sentToCentral);
+
+      for (const [key, payment] of unsentPayments) {
+        const updatedPayment = {
+          ...payment,
+          sentToCentral: true,
+          centralSendTime: new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }),
+        };
+
+        await AsyncStorage.setItem(key, JSON.stringify(updatedPayment));
+      }
+
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000);
+      console.log('Tüm ödemeler merkeze gönderildi.');
+    } catch (e) {
+      console.log('Ödemeleri gönderme hatası:', e);
+    }
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.topBar}>
-        <View style={[styles.dot, loading ? styles.dotRed : styles.dotGreen]} />
-        <Text style={[styles.statusText, loading ? styles.loadingText : styles.readyText]}>
-          {loading ? 'Servis Çalışmıyor...' : 'Servis Durumu: Hazır'}
+        <View style={[styles.dot, serviceStatus ? styles.dotGreen : styles.dotRed]} />
+        <Text style={[styles.statusText, serviceStatus ? styles.readyText : styles.loadingText]}>
+          {serviceStatus ? 'Servis Durumu: Hazır' : 'Servis Çalışmıyor...'}
         </Text>
-        <TouchableOpacity style={styles.button} onPress={fetchData}>
-          <Text style={styles.buttonText}>Veri Al</Text>
+        <TouchableOpacity style={styles.button} onPress={toggleServiceStatus}>
+          <Text style={styles.buttonText}>Servis Aç/Kapat</Text>
         </TouchableOpacity>
       </View>
+      {chartData.labels.length > 0 ? (
+        <LineChart
+          data={chartData}
+          width={Dimensions.get('window').width - 20}
+          height={220}
+          yAxisLabel=""
+          chartConfig={{
+            backgroundColor: '#e26a00',
+            backgroundGradientFrom: '#fb8c00',
+            backgroundGradientTo: '#ffa726',
+            decimalPlaces: 0,
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16
+            },
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+          }}
+          bezier
+          style={{
+            marginVertical: 8,
+            borderRadius: 16
+          }}
+        />
+      ) : (
+        <Text style={styles.noDataText}>Veri bulunamadı.</Text>
+      )}
       <View style={styles.content}>
         <View style={styles.row}>
           <MyCard navigation={navigation} CardName="Satış" CardPage="Sales" CardColor="#4CAF50" />
@@ -48,6 +184,16 @@ export default function Home({ navigation }) {
           <MyCard navigation={navigation} CardName="www" CardColor="#4CAF50" />
         </View>
       </View>
+      <Modal
+        visible={toastVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setToastVisible(false)}
+      >
+        <View style={styles.toastContainer}>
+          <Text style={styles.toastText}>Tüm ödemeler merkeze gönderildi.</Text>
+        </View>
+      </Modal>
     </ScrollView>
   );
 }
@@ -103,5 +249,22 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     marginBottom: 10,
+  },
+  noDataText: {
+    color: 'white',
+    textAlign: 'center',
+    marginTop: 20,
+  },
+  toastContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  toastText: {
+    backgroundColor: '#333',
+    color: '#fff',
+    padding: 10,
+    borderRadius: 10,
   },
 });
