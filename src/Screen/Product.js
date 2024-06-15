@@ -55,6 +55,7 @@ const Product = ({ navigation }) => {
       return product;
     });
 
+    
     setProductList(updatedProductList);
     setFavoriteList(updatedProductList.filter(product => product.favori === 1));
   };
