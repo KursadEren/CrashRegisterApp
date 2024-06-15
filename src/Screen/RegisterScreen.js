@@ -5,7 +5,7 @@ import MyButton from '../Component/MyButton';
 import { useLandscape } from '../Context/LandSpaceProvider'; 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL } from '../GroceryData/Constant';
+import { API_URL,API_URL2 } from '../GroceryData/Constant';
 
 
 const RegisterScreen = ({ navigation }) => {
@@ -46,7 +46,7 @@ const RegisterScreen = ({ navigation }) => {
 
     try {
       // Mock servise kullanıcı kaydetme isteği gönder
-      const response = await axios.post(`${API_URL}/users`, {
+      const response = await axios.post(`${API_URL2}/users/users`, {
         username,
         password
       });

@@ -29,6 +29,7 @@ const Product = ({ navigation }) => {
       if (storedProductData) {
         const parsedProductData = JSON.parse(storedProductData);
         setProductList(parsedProductData);
+        setFavoriteList(parsedProductData.filter(product => product.favori === 1));
       } else {
         console.log('No product data found in AsyncStorage.');
       }
@@ -40,16 +41,40 @@ const Product = ({ navigation }) => {
     }
   };
 
-  const handleItemSelect = (item) => {
-    if (favoriteList.some((fav) => fav.id === item.id)) {
-      setFavoriteList(favoriteList.filter((fav) => fav.id !== item.id));
-    } else {
-      setFavoriteList([...favoriteList, item]);
-    }
+  const handleItemSelect = async (item) => {
+    const updatedProductList = productList.map(product => {
+      if (product.objectID === item.objectID) {
+        const updatedProduct = { ...product, favori: product.favori === 0 ? 1 : 0 };
+        AsyncStorage.getItem('@productData').then(storedData => {
+          const parsedData = JSON.parse(storedData);
+          const updatedStoredData = parsedData.map(p => p.objectID === item.objectID ? updatedProduct : p);
+          AsyncStorage.setItem('@productData', JSON.stringify(updatedStoredData));
+        });
+        return updatedProduct;
+      }
+      return product;
+    });
+
+    setProductList(updatedProductList);
+    setFavoriteList(updatedProductList.filter(product => product.favori === 1));
   };
 
   const handleItemRemove = (item) => {
-    setFavoriteList(favoriteList.filter((fav) => fav.id !== item.id));
+    const updatedProductList = productList.map(product => {
+      if (product.objectID === item.objectID) {
+        const updatedProduct = { ...product, favori: 0 };
+        AsyncStorage.getItem('@productData').then(storedData => {
+          const parsedData = JSON.parse(storedData);
+          const updatedStoredData = parsedData.map(p => p.objectID === item.objectID ? updatedProduct : p);
+          AsyncStorage.setItem('@productData', JSON.stringify(updatedStoredData));
+        });
+        return updatedProduct;
+      }
+      return product;
+    });
+
+    setProductList(updatedProductList);
+    setFavoriteList(updatedProductList.filter(product => product.favori === 1));
   };
 
   const handleAddToCart = (item) => {
@@ -91,7 +116,7 @@ const Product = ({ navigation }) => {
           showSearchInput={false}
           onItemSelect={handleItemRemove}
           isProductList={true}
-          information={"update"}
+         
         />
       ) : (
         <MyFlatlist
@@ -104,12 +129,14 @@ const Product = ({ navigation }) => {
           information={"notremove"}
         />
       )}
+      
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    height:500, 
     flex: 1,
     padding: 20,
     backgroundColor: '#1a1a1a',
