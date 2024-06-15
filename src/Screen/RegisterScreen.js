@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Image, BackHandler, Alert } from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, Image, BackHandler, Alert, Animated, PanResponder, Dimensions } from 'react-native';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
-import { useLandscape } from '../Context/LandSpaceProvider'; 
+import { useLandscape } from '../Context/LandSpaceProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL,API_URL2 } from '../GroceryData/Constant';
+import { API_URL, API_URL2 } from '../GroceryData/Constant';
 
+const { width } = Dimensions.get('window');
 
 const RegisterScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const isLandscape = useLandscape();
+  const translateX = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -45,21 +47,18 @@ const RegisterScreen = ({ navigation }) => {
     }
 
     try {
-      // Mock servise kullanıcı kaydetme isteği gönder
       const response = await axios.post(`${API_URL2}/users/users`, {
         username,
         password
       });
-
-      console.log('Mock servis yanıtı:', response);
 
       if (response.status !== 201) {
         Alert.alert('Error', `User registration failed with status ${response.status}`);
         return;
       }
 
-      // Kullanıcı verilerini AsyncStorage'a kaydet
-      await AsyncStorage.setItem('@user_' + username, password);
+      await AsyncStorage.setItem('@biometric_user', username);
+      await AsyncStorage.setItem('@biometric_password', password);
 
       Alert.alert('Success', 'User registered successfully');
       navigation.navigate("LoginScreen");
@@ -69,9 +68,44 @@ const RegisterScreen = ({ navigation }) => {
     }
   };
 
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onPanResponderMove: Animated.event(
+        [
+          null,
+          { dx: translateX }
+        ],
+        { useNativeDriver: false }
+      ),
+      onPanResponderRelease: (evt, gestureState) => {
+        if (gestureState.dx < -width / 4) {
+          Animated.timing(translateX, {
+            toValue: -width,
+            duration: 300,
+            useNativeDriver: false
+          }).start(() => {
+            navigation.navigate('LoginScreen');
+            translateX.setValue(0);
+          });
+        } else {
+          Animated.spring(translateX, {
+            toValue: 0,
+            useNativeDriver: false
+          }).start();
+        }
+      }
+    })
+  ).current;
+
   return (
     <View style={[styles.container, isLandscape ? styles.containerLandscape : styles.containerPortrait]}>
-      <Image source={require('../../Image/logo.png')} style={styles.logo} />
+      <Animated.View
+        style={[styles.logoContainer, { transform: [{ translateX }] }]}
+        {...panResponder.panHandlers}
+      >
+        <Image source={require('../../Image/logo.png')} style={styles.logo} />
+      </Animated.View>
       <View style={styles.textInputContainer}>
         <MyTextInput onChangeText={setUsername} label1="Name" />
       </View>
@@ -103,6 +137,10 @@ const styles = StyleSheet.create({
     flexDirection: 'column',
     justifyContent: 'space-around',
   },
+  logoContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   logo: {
     width: 100,
     height: 100,
@@ -112,6 +150,7 @@ const styles = StyleSheet.create({
     width: '80%',
     paddingHorizontal: 10,
     paddingVertical: 15,
+    marginTop: 20,
   },
 });
 

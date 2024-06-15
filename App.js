@@ -49,7 +49,7 @@ function App() {
             <Stack.Screen name="Price" component={SeePrice} options={{ header: () => <CustomHeader title="Price" /> }} />
             <Stack.Screen name="Collections" component={Collections} options={{ header: () => <CustomHeader title="Collections" /> }} />
             <Stack.Screen name="Deneme" component={Deneme} options={{ header: () => <CustomHeader title="Deneme" /> }} />
-            <Stack.Screen name="Register" component={RegisterScreen} options={{ header: () => <CustomHeader title="Register" /> }} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ header: () => <CustomHeader title="Register" /> }} />
           </Stack.Navigator>
         </NavigationContainer>
       </AppProvider>
