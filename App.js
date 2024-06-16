@@ -18,7 +18,7 @@ import { AppProvider } from './src/Context/AppProvider';
 import RegisterScreen from './src/Screen/RegisterScreen';
 import SwipeScreen from './src/Screen/SwipeScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-
+import BiometricScreen from './src/Screen/BiometricScreen';
 const Stack = createStackNavigator();
 
 function CustomHeader({ title }) {
@@ -38,6 +38,7 @@ function App() {
             
           
             <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
+            <Stack.Screen name="BiometricScreen" component={BiometricScreen} options={{ headerShown: false }}  />
             <Stack.Screen name="SwipeScreen" component={SwipeScreen} options={{ headerShown: false }} />
             <Stack.Screen name="MyTabs" component={MyTabs} options={{ header: () => <CustomHeader title="MyTabs" /> }} />
             <Stack.Screen name="Product" component={Product} options={{ header: () => <CustomHeader title="Product" /> }} />
