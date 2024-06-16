@@ -14,6 +14,8 @@ const Sales = ({ navigation }) => {
   const [quantityModalVisible, setQuantityModalVisible] = useState(false);
   const [quantityInput, setQuantityInput] = useState('');
   const [isItemListEmpty, setIsItemListEmpty] = useState(true);
+  const [bagModalVisible, setBagModalVisible] = useState(false);
+  const [bagQuantity, setBagQuantity] = useState('');
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -77,12 +79,25 @@ const Sales = ({ navigation }) => {
     setQuantityInput('');
   };
 
-  const HandleRouteReceipt = () => {
-    navigation.navigate("Receipt", { data2List: data2List });
+  const handleRouteReceipt = () => {
+    setBagModalVisible(true);
+  };
+
+  const handleBagQuantityChange = (text) => {
+    setBagQuantity(text);
   };
 
   const handleQuantityChange = (text) => {
     setQuantityInput(text);
+  };
+
+  const handleBagQuantitySubmit = () => {
+    const bagCount = parseInt(bagQuantity, 10) || 0;
+    const bagCost = bagCount * 0.25;
+    const updatedData2List = data2List.map(item => ({ ...item, bagCount, bagCost }));
+    setData2List(updatedData2List);
+    setBagModalVisible(false);
+    navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
   };
 
   return (
@@ -131,10 +146,36 @@ const Sales = ({ navigation }) => {
         </View>
       </Modal>
 
+      <Modal
+        visible={bagModalVisible}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait]}>
+            <Text style={styles.modalText}>Enter Bag Quantity (25 cents per bag):</Text>
+            <MyTextInput
+              label1="Bag Quantity"
+              onChangeText={handleBagQuantityChange}
+              value={bagQuantity}
+            />
+
+            <View style={styles.modalButtonContainer}>
+              <View>
+                <MyButton visible={true} OnChangeButton={handleBagQuantitySubmit} text="Submit" />
+              </View>
+              <View>
+                <MyButton visible={true} OnChangeButton={() => setBagModalVisible(false)} text="Cancel" />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
         <MyButton
           visible={!isItemListEmpty}
-          OnChangeButton={HandleRouteReceipt}
+          OnChangeButton={handleRouteReceipt}
           text="Go Receipt"
         />
       </View>

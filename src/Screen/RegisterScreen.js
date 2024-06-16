@@ -6,6 +6,7 @@ import { useLandscape } from '../Context/LandSpaceProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL, API_URL2 } from '../GroceryData/Constant';
+import ReactNativeBiometrics from 'react-native-biometrics';
 
 const { width } = Dimensions.get('window');
 
@@ -28,6 +29,40 @@ const RegisterScreen = ({ navigation }) => {
   const isValidPassword = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
+  };
+
+  const handleBiometricEnrollment = async () => {
+    const rnBiometrics = new ReactNativeBiometrics();
+
+    try {
+      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+
+      if (!available) {
+        Alert.alert('Error', 'Biometric authentication is not available on this device.');
+        return;
+      }
+
+      if (!biometryType) {
+        Alert.alert('Error', 'No biometrics are enrolled on this device. Please enroll biometrics and try again.');
+        return;
+      }
+
+      const resultObject = await rnBiometrics.simplePrompt({ promptMessage: 'Confirm fingerprint' });
+      const { success } = resultObject;
+
+      if (success) {
+        await AsyncStorage.setItem('@biometric_user', username);
+        await AsyncStorage.setItem('@biometric_password', password);
+
+        Alert.alert('Success', 'Biometric authentication setup successfully');
+        navigation.navigate("LoginScreen");
+      } else {
+        Alert.alert('Error', 'Biometric authentication failed');
+      }
+    } catch (error) {
+      console.error('Biometric authentication failed:', error);
+      Alert.alert('Error', `Biometric authentication failed: ${error.message}`);
+    }
   };
 
   const handleRegister = async () => {
@@ -61,7 +96,9 @@ const RegisterScreen = ({ navigation }) => {
       await AsyncStorage.setItem('@biometric_password', password);
 
       Alert.alert('Success', 'User registered successfully');
-      navigation.navigate("LoginScreen");
+
+      // Biometric enrollment
+      handleBiometricEnrollment();
     } catch (e) {
       console.log('Kayıt hatası:', e);
       Alert.alert('Error', 'Failed to register user');

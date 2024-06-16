@@ -69,6 +69,15 @@ function LoginScreen({ navigation }) {
             navigation.navigate('RegisterScreen');
             translateX.setValue(0);
           });
+        } else if (gestureState.dx < -width / 4) {
+          Animated.timing(translateX, {
+            toValue: -width,
+            duration: 300,
+            useNativeDriver: false
+          }).start(() => {
+            navigation.navigate('BiometricScreen');
+            translateX.setValue(0);
+          });
         } else {
           Animated.spring(translateX, {
             toValue: 0,
