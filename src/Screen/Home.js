@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView, Dimensions, Modal } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView, Dimensions, Modal, useWindowDimensions } from 'react-native';
 import { LineChart } from 'react-native-chart-kit';
 import MyCard from '../Component/MyCard';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
@@ -14,6 +14,9 @@ export default function Home({ navigation }) {
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
   const [toastVisible, setToastVisible] = useState(false);
   const [productData, setProductData] = useState([]);
+
+  const { width, height } = useWindowDimensions();
+  const isLandscape = width > height;
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -130,7 +133,7 @@ export default function Home({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.topBar}>
         <View style={[styles.dot, serviceStatus ? styles.dotGreen : styles.dotRed]} />
         <Text style={[styles.statusText, serviceStatus ? styles.readyText : styles.loadingText]}>
@@ -143,8 +146,8 @@ export default function Home({ navigation }) {
       {chartData.labels.length > 0 ? (
         <LineChart
           data={chartData}
-          width={Dimensions.get('window').width - 20}
-          height={220}
+          width={width - 20} // Responsive genişlik
+          height={isLandscape ? 180 : 220} // Responsive yükseklik
           yAxisLabel=""
           chartConfig={{
             backgroundColor: '#e26a00',
@@ -200,7 +203,7 @@ export default function Home({ navigation }) {
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     backgroundColor: '#1a1a1a',
     padding: 10,
   },
@@ -225,6 +228,7 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 18,
     color: '#fff',
+    flex: 1,
   },
   loadingText: {
     color: 'red',
@@ -268,3 +272,5 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
 });
+
+

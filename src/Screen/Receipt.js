@@ -5,12 +5,13 @@ import { useNavigation } from '@react-navigation/native';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 
 const Receipt = ({ route }) => {
-  const { data2List } = route.params;
+  const { data2List, bagCount, bagCost } = route.params;
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentType, setPaymentType] = useState('');
   const [cashAmount, setCashAmount] = useState('');
   const [cardAmount, setCardAmount] = useState('');
   const [change, setChange] = useState(0);
+  const [campaignDiscount, setCampaignDiscount] = useState(0);
   const navigation = useNavigation();
 
   const { serviceStatus } = useServiceStatus();
@@ -30,14 +31,15 @@ const Receipt = ({ route }) => {
   const calculateTotals = () => {
     let subtotal = 0;
     let totalItems = 0;
-   
+
     data2List.forEach(item => {
       subtotal += item.price * item.count;
       totalItems += item.count;
     });
+
     return {
       subtotal,
-      total: subtotal,
+      total: subtotal - campaignDiscount + bagCost,
       totalItems,
     };
   };
@@ -61,6 +63,9 @@ const Receipt = ({ route }) => {
         cashAmount: parseFloat(cashAmount || 0),
         cardAmount: parseFloat(cardAmount || 0),
         change: totalPaid - total,
+        bagCount: bagCount, // Poşet sayısı
+        bagCost: bagCost, // Poşet maliyeti
+        campaignDiscount: campaignDiscount, // Kampanya indirimi
         saleDate: currentDate.toLocaleString('tr-TR', options), // Satılma tarihi
         centralSendTime: serviceStatus ? currentDate.toLocaleString('tr-TR', options) : null,
         sentToCentral: serviceStatus // Merkeze gönderildi durumu
@@ -82,9 +87,36 @@ const Receipt = ({ route }) => {
       alert("Ödenen miktar toplamdan az olamaz");
     }
   };
+
+  const applyCampaign1 = () => {
+    let discount = 0;
+    data2List.forEach(item => {
+      const discountCount = Math.floor(item.count / 3);
+      discount += discountCount * item.price;
+    });
+    setCampaignDiscount(discount);
+  };
   
+  const applyCampaign2 = () => {
+    let discount = 0;
+    data2List.forEach(item => {
+      if (item.count >= 5) {
+        discount += item.price * 0.2 * item.count; // %20 indirim
+      }
+    });
+    setCampaignDiscount(discount);
+  };
+
   return (
     <View style={styles.container}>
+      <View style={styles.campaignButtonContainer}>
+        <TouchableOpacity style={styles.campaignButton} onPress={applyCampaign1}>
+          <Text style={styles.campaignButtonText}>3 Al 2 Öde</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.campaignButton} onPress={applyCampaign2}>
+          <Text style={styles.campaignButtonText}>5 Al %20 İndirim</Text>
+        </TouchableOpacity>
+      </View>
       <View style={styles.header}>
         <View style={{ flex: 2 }}>
           <Text style={styles.headerText}>Product</Text>
@@ -116,11 +148,13 @@ const Receipt = ({ route }) => {
         style={{ flex: 10 }}
       />
 
-      <View style={styles.totalContainer}>
-        <Text style={styles.totalText}>Ara Toplam: {subtotal.toFixed(2)}</Text>
-        <Text style={styles.totalText}>Toplam: {total.toFixed(2)}</Text>
-        <Text style={styles.totalText}>Toplam Ürün Sayısı: {totalItems}</Text>
-        <Text style={styles.totalText}>Para Üstü: {change.toFixed(2)}</Text>
+      <View style={[styles.totalContainer, isLandscape && styles.totalContainerLandscape]}>
+        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Ara Toplam: {subtotal.toFixed(2)}</Text>
+        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam Kampanya İndirimi: {campaignDiscount.toFixed(2)}</Text>
+        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam Poşet Maliyeti: {bagCost.toFixed(2)}</Text>
+        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam: {total.toFixed(2)}</Text>
+        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam Ürün Sayısı: {totalItems}</Text>
+        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Para Üstü: {change.toFixed(2)}</Text>
       </View>
 
       <TouchableOpacity
@@ -227,6 +261,20 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     backgroundColor: '#1a1a1a',
   },
+  campaignButtonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginVertical: 10,
+  },
+  campaignButton: {
+    backgroundColor: '#ff6600',
+    padding: 10,
+    borderRadius: 5,
+  },
+  campaignButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   header: {
     backgroundColor: "#333",
     marginTop: 3,
@@ -263,9 +311,15 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#333',
   },
+  totalContainerLandscape: {
+    padding: 5,
+  },
   totalText: {
     fontSize: 22,
     color: '#fff',
+  },
+  totalTextLandscape: {
+    fontSize: 16,
   },
   paymentButton: {
     backgroundColor: "#ff6600",
