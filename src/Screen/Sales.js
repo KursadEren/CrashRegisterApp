@@ -16,6 +16,7 @@ const Sales = ({ navigation }) => {
   const [isItemListEmpty, setIsItemListEmpty] = useState(true);
   const [bagModalVisible, setBagModalVisible] = useState(false);
   const [bagQuantity, setBagQuantity] = useState('');
+  const [bagCost, setBagCost] = useState(0);
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -94,11 +95,14 @@ const Sales = ({ navigation }) => {
   const handleBagQuantitySubmit = () => {
     const bagCount = parseInt(bagQuantity, 10) || 0;
     const bagCost = bagCount * 0.25;
+    setBagCost(bagCost);
     const updatedData2List = data2List.map(item => ({ ...item, bagCount, bagCost }));
     setData2List(updatedData2List);
     setBagModalVisible(false);
     navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
   };
+
+  const totalCost = data2List.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
 
   return (
     <ScrollView style={[styles.scrollView, { padding: width * 0.05 }]}>
@@ -173,6 +177,7 @@ const Sales = ({ navigation }) => {
       </Modal>
 
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
+        <Text style={styles.totalText}>Total Cost: ${totalCost.toFixed(2)}</Text>
         <MyButton
           visible={!isItemListEmpty}
           OnChangeButton={handleRouteReceipt}
@@ -222,6 +227,11 @@ const styles = StyleSheet.create({
   buttonContainer: {
     marginTop: 20,
     alignItems: 'center',
+  },
+  totalText: {
+    fontSize: 18,
+    color: '#fff',
+    marginBottom: 10,
   },
 });
 
