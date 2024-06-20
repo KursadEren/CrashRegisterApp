@@ -1,13 +1,15 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
 import MyButton from '../Component/MyButton';
-import MyTextInput from '../Component/MyTextınput'; 
+import MyTextInput from '../Component/MyTextınput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeContext } from '../Context/ThemeContext';
 
 const DATA2 = [];
 
 const Sales = ({ navigation }) => {
+  const { theme } = useContext(ThemeContext);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [data1List, setData1List] = useState([]);
   const [data2List, setData2List] = useState(DATA2);
@@ -105,7 +107,7 @@ const Sales = ({ navigation }) => {
   const totalCost = data2List.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
 
   return (
-    <ScrollView style={[styles.scrollView, { padding: width * 0.05 }]}>
+    <ScrollView style={[styles.scrollView, { padding: width * 0.05, backgroundColor: theme.backgroundColor }]}>
       <MyFlatlist
         data={data1List}
         showSearchInput={true}
@@ -130,8 +132,8 @@ const Sales = ({ navigation }) => {
         transparent={true}
       >
         <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait]}>
-            <Text style={styles.modalText}>Enter Quantity:</Text>
+          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait, { backgroundColor: theme.modalBackground }]}>
+            <Text style={[styles.modalText, { color: theme.textColor }]}>Enter Quantity:</Text>
             <MyTextInput
               label1="Quantity"
               onChangeText={handleQuantityChange}
@@ -156,8 +158,8 @@ const Sales = ({ navigation }) => {
         transparent={true}
       >
         <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait]}>
-            <Text style={styles.modalText}>Enter Bag Quantity (25 cents per bag):</Text>
+          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait, { backgroundColor: theme.modalBackground }]}>
+            <Text style={[styles.modalText, { color: theme.textColor }]}>Enter Bag Quantity (25 cents per bag):</Text>
             <MyTextInput
               label1="Bag Quantity"
               onChangeText={handleBagQuantityChange}
@@ -177,7 +179,7 @@ const Sales = ({ navigation }) => {
       </Modal>
 
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
-        <Text style={styles.totalText}>Total Cost: ${totalCost.toFixed(2)}</Text>
+        <Text style={[styles.totalText, { color: theme.textColor }]}>Total Cost: ${totalCost.toFixed(2)}</Text>
         <MyButton
           visible={!isItemListEmpty}
           OnChangeButton={handleRouteReceipt}
@@ -191,7 +193,6 @@ const Sales = ({ navigation }) => {
 const styles = StyleSheet.create({
   scrollView: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
   },
   modalContainer: {
     flex: 1,
@@ -200,7 +201,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
   },
   modalContent: {
-    backgroundColor: '#333',
     padding: 20,
     borderRadius: 10,
     width: '80%',
@@ -216,7 +216,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalText: {
-    color: '#fff',
     marginBottom: 10,
   },
   modalButtonContainer: {
@@ -230,7 +229,6 @@ const styles = StyleSheet.create({
   },
   totalText: {
     fontSize: 18,
-    color: '#fff',
     marginBottom: 10,
   },
 });

@@ -1,12 +1,17 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { Icon } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import Home from '../Screen/Home';
 import BasketScreen from '../Screen/BasketScreen';
+import ProfileScreen from '../Screen/ProfileScreen';
+import SettingsScreen from '../Screen/SettingsScreen';
+import { useTheme } from '@react-navigation/native';
 
 const Tab = createBottomTabNavigator();
 
 function MyTabs() {
+  const { colors } = useTheme();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
@@ -15,21 +20,25 @@ function MyTabs() {
           if (route.name === 'Home') {
             iconName = focused ? 'home' : 'home-outline';
           } else if (route.name === 'Basket') {
-            iconName = focused ? 'shopping-basket' : 'shopping-basket-outline';
+            iconName = focused ? 'basket' : 'basket-outline';
+          } else if (route.name === 'Profile') {
+            iconName = focused ? 'account' : 'account-outline';
+          } else if (route.name === 'Settings') {
+            iconName = focused ? 'cog' : 'cog-outline';
           }
 
-          return <Icon name={iconName} size={size} color={color} />;
+          return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
         },
-        tabBarActiveTintColor: '#ff6600',
+        tabBarActiveTintColor: colors.primary,
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: {
-          backgroundColor: '#1a1a1a',
+          backgroundColor: colors.background,
           borderTopWidth: 0,
         },
         headerStyle: {
-          backgroundColor: '#1a1a1a',
+          backgroundColor: colors.background,
         },
-        headerTintColor: '#ff6600',
+        headerTintColor: colors.primary,
         headerTitleStyle: {
           fontWeight: 'bold',
         },
@@ -43,6 +52,16 @@ function MyTabs() {
       <Tab.Screen
         name="Basket"
         component={BasketScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Profile"
+        component={ProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
         options={{ headerShown: false }}
       />
     </Tab.Navigator>

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-paper';
-import { useLandscape } from '../Context/LandSpaceProvider'; // Yolun doğru olduğuna dikkat edin
+import { useLandscape } from '../Context/LandSpaceProvider';
+import { ThemeContext } from '../Context/ThemeContext'; // ThemeContext'i dahil edelim
 
 export default function MyButton({ OnChangeButton, iconname, text, visible }) {
+  const { theme } = useContext(ThemeContext); // Tema renklerini kullanmak için context'i kullanalım
   const [loading, setLoading] = useState(false);
   const isLandscape = useLandscape();
 
@@ -22,7 +24,7 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
       <Button
         mode="contained"
         onPress={onPress}
-        style={styles.button}
+        style={[styles.button, { backgroundColor: theme.primaryColor }]} // Buton rengini tema renklerine göre ayarlayalım
         labelStyle={styles.buttonText}
         disabled={loading}
       >
@@ -33,9 +35,7 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
 }
 
 const styles = StyleSheet.create({
-  buttonContainer: {
-    
-  },
+  buttonContainer: {},
   buttonContainerPortrait: {
     width: '100%',
   },
@@ -43,9 +43,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   button: {
-    backgroundColor: '#ff6600',
     borderRadius: 5,
-   
   },
   buttonText: {
     color: '#fff',

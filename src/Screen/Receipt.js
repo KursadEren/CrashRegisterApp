@@ -1,11 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, TextInput, BackHandler, useWindowDimensions, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
+import { ThemeContext } from '../Context/ThemeContext';
 
 const Receipt = ({ route }) => {
   const { data2List, bagCount, bagCost } = route.params;
+  const { theme } = useContext(ThemeContext);
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentType, setPaymentType] = useState('');
   const [cashAmount, setCashAmount] = useState('');
@@ -13,9 +15,7 @@ const Receipt = ({ route }) => {
   const [change, setChange] = useState(0);
   const [campaignDiscount, setCampaignDiscount] = useState(0);
   const navigation = useNavigation();
-
   const { serviceStatus } = useServiceStatus();
-
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
@@ -68,7 +68,8 @@ const Receipt = ({ route }) => {
         campaignDiscount: campaignDiscount, // Kampanya indirimi
         saleDate: currentDate.toLocaleString('tr-TR', options), // Satılma tarihi
         centralSendTime: serviceStatus ? currentDate.toLocaleString('tr-TR', options) : null,
-        sentToCentral: serviceStatus // Merkeze gönderildi durumu
+        sentToCentral: serviceStatus, // Merkeze gönderildi durumu
+        pdfPath: null // Başlangıçta null olarak ayarlanmış PDF yolu
       };
   
       try {
@@ -108,24 +109,24 @@ const Receipt = ({ route }) => {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <View style={styles.campaignButtonContainer}>
-        <TouchableOpacity style={styles.campaignButton} onPress={applyCampaign1}>
+        <TouchableOpacity style={[styles.campaignButton, { backgroundColor: theme.primaryColor }]} onPress={applyCampaign1}>
           <Text style={styles.campaignButtonText}>3 Al 2 Öde</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.campaignButton} onPress={applyCampaign2}>
+        <TouchableOpacity style={[styles.campaignButton, { backgroundColor: theme.primaryColor }]} onPress={applyCampaign2}>
           <Text style={styles.campaignButtonText}>5 Al %20 İndirim</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.header}>
+      <View style={[styles.header, { backgroundColor: theme.headerBackground }]}>
         <View style={{ flex: 2 }}>
-          <Text style={styles.headerText}>Product</Text>
+          <Text style={[styles.headerText, { color: theme.primaryColor }]}>Product</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={styles.headerText}>Price</Text>
+          <Text style={[styles.headerText, { color: theme.primaryColor }]}>Price</Text>
         </View>
         <View style={{ flex: 0.5 }}>
-          <Text style={styles.headerText}>Count</Text>
+          <Text style={[styles.headerText, { color: theme.primaryColor }]}>Count</Text>
         </View>
       </View>
 
@@ -133,32 +134,50 @@ const Receipt = ({ route }) => {
         data={data2List}
         keyExtractor={(item, index) => index.toString()}
         renderItem={({ item }) => (
-          <View style={styles.item}>
+          <View style={[styles.item, { backgroundColor: theme.itemBackground }]}>
             <View style={{ flex: 2 }}>
-              <Text style={styles.itemText}>{item.name}</Text>
+              <Text style={[styles.itemText, { color: theme.textColor }]}>{item.name}</Text>
             </View>
             <View style={{ flex: 1 }}>
-              <Text style={styles.itemText}>{item.price}</Text>
+              <Text style={[styles.itemText, { color: theme.textColor }]}>{item.price}</Text>
             </View>
             <View style={{ flex: 0.5 }}>
-              <Text style={styles.itemText}>x{item.count}</Text>
+              <Text style={[styles.itemText, { color: theme.textColor }]}>x{item.count}</Text>
             </View>
           </View>
         )}
         style={{ flex: 10 }}
       />
 
-      <View style={[styles.totalContainer, isLandscape && styles.totalContainerLandscape]}>
-        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Ara Toplam: {subtotal.toFixed(2)}</Text>
-        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam Kampanya İndirimi: {campaignDiscount.toFixed(2)}</Text>
-        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam Poşet Maliyeti: {bagCost.toFixed(2)}</Text>
-        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam: {total.toFixed(2)}</Text>
-        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Toplam Ürün Sayısı: {totalItems}</Text>
-        <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape]}>Para Üstü: {change.toFixed(2)}</Text>
+      <View style={[styles.totalContainer, isLandscape && styles.totalContainerLandscape, { backgroundColor: theme.totalBackground }]}>
+        <View style={styles.totalItem}>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Ara Toplam:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{subtotal.toFixed(2)}</Text>
+        </View>
+        <View style={styles.totalItem}>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam Kampanya İndirimi:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{campaignDiscount.toFixed(2)}</Text>
+        </View>
+        <View style={styles.totalItem}>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam Poşet Maliyeti:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{bagCost.toFixed(2)}</Text>
+        </View>
+        <View style={styles.totalItem}>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{total.toFixed(2)}</Text>
+        </View>
+        <View style={styles.totalItem}>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam Ürün Sayısı:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{totalItems}</Text>
+        </View>
+        <View style={styles.totalItem}>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Para Üstü:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{change.toFixed(2)}</Text>
+        </View>
       </View>
 
       <TouchableOpacity
-        style={styles.paymentButton}
+        style={[styles.paymentButton, { backgroundColor: theme.primaryColor }]}
         onPress={() => setModalVisible(true)}
       >
         <Text style={styles.paymentButtonText}>Ödeme Yap</Text>
@@ -170,79 +189,79 @@ const Receipt = ({ route }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={[styles.modalContainer, { paddingVertical: height * 0.05 }, { height: isLandscape ? '100%' : '100%' }]}>
+        <View style={[styles.modalContainer, { paddingVertical: height * 0.05 }]}>
           <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingVertical: height * 0.1 }]}>
-            <View style={[styles.modalContent, { height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%' }]}>
-              <Text style={styles.modalTitle}>Ödeme Yöntemi Seç</Text>
+            <View style={[styles.modalContent, { height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%', backgroundColor: theme.modalBackground }]}>
+              <Text style={[styles.modalTitle, { color: theme.textColor }]}>Ödeme Yöntemi Seç</Text>
 
               <TouchableOpacity
-                style={[styles.modalButton, paymentType === 'cash' && styles.selectedButton]}
+                style={[styles.modalButton, paymentType === 'cash' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
                 onPress={() => setPaymentType('cash')}
               >
-                <Text style={styles.modalButtonText}>Nakit</Text>
+                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>Nakit</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalButton, paymentType === 'card' && styles.selectedButton]}
+                style={[styles.modalButton, paymentType === 'card' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
                 onPress={() => setPaymentType('card')}
               >
-                <Text style={styles.modalButtonText}>Kart</Text>
+                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>Kart</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
-                style={[styles.modalButton, paymentType === 'both' && styles.selectedButton]}
+                style={[styles.modalButton, paymentType === 'both' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
                 onPress={() => setPaymentType('both')}
               >
-                <Text style={styles.modalButtonText}>Hem Kart Hem Nakit</Text>
+                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>Hem Kart Hem Nakit</Text>
               </TouchableOpacity>
 
               {paymentType !== '' && (
                 <View>
                   {paymentType === 'cash' && (
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                       placeholder="Nakit Miktarı"
                       keyboardType="numeric"
                       value={cashAmount}
                       onChangeText={setCashAmount}
-                      placeholderTextColor="#aaa"
+                      placeholderTextColor={theme.placeholderTextColor}
                     />
                   )}
                   {paymentType === 'card' && (
                     <TextInput
-                      style={styles.input}
+                      style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                       placeholder="Kart Miktarı"
                       keyboardType="numeric"
                       value={cardAmount}
                       onChangeText={setCardAmount}
-                      placeholderTextColor="#aaa"
+                      placeholderTextColor={theme.placeholderTextColor}
                     />
                   )}
                   {paymentType === 'both' && (
                     <View>
                       <TextInput
-                        style={styles.input}
+                        style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                         placeholder="Nakit Miktarı"
                         keyboardType="numeric"
                         value={cashAmount}
                         onChangeText={setCashAmount}
-                        placeholderTextColor="#aaa"
+                        placeholderTextColor={theme.placeholderTextColor}
                       />
                       <TextInput
-                        style={styles.input}
+                        style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                         placeholder="Kart Miktarı"
                         keyboardType="numeric"
                         value={cardAmount}
                         onChangeText={setCardAmount}
-                        placeholderTextColor="#aaa"
+                        placeholderTextColor={theme.placeholderTextColor}
                       />
                     </View>
                   )}
                   <TouchableOpacity
-                    style={styles.submitButton}
+                    style={[styles.submitButton, { backgroundColor: theme.buttonBackground }]}
                     onPress={handlePayment}
                   >
-                    <Text style={styles.submitButtonText}>Ödeme Yap</Text>
+                    <Text style={[styles.submitButtonText, { color: theme.textColor }]}>Ödeme Yap</Text>
                   </TouchableOpacity>
                 </View>
               )}
@@ -259,7 +278,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    backgroundColor: '#1a1a1a',
   },
   campaignButtonContainer: {
     flexDirection: 'row',
@@ -267,7 +285,6 @@ const styles = StyleSheet.create({
     marginVertical: 10,
   },
   campaignButton: {
-    backgroundColor: '#ff6600',
     padding: 10,
     borderRadius: 5,
   },
@@ -276,7 +293,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   header: {
-    backgroundColor: "#333",
     marginTop: 3,
     borderTopWidth: 0.4,
     borderBottomWidth: 0.4,
@@ -288,11 +304,9 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   headerText: {
-    color: '#ff6600',
     fontWeight: 'bold',
   },
   item: {
-    backgroundColor: "#444",
     justifyContent: "space-around",
     alignItems: "center",
     flexDirection: "row",
@@ -300,29 +314,29 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.4,
     borderBottomColor: '#555',
   },
-  itemText: {
-    color: '#fff',
-  },
+  itemText: {},
   totalContainer: {
     borderWidth: 2,
     borderColor: '#555',
     marginBottom: 3,
     padding: 10,
     borderRadius: 10,
-    backgroundColor: '#333',
   },
   totalContainerLandscape: {
     padding: 5,
   },
+  totalItem: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 2,
+  },
   totalText: {
     fontSize: 22,
-    color: '#fff',
   },
   totalTextLandscape: {
     fontSize: 16,
   },
   paymentButton: {
-    backgroundColor: "#ff6600",
     padding: 15,
     alignItems: "center",
     borderRadius: 10,
@@ -345,51 +359,40 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     padding: 30,
-    backgroundColor: "#333",
     borderRadius: 10,
     alignItems: "center",
   },
   modalTitle: {
     fontSize: 26,
     marginBottom: 20,
-    color: '#fff',
   },
   modalButton: {
     padding: 20,
     marginTop: 15,
-    backgroundColor: "#444",
     width: "100%",
     alignItems: "center",
     borderRadius: 5,
   },
-  selectedButton: {
-    backgroundColor: '#555',
-  },
+  selectedButton: {},
   modalButtonText: {
-    color: '#fff',
     fontSize: 18,
   },
   input: {
     width: "100%",
     padding: 15,
     borderWidth: 1,
-    borderColor: "#555",
     marginTop: 15,
     borderRadius: 5,
-    color: '#fff',
-    backgroundColor: '#444',
     fontSize: 18,
   },
   submitButton: {
     marginTop: 20,
     padding: 20,
-    backgroundColor: "#444",
     width: "100%",
     alignItems: "center",
     borderRadius: 5,
   },
   submitButtonText: {
-    color: "white",
     fontSize: 20,
   },
 });

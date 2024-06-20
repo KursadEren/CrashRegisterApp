@@ -1,15 +1,19 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, StyleSheet, Image, BackHandler, Alert, Animated, PanResponder, Dimensions } from 'react-native';
+import React, { useContext, useState, useEffect, useRef } from 'react';
+import { View, StyleSheet, Image, BackHandler, Alert, Animated, PanResponder, Dimensions, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+import ReactNativeBiometrics from 'react-native-biometrics';
 import { useLandscape } from '../Context/LandSpaceProvider';
-import { API_URL ,API_URL2} from '../GroceryData/Constant';
+import { ThemeContext } from '../Context/ThemeContext';
+import { API_URL ,API_URL2 } from '../GroceryData/Constant';
 
 const { width } = Dimensions.get('window');
 
-function LoginScreen({ navigation }) {
+function AuthScreen({ navigation }) {
+  const { theme } = useContext(ThemeContext);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const isLandscape = useLandscape();
@@ -46,6 +50,31 @@ function LoginScreen({ navigation }) {
     } catch (e) {
       console.log('Error:', e);
       Alert.alert('Error', 'Failed to login');
+    }
+  };
+
+  const handleBiometricAuth = async () => {
+    const rnBiometrics = new ReactNativeBiometrics();
+
+    try {
+      const resultObject = await rnBiometrics.simplePrompt({ promptMessage: 'Confirm fingerprint' });
+      const { success } = resultObject;
+
+      if (success) {
+        const username = await AsyncStorage.getItem('@biometric_user');
+        const password = await AsyncStorage.getItem('@biometric_password');
+
+        if (username && password) {
+          Alert.alert('Authentication Successful', 'You have been authenticated successfully');
+          navigation.navigate('MyTabs'); // Successful authentication
+        } else {
+          Alert.alert('Error', 'No biometric credentials found');
+        }
+      } else {
+        Alert.alert('Authentication Failed', 'Fingerprint authentication failed');
+      }
+    } catch (error) {
+      Alert.alert('Authentication Failed', `Fingerprint authentication failed: ${error.message}`);
     }
   };
 
@@ -89,12 +118,12 @@ function LoginScreen({ navigation }) {
   ).current;
 
   return (
-    <View style={[styles.container, isLandscape ? styles.containerLandscape : styles.containerPortrait]}>
+    <View style={[styles.container, isLandscape ? styles.containerLandscape : styles.containerPortrait, { backgroundColor: theme.backgroundColor }]}>
       <Animated.View
         style={[styles.logoContainer, { transform: [{ translateX }] }]}
         {...panResponder.panHandlers}
       >
-        <Image source={require('../../Image/logo.png')} style={styles.logo} />
+        <Image source={require('../../Image/logo1.png')} style={styles.logo} />
       </Animated.View>
       <View style={styles.textInputContainer}>
         <MyTextInput onChangeText={setUsername} label1="Name" />
@@ -105,6 +134,12 @@ function LoginScreen({ navigation }) {
       <View style={styles.textInputContainer}>
         <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text="Giriş Yap" />
       </View>
+      <View style={styles.biometricContainer}>
+        <Text style={[styles.text, { color: theme.textColor }]}>Biometric Authentication</Text>
+        <TouchableOpacity style={[styles.fingerprintButton, { backgroundColor: theme.secondaryColor }]} onPress={handleBiometricAuth}>
+          <Ionicons name="finger-print" size={50} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -112,7 +147,6 @@ function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
@@ -139,6 +173,18 @@ const styles = StyleSheet.create({
     paddingVertical: 15,
     marginTop: 20,
   },
+  biometricContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  text: {
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  fingerprintButton: {
+    padding: 10,
+    borderRadius: 50,
+  },
 });
 
-export default LoginScreen;
+export default AuthScreen;

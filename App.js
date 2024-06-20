@@ -18,7 +18,6 @@ import { AppProvider } from './src/Context/AppProvider';
 import RegisterScreen from './src/Screen/RegisterScreen';
 import SwipeScreen from './src/Screen/SwipeScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
-import BiometricScreen from './src/Screen/BiometricScreen';
 const Stack = createStackNavigator();
 
 function CustomHeader({ title }) {
@@ -38,19 +37,18 @@ function App() {
             
           
             <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="BiometricScreen" component={BiometricScreen} options={{ headerShown: false }}  />
             <Stack.Screen name="SwipeScreen" component={SwipeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="MyTabs" component={MyTabs} options={{ header: () => <CustomHeader title="MyTabs" /> }} />
-            <Stack.Screen name="Product" component={Product} options={{ header: () => <CustomHeader title="Product" /> }} />
-            <Stack.Screen name="Reports" component={Reports} options={{ header: () => <CustomHeader title="Reports" /> }} />
-            <Stack.Screen name="Other Operations" component={OtherOp} options={{ header: () => <CustomHeader title="Other Operations" /> }} />
-            <Stack.Screen name="Sales" component={Sales} options={{ header: () => <CustomHeader title="Sales" /> }} />
-            <Stack.Screen name="Receipt" component={Receipt} options={{ header: () => <CustomHeader title="Receipt" /> }} />
-            <Stack.Screen name="ReceiptPrint" component={ReceiptPrint} options={{ header: () => <CustomHeader title="ReceiptPrint" /> }} />
-            <Stack.Screen name="Price" component={SeePrice} options={{ header: () => <CustomHeader title="Price" /> }} />
-            <Stack.Screen name="Collections" component={Collections} options={{ header: () => <CustomHeader title="Collections" /> }} />
-            <Stack.Screen name="Deneme" component={Deneme} options={{ header: () => <CustomHeader title="Deneme" /> }} />
-            <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ header: () => <CustomHeader title="Register" /> }} />
+            <Stack.Screen name="MyTabs" component={MyTabs} options={{ headerShown: false }} />
+            <Stack.Screen name="Product" component={Product} options={{ headerShown: false }} />
+            <Stack.Screen name="Reports" component={Reports} options={{ headerShown: false }} />
+            <Stack.Screen name="Other Operations" component={OtherOp} options={{ headerShown: false }} />
+            <Stack.Screen name="Sales" component={Sales} options={{ headerShown: false }} />
+            <Stack.Screen name="Receipt" component={Receipt} options={{ headerShown: false }} />
+            <Stack.Screen name="ReceiptPrint" component={ReceiptPrint} options={{ headerShown: false }} />
+            <Stack.Screen name="SeePrice" component={SeePrice} options={{ headerShown: false }} />
+            <Stack.Screen name="Collections" component={Collections} options={{ headerShown: false }} />
+            <Stack.Screen name="Deneme" component={Deneme} options={{ headerShown: false }} />
+            <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }}/>
           </Stack.Navigator>
         </NavigationContainer>
       </AppProvider>
