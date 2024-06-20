@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeContext } from '../Context/ThemeContext';
 
 const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
+  const { theme } = useContext(ThemeContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState(data);
 
@@ -46,13 +48,13 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
 
   const renderItem = ({ item }) => {
     return (
-      <View style={[styles.card, isProductList && styles.cardLarge]}>
+      <View style={[styles.card, isProductList && styles.cardLarge, { backgroundColor: theme.primaryColor }]}>
         {isProductList && (
           <TouchableOpacity style={styles.favoriteIcon} onPress={() => toggleFavorite(item)}>
             <Icon
               name={item.favori === 1 ? 'star' : 'star-o'}
               size={24}
-              color="#ffcc00"
+              color={theme.accentColor}
             />
           </TouchableOpacity>
         )}
@@ -63,19 +65,19 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
             onItemSelect(item);
           }
         }}>
-          <View style={styles.item}>
+          <View style={[styles.item, { backgroundColor: theme.itemBackground }]}>
             <View style={styles.textContainer}>
               <Image source={{ uri: item.image }} resizeMode="contain" style={[styles.image, isProductList && styles.imageLarge]} />
-              <Text style={[styles.name, isProductList && styles.nameLarge]}>{item.name}</Text>
+              <Text style={[styles.name, isProductList && styles.nameLarge, { color: theme.textColor }]}>{item.name}</Text>
             </View>
           </View>
-          <Text style={[styles.price, isProductList && styles.priceLarge]}>Price: ${item.price}</Text>
+          <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>Price: ${item.price}</Text>
           {information === 'update' && (
             <View style={styles.updateContainer}>
               <View style={styles.quantityContainer}>
-                <Text style={styles.label}>Quantity: </Text>
+                <Text style={[styles.label, { color: theme.textColor }]}>Quantity: </Text>
                 <TextInput
-                  style={styles.quantityInput}
+                  style={[styles.quantityInput, { borderColor: theme.secondaryColor, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                   keyboardType="numeric"
                   placeholder="Quantity"
                   value={item.count ? item.count.toString() : ''}
@@ -83,7 +85,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
                   placeholderTextColor="#aaa"
                 />
               </View>
-              <Text style={styles.total}>Total: ${calculateTotal(item)}</Text>
+              <Text style={[styles.total, { color: theme.textColor }]}>Total: ${calculateTotal(item)}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -95,11 +97,11 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
     <View style={isProductList ? styles.FovoriContainer : styles.container}>
       {showSearchInput && (
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { borderColor: theme.secondaryColor, color: theme.textColor, backgroundColor: theme.inputBackground }]}
           placeholder="Search..."
           value={searchQuery}
           onChangeText={handleSearch}
-          placeholderTextColor="#aaa"
+          placeholderTextColor={theme.placeholderTextColor}
         />
       )}
       <FlatList
@@ -120,7 +122,6 @@ const styles = StyleSheet.create({
     height: "auto",
   },
   item: {
-    backgroundColor: "#333",
     width: 200,
     height: 190,
     padding: 20,
@@ -155,7 +156,6 @@ const styles = StyleSheet.create({
     width: 180,
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#fff',
   },
   nameLarge: {
     fontSize: 16,
@@ -163,8 +163,6 @@ const styles = StyleSheet.create({
   price: {
     fontSize: 16,
     marginTop: 5,
-    color: '#4bc91a',
-    backgroundColor: "#000",
     paddingLeft: 20,
     marginHorizontal: 15,
   },
@@ -179,22 +177,16 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     height: 40,
-    borderColor: '#555',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    color: '#fff',
-    backgroundColor: '#444',
   },
   quantityInput: {
-    borderColor: '#555',
     borderWidth: 1,
     borderRadius: 5,
     paddingHorizontal: 10,
     marginBottom: 10,
-    color: '#fff',
-    backgroundColor: '#444',
   },
   updateContainer: {
     marginHorizontal: 15,
@@ -203,14 +195,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  label: {
-    color: '#fff',
-  },
-  total: {
-    color: '#fff',
-  },
+  label: {},
+  total: {},
   card: {
-    backgroundColor: '#333',
     borderRadius: 10,
     padding: 10,
     marginVertical: 0,
@@ -228,11 +215,9 @@ const styles = StyleSheet.create({
     top: 10,
     right: 10,
   },
-  FovoriContainer:{
-    flex:1,
-    height:500,
-    borderBottomWidth:1
-    
+  FovoriContainer: {
+    flex: 1,
+    height: 300,
   }
 });
 

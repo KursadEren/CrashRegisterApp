@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, StyleSheet, ActivityIndicator, Text, ScrollView, BackHandler, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MyFlatlist from '../Component/MyFlatlist';
+import { ThemeContext } from '../Context/ThemeContext';
 
 const Product = ({ navigation }) => {
+  const { theme } = useContext(ThemeContext);
   const [productList, setProductList] = useState([]);
   const [favoriteList, setFavoriteList] = useState([]);
   const [cartList, setCartList] = useState([]);
@@ -84,31 +86,31 @@ const Product = ({ navigation }) => {
 
   if (loading) {
     return (
-      <View style={styles.centered}>
-        <ActivityIndicator size="large" color="#ff6600" />
+      <View style={[styles.centered, { backgroundColor: theme.backgroundColor }]}>
+        <ActivityIndicator size="large" color={theme.primaryColor} />
       </View>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.centered}>
-        <Text style={styles.errorText}>Error loading products</Text>
+      <View style={[styles.centered, { backgroundColor: theme.backgroundColor }]}>
+        <Text style={[styles.errorText, { color: theme.textColor }]}>Error loading products</Text>
       </View>
     );
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <View style={styles.headerContainer}>
-        <Text style={styles.header}>All Products</Text>
+        <Text style={[styles.header, { color: theme.primaryColor }]}>All Products</Text>
         <TouchableOpacity style={styles.favoritesButton} onPress={() => setShowFavorites(!showFavorites)}>
-          <Icon name="star" size={24} color="#ffcc00" />
-          <Text style={styles.favoritesButtonText}>Favorites</Text>
+          <Icon name="star" size={24} color={theme.accentColor} />
+          <Text style={[styles.favoritesButtonText, { color: theme.accentColor }]}>Favorites</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Sales', { cartList })}>
-          <Icon name="shopping-cart" size={24} color="#ffcc00" />
-          <Text style={styles.cartButtonText}>Cart</Text>
+          <Icon name="shopping-cart" size={24} color={theme.accentColor} />
+          <Text style={[styles.cartButtonText, { color: theme.accentColor }]}>Cart</Text>
         </TouchableOpacity>
       </View>
       {showFavorites ? (
@@ -117,7 +119,6 @@ const Product = ({ navigation }) => {
           showSearchInput={false}
           onItemSelect={handleItemRemove}
           isProductList={true}
-         
         />
       ) : (
         <MyFlatlist
@@ -130,17 +131,14 @@ const Product = ({ navigation }) => {
           information={"notremove"}
         />
       )}
-      
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    height:500, 
     flex: 1,
     padding: 20,
-    backgroundColor: '#1a1a1a',
   },
   headerContainer: {
     flexDirection: 'row',
@@ -151,7 +149,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginVertical: 10,
-    color: '#ff6600',
   },
   favoritesButton: {
     flexDirection: 'row',
@@ -159,7 +156,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   favoritesButtonText: {
-    color: '#ffcc00',
     marginLeft: 5,
     fontSize: 16,
   },
@@ -169,7 +165,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   cartButtonText: {
-    color: '#ffcc00',
     marginLeft: 5,
     fontSize: 16,
   },
@@ -177,10 +172,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#1a1a1a',
   },
   errorText: {
-    color: 'red',
+    fontSize: 16,
   },
 });
 

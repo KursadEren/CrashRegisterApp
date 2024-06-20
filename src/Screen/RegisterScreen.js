@@ -141,7 +141,7 @@ const RegisterScreen = ({ navigation }) => {
         style={[styles.logoContainer, { transform: [{ translateX }] }]}
         {...panResponder.panHandlers}
       >
-        <Image source={require('../../Image/logo.png')} style={styles.logo} />
+        <Image source={require('../../Image/logo1.png')} style={styles.logo} />
       </Animated.View>
       <View style={styles.textInputContainer}>
         <MyTextInput onChangeText={setUsername} label1="Name" />
@@ -162,7 +162,7 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#f8f9fa', // updated background color
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,

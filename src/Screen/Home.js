@@ -1,80 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, BackHandler, ScrollView, Dimensions, Modal, useWindowDimensions } from 'react-native';
-import { LineChart } from 'react-native-chart-kit';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Modal, useWindowDimensions } from 'react-native';
+import Icon from 'react-native-vector-icons/Ionicons';
 import MyCard from '../Component/MyCard';
-import { useServiceStatus } from '../Context/ServiceStatusContext';
+import MyFlatlist from '../Component/MyFlatlist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL , API_URL2 } from '../GroceryData/Constant';
+import { LineChart } from 'react-native-chart-kit';
+import { useServiceStatus } from '../Context/ServiceStatusContext';
+import { ThemeContext } from '../Context/ThemeContext';
+import { API_URL2 } from '../GroceryData/Constant';
 
-export default function Home({ navigation }) {
+const Home = ({ navigation }) => {
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const { serviceStatus, setServiceStatus } = useServiceStatus();
-  const [loading, setLoading] = useState(false);
-  const [pendingPayments, setPendingPayments] = useState([]);
-  const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
-  const [toastVisible, setToastVisible] = useState(false);
   const [productData, setProductData] = useState([]);
-
+  const [favorites, setFavorites] = useState([]);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
-
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      navigation.goBack();
-      return true;
-    });
-
-    return () => backHandler.remove();
-  }, []);
-
-  useEffect(() => {
-    if (serviceStatus) {
-      sendUnsentPaymentsToCentral();
-    }
-  }, [serviceStatus]);
-
-  useEffect(() => {
-    const fetchPendingPayments = async () => {
-      try {
-        const keys = await AsyncStorage.getAllKeys();
-        const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
-        const paymentItems = await AsyncStorage.multiGet(paymentKeys);
-
-        const parsedData = paymentItems.map(item => JSON.parse(item[1]));
-        console.log('Pending Payments:', parsedData); // Veri kontrolü için log
-        setPendingPayments(parsedData);
-      } catch (error) {
-        console.error('Error fetching pending payments:', error);
-      }
-    };
-
-    fetchPendingPayments();
-  }, []);
-
-  useEffect(() => {
-    if (pendingPayments.length > 0) {
-      const aggregateSales = {};
-
-      pendingPayments.forEach(payment => {
-        const dateTime = payment.saleDate.split(' ')[0]; // Sadece tarih kısmını al
-        const totalItems = payment.items.reduce((total, item) => total + item.count, 0);
-        
-        if (aggregateSales[dateTime]) {
-          aggregateSales[dateTime] += totalItems;
-        } else {
-          aggregateSales[dateTime] = totalItems;
-        }
-      });
-
-      const sortedDateTimes = Object.keys(aggregateSales).sort();
-      const data = sortedDateTimes.map(dateTime => aggregateSales[dateTime]);
-
-      setChartData({
-        labels: sortedDateTimes,
-        datasets: [{ data }]
-      });
-    }
-  }, [pendingPayments]);
 
   useEffect(() => {
     const fetchProductData = async () => {
@@ -82,14 +27,14 @@ export default function Home({ navigation }) {
         const response = await axios.get(`${API_URL2}/products/product`);
         if (response.status === 200) {
           const products = response.data.map(product => ({
-            objectID: product.objectID, // objectID alanını ekleyin
+            objectID: product.objectID,
             name: product.name,
             price: product.price,
             image: product.image,
             categories: product.categories,
             favori: 0
           }));
-          
+
           await AsyncStorage.setItem('@productData', JSON.stringify(products));
           setProductData(products);
         }
@@ -101,9 +46,64 @@ export default function Home({ navigation }) {
     fetchProductData();
   }, []);
 
-  const toggleServiceStatus = () => {
-    setServiceStatus(!serviceStatus);
-  };
+  useEffect(() => {
+    const fetchFavorites = async () => {
+      try {
+        const data = await AsyncStorage.getItem('@productData');
+        if (data) {
+          const products = JSON.parse(data);
+          const favoriteProducts = products.filter(product => product.favori === 1);
+          setFavorites(favoriteProducts);
+        }
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+      }
+    };
+
+    fetchFavorites();
+  }, []);
+
+  useEffect(() => {
+    const fetchPendingPayments = async () => {
+      try {
+        const keys = await AsyncStorage.getAllKeys();
+        const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
+        const paymentItems = await AsyncStorage.multiGet(paymentKeys);
+
+        const parsedData = paymentItems.map(item => JSON.parse(item[1]));
+        const aggregateSales = {};
+
+        parsedData.forEach(payment => {
+          const dateTime = payment.saleDate.split(' ')[0];
+          const totalItems = payment.items.reduce((total, item) => total + item.count, 0);
+
+          if (aggregateSales[dateTime]) {
+            aggregateSales[dateTime] += totalItems;
+          } else {
+            aggregateSales[dateTime] = totalItems;
+          }
+        });
+
+        const sortedDateTimes = Object.keys(aggregateSales).sort();
+        const data = sortedDateTimes.map(dateTime => aggregateSales[dateTime]);
+
+        setChartData({
+          labels: sortedDateTimes,
+          datasets: [{ data }]
+        });
+      } catch (error) {
+        console.error('Error fetching pending payments:', error);
+      }
+    };
+
+    fetchPendingPayments();
+  }, []);
+
+  useEffect(() => {
+    if (serviceStatus) {
+      sendUnsentPaymentsToCentral();
+    }
+  }, [serviceStatus]);
 
   const sendUnsentPaymentsToCentral = async () => {
     try {
@@ -124,6 +124,7 @@ export default function Home({ navigation }) {
         await AsyncStorage.setItem(key, JSON.stringify(updatedPayment));
       }
 
+      setToastMessage('Tüm ödemeler merkeze gönderildi.');
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 2000);
       console.log('Tüm ödemeler merkeze gönderildi.');
@@ -132,33 +133,83 @@ export default function Home({ navigation }) {
     }
   };
 
+  const toggleServiceStatus = () => {
+    setServiceStatus(!serviceStatus);
+    if (!serviceStatus) {
+      setToastMessage('Servis açıldı.');
+    } else {
+      setToastMessage('Servis kapatıldı.');
+    }
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000);
+  };
+
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      <View style={styles.topBar}>
-        <View style={[styles.dot, serviceStatus ? styles.dotGreen : styles.dotRed]} />
-        <Text style={[styles.statusText, serviceStatus ? styles.readyText : styles.loadingText]}>
-          {serviceStatus ? 'Servis Durumu: Hazır' : 'Servis Çalışmıyor...'}
-        </Text>
-        <TouchableOpacity style={styles.button} onPress={toggleServiceStatus}>
-          <Text style={styles.buttonText}>Servis Aç/Kapat</Text>
-        </TouchableOpacity>
+    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+      {/* Başlık ve Hoşgeldiniz Mesajı */}
+      <View style={styles.header}>
+        <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
+        <View style={styles.headerTextContainer}>
+          <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>Merhaba,</Text>
+          <Text style={[styles.userName, { color: theme.textColor }]}>Kursad</Text>
+          <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.primaryColor }]} onPress={toggleTheme}>
+            <Text style={styles.themeButtonText}>Temayı Değiştir</Text>
+          </TouchableOpacity>
+          <View style={styles.serviceStatusContainer}>
+            <Text style={[styles.serviceTitle, { color: theme.textColor }]}>Servis</Text>
+            <View style={[styles.dot, serviceStatus ? { backgroundColor: theme.primaryColor } : { backgroundColor: theme.dangerColor }]} />
+            <Text style={[styles.statusText, serviceStatus ? { color: theme.primaryColor } : { color: theme.dangerColor }]}>
+              {serviceStatus ? 'Hazır' : 'Çalışmıyor'}
+            </Text>
+          </View>
+          <TouchableOpacity style={[styles.serviceButton, { backgroundColor: theme.primaryColor }]} onPress={toggleServiceStatus}>
+            <Text style={styles.serviceButtonText}>{serviceStatus ? 'Kapat' : 'Aç'}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
+
+      {/* Arama Çubuğu */}
+      <View style={styles.searchContainer}>
+        <Icon name="search" size={20} color={theme.textColor} style={styles.searchIcon} />
+        <TextInput style={[styles.searchBar, { borderColor: theme.secondaryColor }]} placeholder="Ara..." placeholderTextColor={theme.textColor} />
+      </View>
+
+      {/* Kategoriler */}
+      <View style={styles.content}>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName="Satış" CardPage="Sales" CardColor={theme.primaryColor} IconName="cash-register" />
+          <MyCard navigation={navigation} CardName="Fiyat Gör" CardPage="Product" CardColor={theme.primaryColor} IconName="tag" />
+        </View>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName="İade İşlemi" CardPage="Return" CardColor={theme.primaryColor} IconName="backup-restore" />
+          <MyCard navigation={navigation} CardName="Tahsilatlar" CardPage="Collections" CardColor={theme.primaryColor} IconName="credit-card-check-outline" />
+        </View>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName="Raporlar" CardPage="Reports" CardColor={theme.primaryColor} IconName="file-chart-outline" />
+          <MyCard navigation={navigation} CardName="Diğer İşlemler" CardPage="SeePrice" CardColor={theme.primaryColor} IconName="cogs" />
+        </View>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName="Direkt Ürün Girişi" CardPage="Product" CardColor={theme.primaryColor} IconName="cart-plus" />
+          <MyCard navigation={navigation} CardName="www" CardColor={theme.primaryColor} IconName="web" />
+        </View>
+      </View>
+
+      {/* Grafik */}
       {chartData.labels.length > 0 ? (
         <LineChart
           data={chartData}
-          width={width - 20} // Responsive genişlik
-          height={isLandscape ? 180 : 220} // Responsive yükseklik
-          yAxisLabel=""
+          width={width - 40}
+          height={isLandscape ? 180 : 220}
           chartConfig={{
-            backgroundColor: '#e26a00',
-            backgroundGradientFrom: '#fb8c00',
-            backgroundGradientTo: '#ffa726',
+            backgroundColor: theme.primaryColor,
+            backgroundGradientFrom: theme.primaryColor,
+            backgroundGradientTo: theme.secondaryColor,
             decimalPlaces: 0,
             color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
             style: {
               borderRadius: 16
-            },
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            }
           }}
           bezier
           style={{
@@ -167,26 +218,36 @@ export default function Home({ navigation }) {
           }}
         />
       ) : (
-        <Text style={styles.noDataText}>Veri bulunamadı.</Text>
+        <Text style={[styles.noDataText, { color: theme.textColor }]}>Veri bulunamadı.</Text>
       )}
-      <View style={styles.content}>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="Satış" CardPage="Sales" CardColor="#4CAF50" />
-          <MyCard navigation={navigation} CardName="Fiyat Gör" CardPage="Product" CardColor="#4CAF50" />
-        </View>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="İade İşlemi" CardPage="Return" CardColor="#F44336" />
-          <MyCard navigation={navigation} CardName="Tahsilatlar" CardPage="Collections" CardColor="#FFEB3B" />
-        </View>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="Raporlar" CardPage="Reports" CardColor="#2196F3" />
-          <MyCard navigation={navigation} CardName="Diğer İşlemler" CardPage="OtherOp" CardColor="#4CAF50" />
-        </View>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="Direkt Ürün Girişi" CardPage="Product" CardColor="#4CAF50" />
-          <MyCard navigation={navigation} CardName="www" CardColor="#4CAF50" />
-        </View>
+
+      {/* Öne Çıkanlar (Favoriler) */}
+      <View style={styles.featuredSection}>
+        <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Favoriler</Text>
+        <MyFlatlist
+          data={favorites}
+          showSearchInput={false}
+          onItemSelect={() => {}}
+          onItemRemove={() => {}}
+          favoriteList={favorites}
+          isProductList={true}
+          information={"notremove"}
+          isFavoriteList={true}
+        />
       </View>
+
+      {/* Kullanıcı Bilgileri ve Ayarlar */}
+      <View style={styles.userSection}>
+        <TouchableOpacity style={[styles.userButton, { backgroundColor: theme.primaryColor }]}>
+          <Icon name="person" size={20} color="#fff" />
+          <Text style={styles.userButtonText}>Profil</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.userButton, { backgroundColor: theme.primaryColor }]}>
+          <Icon name="settings" size={20} color="#fff" />
+          <Text style={styles.userButtonText}>Ayarlar</Text>
+        </TouchableOpacity>
+      </View>
+
       <Modal
         visible={toastVisible}
         transparent={true}
@@ -194,57 +255,98 @@ export default function Home({ navigation }) {
         onRequestClose={() => setToastVisible(false)}
       >
         <View style={styles.toastContainer}>
-          <Text style={styles.toastText}>Tüm ödemeler merkeze gönderildi.</Text>
+          <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       </Modal>
     </ScrollView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: '#1a1a1a',
-    padding: 10,
+    padding: 20,
   },
-  topBar: {
+  header: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 20,
+  },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    marginRight: 10,
+  },
+  headerTextContainer: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  welcomeMessage: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  userName: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  themeButton: {
+    marginTop: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    borderRadius: 5,
+    alignSelf: 'flex-start',
+  },
+  themeButtonText: {
+    color: 'white',
+    fontSize: 14,
+  },
+  serviceStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  serviceTitle: {
+    marginRight: 5,
+    fontSize: 14,
+    fontWeight: 'bold',
   },
   dot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    marginRight: 10,
-  },
-  dotGreen: {
-    backgroundColor: 'green',
-  },
-  dotRed: {
-    backgroundColor: 'red',
+    marginRight: 5,
   },
   statusText: {
-    fontSize: 18,
-    color: '#fff',
-    flex: 1,
+    fontSize: 14,
   },
-  loadingText: {
-    color: 'red',
-  },
-  readyText: {
-    color: 'green',
-  },
-  button: {
-    backgroundColor: '#007bff',
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+  serviceButton: {
+    marginTop: 5,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
     borderRadius: 5,
   },
-  buttonText: {
+  serviceButtonText: {
     color: 'white',
-    fontSize: 16,
+    fontSize: 14,
+  },
+  searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  searchIcon: {
+    position: 'absolute',
+    left: 10,
+  },
+  searchBar: {
+    flex: 1,
+    height: 40,
+    borderWidth: 1,
+    borderRadius: 20,
+    paddingLeft: 40,
+    backgroundColor: '#fff',
   },
   content: {
     flex: 1,
@@ -254,10 +356,59 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 10,
   },
-  noDataText: {
-    color: 'white',
-    textAlign: 'center',
-    marginTop: 20,
+  featuredSection: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  featuredScroll: {
+    marginBottom: 20,
+  },
+  featuredItem: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    padding: 10,
+    marginRight: 10,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 3,
+    width: 160,
+    height: 220,
+  },
+  featuredImage: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+  },
+  featuredText: {
+    marginTop: 10,
+    fontWeight: 'bold',
+  },
+  featuredPrice: {
+    marginTop: 5,
+  },
+  userSection: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  userButton: {
+    padding: 10,
+    borderRadius: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  userButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    marginLeft: 5,
   },
   toastContainer: {
     flex: 1,
@@ -271,6 +422,10 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 10,
   },
+  noDataText: {
+    textAlign: 'center',
+    marginTop: 20,
+  },
 });
 
-
+export default Home;

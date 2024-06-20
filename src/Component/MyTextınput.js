@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { TextInput, useTheme, Provider as PaperProvider } from 'react-native-paper';
+import { TextInput } from 'react-native-paper';
+import { ThemeContext } from '../Context/ThemeContext'; // ThemeContext'i dahil edelim
 
 function MyTextInput({ label1, icon, onChangeText, value }) {
+  const { theme } = useContext(ThemeContext); // Tema renklerini kullanmak için context'i kullanalım
   const [text, setText] = useState(value || '');
   const [isSecureTextEntry, setIsSecureTextEntry] = useState(false);
 
@@ -15,25 +17,23 @@ function MyTextInput({ label1, icon, onChangeText, value }) {
     onChangeText(text);
   };
 
-  const theme = {
-    colors: {
-      text: 'white', // Label rengi
-      placeholder: 'white', // Placeholder rengi
-    },
-  };
-
   return (
     <View style={styles.inputContainer}>
       <TextInput
         label={label1}
         value={text}
-        textColor='white'
         secureTextEntry={isSecureTextEntry}
         onChangeText={handleTextChange}
         right={icon ? <TextInput.Icon icon={icon} /> : null}
-        style={styles.input}
-        theme={theme}
-        placeholderTextColor="#FFF"
+        style={[styles.input, { backgroundColor: theme.secondaryColor }]}
+        theme={{
+          colors: {
+            text: theme.textColor,
+            placeholder: theme.textColor,
+            primary: theme.primaryColor,
+            background: theme.secondaryColor,
+          },
+        }}
       />
     </View>
   );
@@ -44,8 +44,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   input: {
-    backgroundColor: '#333',
-    color: "white",
     borderRadius: 5,
   },
 });

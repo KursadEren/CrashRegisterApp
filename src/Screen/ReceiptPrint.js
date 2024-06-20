@@ -1,45 +1,52 @@
-import React,{useState} from 'react';
+import React, { useState, useContext } from 'react';
 import { ScrollView, View, Text, StyleSheet, Alert } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import RNFS from 'react-native-fs';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
-import MyButton from '../Component/MyButton'; // MyButton bileşenini ekliyoruz
+import MyButton from '../Component/MyButton';
 import { useWindowDimensions } from 'react-native';
+import { ThemeContext } from '../Context/ThemeContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ReceiptContent = ({ paymentDetails }) => (
-  <View style={styles.receiptContainer}>
-    <Text style={styles.title}>Fiş</Text>
-    <Text style={styles.info}>Tarih: {paymentDetails.date}</Text>
-    <View style={styles.tableContainer}>
-      <View style={styles.tableRow}>
-        <Text style={[styles.tableHeader, { flex: 2 }]}>Ürün</Text>
-        <Text style={styles.tableHeader}>Fiyat</Text>
-        <Text style={styles.tableHeader}>Adet</Text>
-        <Text style={styles.tableHeader}>Toplam</Text>
-      </View>
-      {paymentDetails.items.map((item, index) => (
-        <View key={index} style={styles.tableRow}>
-          <Text style={[styles.tableData, { flex: 2 }]}>{item.name}</Text>
-          <Text style={styles.tableData}>{item.price.toFixed(2)}</Text>
-          <Text style={styles.tableData}>{item.count}</Text>
-          <Text style={styles.tableData}>{(item.price * item.count).toFixed(2)}</Text>
+const ReceiptContent = ({ paymentDetails }) => {
+  const { theme } = useContext(ThemeContext);
+
+  return (
+    <View style={[styles.receiptContainer, { backgroundColor: theme.backgroundColor }]}>
+      <Text style={[styles.title, { color: theme.textColor }]}>Fiş</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>Tarih: {paymentDetails.date}</Text>
+      <View style={styles.tableContainer}>
+        <View style={styles.tableRow}>
+          <Text style={[styles.tableHeader, { color: theme.textColor, flex: 2 }]}>Ürün</Text>
+          <Text style={[styles.tableHeader, { color: theme.textColor }]}>Fiyat</Text>
+          <Text style={[styles.tableHeader, { color: theme.textColor }]}>Adet</Text>
+          <Text style={[styles.tableHeader, { color: theme.textColor }]}>Toplam</Text>
         </View>
-      ))}
+        {paymentDetails.items.map((item, index) => (
+          <View key={index} style={styles.tableRow}>
+            <Text style={[styles.tableData, { color: theme.textColor, flex: 2 }]}>{item.name}</Text>
+            <Text style={[styles.tableData, { color: theme.textColor }]}>{item.price.toFixed(2)}</Text>
+            <Text style={[styles.tableData, { color: theme.textColor }]}>{item.count}</Text>
+            <Text style={[styles.tableData, { color: theme.textColor }]}>{(item.price * item.count).toFixed(2)}</Text>
+          </View>
+        ))}
+      </View>
+      <Text style={[styles.info, { color: theme.textColor }]}>Ara Toplam: {paymentDetails.subtotal.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>Toplam: {paymentDetails.total.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>Ödeme Yöntemi: {paymentDetails.paymentType}</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>Nakit: {paymentDetails.cashAmount.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>Kart: {paymentDetails.cardAmount.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>Para Üstü: {paymentDetails.change.toFixed(2)} TL</Text>
     </View>
-    <Text style={styles.info}>Ara Toplam: {paymentDetails.subtotal.toFixed(2)} TL</Text>
-    <Text style={styles.info}>Toplam: {paymentDetails.total.toFixed(2)} TL</Text>
-    <Text style={styles.info}>Ödeme Yöntemi: {paymentDetails.paymentType}</Text>
-    <Text style={styles.info}>Nakit: {paymentDetails.cashAmount.toFixed(2)} TL</Text>
-    <Text style={styles.info}>Kart: {paymentDetails.cardAmount.toFixed(2)} TL</Text>
-    <Text style={styles.info}>Para Üstü: {paymentDetails.change.toFixed(2)} TL</Text>
-  </View>
-);
+  );
+};
 
 const ReceiptPrint = () => {
+  const { theme } = useContext(ThemeContext);
   const route = useRoute();
   const navigation = useNavigation();
   const { paymentDetails } = route.params;
-  const { width, height } = useWindowDimensions('window');
+  const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
   const handlePrint = async () => {
@@ -53,8 +60,8 @@ const ReceiptPrint = () => {
         <html>
           <head>
             <style>
-              body { font-family: Arial, sans-serif; padding: 20px; }
-              .receiptContainer { background-color: #fff; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+              body { font-family: Arial, sans-serif; padding: 20px; background-color: ${theme.backgroundColor}; color: ${theme.textColor}; }
+              .receiptContainer { background-color: ${theme.backgroundColor}; padding: 15px; border-radius: 10px; margin-bottom: 20px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
               .title { font-size: 24px; font-weight: bold; margin-bottom: 20px; text-align: center; }
               .info { margin-bottom: 10px; font-size: 16px; }
               .tableContainer { margin-bottom: 20px; width: 100%; border-collapse: collapse; }
@@ -102,6 +109,14 @@ const ReceiptPrint = () => {
 
       const file = await RNHTMLtoPDF.convert(options);
       console.log('Dosya kaydedildi: ', file.filePath);
+
+      // PDF dosyasının yolunu paymentDetails'e ekleyin
+      paymentDetails.pdfPath = file.filePath;
+
+      // AsyncStorage'daki ödeme kaydını güncelleyin
+      const paymentKey = '@payment_' + new Date(paymentDetails.saleDate).getTime();
+      await AsyncStorage.setItem(paymentKey, JSON.stringify(paymentDetails));
+
       Alert.alert('Başarılı', `PDF dosyası başarıyla kaydedildi!\n\nDosya Yolu: ${file.filePath}`, [{ text: 'Tamam' }]);
       navigation.navigate("Home");
     } catch (error) {
@@ -111,7 +126,7 @@ const ReceiptPrint = () => {
   };
 
   return (
-    <ScrollView style={[styles.container, { paddingTop: height * 0.05, paddingBottom: height * 0.05 }]}>
+    <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <ReceiptContent paymentDetails={paymentDetails} />
       <View style={styles.buttonContainer}>
         <MyButton visible={true} OnChangeButton={handlePrint} text="Yazdır" />
@@ -127,7 +142,6 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   receiptContainer: {
-    backgroundColor: '#fff',
     padding: 15,
     borderRadius: 10,
     shadowColor: '#000',
@@ -169,7 +183,7 @@ const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    paddingBottom:40,
+    paddingBottom: 40,
   },
 });
 
