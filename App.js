@@ -18,6 +18,7 @@ import { AppProvider } from './src/Context/AppProvider';
 import RegisterScreen from './src/Screen/RegisterScreen';
 import SwipeScreen from './src/Screen/SwipeScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import AllReports from './src/Screen/AllReports';
 const Stack = createStackNavigator();
 
 function CustomHeader({ title }) {
@@ -49,6 +50,7 @@ function App() {
             <Stack.Screen name="Collections" component={Collections} options={{ headerShown: false }} />
             <Stack.Screen name="Deneme" component={Deneme} options={{ headerShown: false }} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }}/>
+            <Stack.Screen name="AllReports" component={AllReports} options={{ headerShown: false }}/>
           </Stack.Navigator>
         </NavigationContainer>
       </AppProvider>

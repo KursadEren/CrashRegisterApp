@@ -123,7 +123,7 @@ function AuthScreen({ navigation }) {
         style={[styles.logoContainer, { transform: [{ translateX }] }]}
         {...panResponder.panHandlers}
       >
-        <Image source={require('../../Image/logo1.png')} style={styles.logo} />
+        <Image source={require('../../Image/logo2.png')} style={styles.logo} />
       </Animated.View>
       <View style={styles.textInputContainer}>
         <MyTextInput onChangeText={setUsername} label1="Name" />
