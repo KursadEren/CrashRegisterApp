@@ -1,8 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons'; // Simgeler için kütüphane
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useTranslation } from 'react-i18next';
 
 export default function MyCard({ CardName, CardColor, CardPage, navigation, IconName }) {
+  const { t } = useTranslation();
+
   const onPressCard = () => {
     if (navigation) {
       navigation.navigate(CardPage);
@@ -13,7 +16,7 @@ export default function MyCard({ CardName, CardColor, CardPage, navigation, Icon
     <TouchableOpacity onPress={onPressCard} style={[styles.card, { backgroundColor: CardColor }]}>
       <View style={styles.cardContent}>
         <Icon name={IconName} size={40} color="#fff" />
-        <Text style={styles.cardText}>{CardName}</Text>
+        <Text style={styles.cardText}>{t(CardName)}</Text>
       </View>
     </TouchableOpacity>
   );
@@ -38,6 +41,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     marginTop: 10,
-    textAlign: 'center', // Metni ortalamak için
+    textAlign: 'center',
   },
 });

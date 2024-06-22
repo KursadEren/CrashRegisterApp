@@ -5,11 +5,13 @@ import MyButton from '../Component/MyButton';
 import MyTextInput from '../Component/MyTextınput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const DATA2 = [];
 
 const Sales = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [data1List, setData1List] = useState([]);
   const [data2List, setData2List] = useState(DATA2);
@@ -31,7 +33,7 @@ const Sales = ({ navigation }) => {
           setData1List(JSON.parse(storedData));
         }
       } catch (error) {
-        console.error('AsyncStorage\'den veri alınırken hata:', error);
+        console.error('Error fetching data from AsyncStorage:', error);
       }
     };
 
@@ -133,19 +135,19 @@ const Sales = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait, { backgroundColor: theme.modalBackground }]}>
-            <Text style={[styles.modalText, { color: theme.textColor }]}>Enter Quantity:</Text>
+            <Text style={[styles.modalText, { color: theme.textColor }]}>{t('enter_quantity')}:</Text>
             <MyTextInput
-              label1="Quantity"
+              label1={t('quantity')}
               onChangeText={handleQuantityChange}
               value={quantityInput}
             />
 
             <View style={styles.modalButtonContainer}>
               <View>
-                <MyButton visible={true} OnChangeButton={handleQuantityUpdate} text="Update" />
+                <MyButton visible={true} OnChangeButton={handleQuantityUpdate} text={t('update')} />
               </View>
               <View>
-                <MyButton visible={true} OnChangeButton={handleCancel} text="Cancel" />
+                <MyButton visible={true} OnChangeButton={handleCancel} text={t('cancel')} />
               </View>
             </View>
           </View>
@@ -159,19 +161,19 @@ const Sales = ({ navigation }) => {
       >
         <View style={styles.modalContainer}>
           <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait, { backgroundColor: theme.modalBackground }]}>
-            <Text style={[styles.modalText, { color: theme.textColor }]}>Enter Bag Quantity (25 cents per bag):</Text>
+            <Text style={[styles.modalText, { color: theme.textColor }]}>{t('enter_bag_quantity')}:</Text>
             <MyTextInput
-              label1="Bag Quantity"
+              label1={t('bag_quantity')}
               onChangeText={handleBagQuantityChange}
               value={bagQuantity}
             />
 
             <View style={styles.modalButtonContainer}>
               <View>
-                <MyButton visible={true} OnChangeButton={handleBagQuantitySubmit} text="Submit" />
+                <MyButton visible={true} OnChangeButton={handleBagQuantitySubmit} text={t('submit')} />
               </View>
               <View>
-                <MyButton visible={true} OnChangeButton={() => setBagModalVisible(false)} text="Cancel" />
+                <MyButton visible={true} OnChangeButton={() => setBagModalVisible(false)} text={t('cancel')} />
               </View>
             </View>
           </View>
@@ -179,11 +181,11 @@ const Sales = ({ navigation }) => {
       </Modal>
 
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
-        <Text style={[styles.totalText, { color: theme.textColor }]}>Total Cost: ${totalCost.toFixed(2)}</Text>
+        <Text style={[styles.totalText, { color: theme.textColor }]}>{t('total_cost')}: ${totalCost.toFixed(2)}</Text>
         <MyButton
           visible={!isItemListEmpty}
           OnChangeButton={handleRouteReceipt}
-          text="Go Receipt"
+          text={t('go_receipt')}
         />
       </View>
     </ScrollView>

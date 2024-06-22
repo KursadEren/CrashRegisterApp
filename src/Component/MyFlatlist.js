@@ -3,9 +3,11 @@ import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image } 
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState(data);
 
@@ -71,21 +73,21 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
               <Text style={[styles.name, isProductList && styles.nameLarge, { color: theme.textColor }]}>{item.name}</Text>
             </View>
           </View>
-          <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>Price: ${item.price}</Text>
+          <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>{t('price')}: ${item.price}</Text>
           {information === 'update' && (
             <View style={styles.updateContainer}>
               <View style={styles.quantityContainer}>
-                <Text style={[styles.label, { color: theme.textColor }]}>Quantity: </Text>
+                <Text style={[styles.label, { color: theme.textColor }]}>{t('quantity')}: </Text>
                 <TextInput
                   style={[styles.quantityInput, { borderColor: theme.secondaryColor, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                   keyboardType="numeric"
-                  placeholder="Quantity"
+                  placeholder={t('quantity')}
                   value={item.count ? item.count.toString() : ''}
                   onChangeText={text => handleQuantityChange(item, text)}
                   placeholderTextColor="#aaa"
                 />
               </View>
-              <Text style={[styles.total, { color: theme.textColor }]}>Total: ${calculateTotal(item)}</Text>
+              <Text style={[styles.total, { color: theme.textColor }]}>{t('total')}: ${calculateTotal(item)}</Text>
             </View>
           )}
         </TouchableOpacity>
@@ -98,7 +100,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
       {showSearchInput && (
         <TextInput
           style={[styles.searchInput, { borderColor: theme.secondaryColor, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-          placeholder="Search..."
+          placeholder={t('search')}
           value={searchQuery}
           onChangeText={handleSearch}
           placeholderTextColor={theme.placeholderTextColor}

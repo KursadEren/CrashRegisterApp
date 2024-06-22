@@ -19,6 +19,15 @@ import RegisterScreen from './src/Screen/RegisterScreen';
 import SwipeScreen from './src/Screen/SwipeScreen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import AllReports from './src/Screen/AllReports';
+import SalesReport from './src/Screen/SalesReport';
+import { I18nextProvider } from 'react-i18next';
+import i18n from './src/i18n/i18n'; 
+
+import 'intl';
+import 'intl/locale-data/jsonp/en'; // İhtiyacınıza göre farklı dilleri de ekleyebilirsiniz
+import 'intl-pluralrules';
+
+
 const Stack = createStackNavigator();
 
 function CustomHeader({ title }) {
@@ -31,12 +40,11 @@ function CustomHeader({ title }) {
 
 function App() {
   return (
+    <I18nextProvider i18n={i18n}>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProvider>
         <NavigationContainer>
           <Stack.Navigator initialRouteName="LoginScreen">
-            
-          
             <Stack.Screen name="LoginScreen" component={LoginScreen} options={{ headerShown: false }} />
             <Stack.Screen name="SwipeScreen" component={SwipeScreen} options={{ headerShown: false }} />
             <Stack.Screen name="MyTabs" component={MyTabs} options={{ headerShown: false }} />
@@ -51,10 +59,12 @@ function App() {
             <Stack.Screen name="Deneme" component={Deneme} options={{ headerShown: false }} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="AllReports" component={AllReports} options={{ headerShown: false }}/>
+            <Stack.Screen name="SalesReport" component={SalesReport} options={{ headerShown: false }}/>
           </Stack.Navigator>
         </NavigationContainer>
-      </AppProvider>
+      </AppProvider>    
     </GestureHandlerRootView>
+    </I18nextProvider>
   );
 }
 

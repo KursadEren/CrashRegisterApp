@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Modal, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Modal, useWindowDimensions, RefreshControl } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MyCard from '../Component/MyCard';
 import MyFlatlist from '../Component/MyFlatlist';
@@ -9,10 +9,12 @@ import { LineChart } from 'react-native-chart-kit';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import { ThemeContext } from '../Context/ThemeContext';
 import { API_URL2 } from '../GroceryData/Constant';
+import { useTranslation } from 'react-i18next';
 
 const Home = ({ navigation }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { serviceStatus, setServiceStatus } = useServiceStatus();
+  const { t, i18n } = useTranslation();
   const [productData, setProductData] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [toastVisible, setToastVisible] = useState(false);
@@ -20,10 +22,12 @@ const Home = ({ navigation }) => {
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    const fetchProductData = async () => {
-      try {
+  const fetchProductData = async () => {
+    try {
+      const storedProductData = await AsyncStorage.getItem('@productData');
+      if (!storedProductData) {
         const response = await axios.get(`${API_URL2}/products/product`);
         if (response.status === 200) {
           const products = response.data.map(product => ({
@@ -34,32 +38,42 @@ const Home = ({ navigation }) => {
             categories: product.categories,
             favori: 0
           }));
-
           await AsyncStorage.setItem('@productData', JSON.stringify(products));
           setProductData(products);
         }
-      } catch (error) {
-        console.error('Error fetching product data:', error);
+      } else {
+        setProductData(JSON.parse(storedProductData));
       }
-    };
+    } catch (error) {
+      console.error('Error fetching product data:', error);
+    }
+  };
 
+  const fetchFavorites = async () => {
+    try {
+      const data = await AsyncStorage.getItem('@productData');
+      if (data) {
+        const products = JSON.parse(data);
+        const favoriteProducts = products.filter(product => product.favori === 1);
+        setFavorites(favoriteProducts);
+      }
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+    }
+  };
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    await fetchProductData();
+    await fetchFavorites();
+    setRefreshing(false);
+  };
+
+  useEffect(() => {
     fetchProductData();
   }, []);
 
   useEffect(() => {
-    const fetchFavorites = async () => {
-      try {
-        const data = await AsyncStorage.getItem('@productData');
-        if (data) {
-          const products = JSON.parse(data);
-          const favoriteProducts = products.filter(product => product.favori === 1);
-          setFavorites(favoriteProducts);
-        }
-      } catch (error) {
-        console.error('Error fetching favorites:', error);
-      }
-    };
-
     fetchFavorites();
   }, []);
 
@@ -124,10 +138,10 @@ const Home = ({ navigation }) => {
         await AsyncStorage.setItem(key, JSON.stringify(updatedPayment));
       }
 
-      setToastMessage('Tüm ödemeler merkeze gönderildi.');
+      setToastMessage(t('all_payments_sent'));
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 2000);
-      console.log('Tüm ödemeler merkeze gönderildi.');
+      console.log(t('all_payments_sent'));
     } catch (e) {
       console.log('Ödemeleri gönderme hatası:', e);
     }
@@ -136,34 +150,47 @@ const Home = ({ navigation }) => {
   const toggleServiceStatus = () => {
     setServiceStatus(!serviceStatus);
     if (!serviceStatus) {
-      setToastMessage('Servis açıldı.');
+      setToastMessage(t('service_opened'));
     } else {
-      setToastMessage('Servis kapatıldı.');
+      setToastMessage(t('service_closed'));
     }
     setToastVisible(true);
     setTimeout(() => setToastVisible(false), 2000);
   };
 
+  const changeLanguage = (lang) => {
+    i18n.changeLanguage(lang);
+  };
+
   return (
-    <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+    <ScrollView
+      contentContainerStyle={[styles.container, { backgroundColor: theme.backgroundColor }]}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={onRefresh}
+          colors={[theme.primaryColor]} // Temanıza uygun renk
+        />
+      }
+    >
       {/* Başlık ve Hoşgeldiniz Mesajı */}
       <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
-          <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>Merhaba,</Text>
+          <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>{t('hello')},</Text>
           <Text style={[styles.userName, { color: theme.textColor }]}>Kursad</Text>
           <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.primaryColor }]} onPress={toggleTheme}>
-            <Text style={styles.themeButtonText}>Temayı Değiştir</Text>
+            <Text style={styles.themeButtonText}>{t('change_theme')}</Text>
           </TouchableOpacity>
           <View style={styles.serviceStatusContainer}>
-            <Text style={[styles.serviceTitle, { color: theme.textColor }]}>Servis</Text>
+            <Text style={[styles.serviceTitle, { color: theme.textColor }]}>{t('service')}</Text>
             <View style={[styles.dot, serviceStatus ? { backgroundColor: theme.primaryColor } : { backgroundColor: theme.dangerColor }]} />
             <Text style={[styles.statusText, serviceStatus ? { color: theme.primaryColor } : { color: theme.dangerColor }]}>
-              {serviceStatus ? 'Hazır' : 'Çalışmıyor'}
+              {serviceStatus ? t('ready') : t('not_working')}
             </Text>
           </View>
           <TouchableOpacity style={[styles.serviceButton, { backgroundColor: theme.primaryColor }]} onPress={toggleServiceStatus}>
-            <Text style={styles.serviceButtonText}>{serviceStatus ? 'Kapat' : 'Aç'}</Text>
+            <Text style={styles.serviceButtonText}>{serviceStatus ? t('close') : t('open')}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -171,26 +198,26 @@ const Home = ({ navigation }) => {
       {/* Arama Çubuğu */}
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color={theme.textColor} style={styles.searchIcon} />
-        <TextInput style={[styles.searchBar, { borderColor: theme.secondaryColor }]} placeholder="Ara..." placeholderTextColor={theme.textColor} />
+        <TextInput style={[styles.searchBar, { borderColor: theme.secondaryColor }]} placeholder={t('search')} placeholderTextColor={theme.textColor} />
       </View>
 
       {/* Kategoriler */}
       <View style={styles.content}>
         <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="Satış" CardPage="Sales" CardColor={theme.primaryColor} IconName="cash-register" />
-          <MyCard navigation={navigation} CardName="Fiyat Gör" CardPage="Product" CardColor={theme.primaryColor} IconName="tag" />
+          <MyCard navigation={navigation} CardName={t('sales')} CardPage="Sales" CardColor={theme.primaryColor} IconName="cash-register" />
+          <MyCard navigation={navigation} CardName={t('see_price')} CardPage="Product" CardColor={theme.primaryColor} IconName="tag" />
         </View>
         <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="İade İşlemi" CardPage="Return" CardColor={theme.primaryColor} IconName="backup-restore" />
-          <MyCard navigation={navigation} CardName="Tahsilatlar" CardPage="Collections" CardColor={theme.primaryColor} IconName="credit-card-check-outline" />
+          <MyCard navigation={navigation} CardName={t('return')} CardPage="Return" CardColor={theme.primaryColor} IconName="backup-restore" />
+          <MyCard navigation={navigation} CardName={t('collections')} CardPage="Collections" CardColor={theme.primaryColor} IconName="credit-card-check-outline" />
         </View>
         <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="Raporlar" CardPage="Reports" CardColor={theme.primaryColor} IconName="file-chart-outline" />
-          <MyCard navigation={navigation} CardName="Diğer İşlemler" CardPage="SeePrice" CardColor={theme.primaryColor} IconName="cogs" />
+          <MyCard navigation={navigation} CardName={t('reports')} CardPage="AllReports" CardColor={theme.primaryColor} IconName="file-chart-outline" />
+          <MyCard navigation={navigation} CardName={t('other_operations')} CardPage="SeePrice" CardColor={theme.primaryColor} IconName="cogs" />
         </View>
         <View style={styles.row}>
-          <MyCard navigation={navigation} CardName="Direkt Ürün Girişi" CardPage="Product" CardColor={theme.primaryColor} IconName="cart-plus" />
-          <MyCard navigation={navigation} CardName="www" CardColor={theme.primaryColor} IconName="web" />
+          <MyCard navigation={navigation} CardName={t('direct_product_entry')} CardPage="Product" CardColor={theme.primaryColor} IconName="cart-plus" />
+          <MyCard navigation={navigation} CardName={t('www')} CardColor={theme.primaryColor} IconName="web" />
         </View>
       </View>
 
@@ -218,34 +245,27 @@ const Home = ({ navigation }) => {
           }}
         />
       ) : (
-        <Text style={[styles.noDataText, { color: theme.textColor }]}>Veri bulunamadı.</Text>
+        <Text style={[styles.noDataText, { color: theme.textColor }]}>{t('no_data')}</Text>
       )}
 
       {/* Öne Çıkanlar (Favoriler) */}
       <View style={styles.featuredSection}>
-        <Text style={[styles.sectionTitle, { color: theme.textColor }]}>Favoriler</Text>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('favorites')}</Text>
+          <TouchableOpacity onPress={() => navigation.navigate("Product")}>
+            <Text>{t('edit')}</Text>
+          </TouchableOpacity>
+        </View>
         <MyFlatlist
           data={favorites}
           showSearchInput={false}
-          onItemSelect={() => {}}
-          onItemRemove={() => {}}
+          onItemSelect={() => { }}
+          onItemRemove={() => { }}
           favoriteList={favorites}
           isProductList={true}
           information={"notremove"}
           isFavoriteList={true}
         />
-      </View>
-
-      {/* Kullanıcı Bilgileri ve Ayarlar */}
-      <View style={styles.userSection}>
-        <TouchableOpacity style={[styles.userButton, { backgroundColor: theme.primaryColor }]}>
-          <Icon name="person" size={20} color="#fff" />
-          <Text style={styles.userButtonText}>Profil</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.userButton, { backgroundColor: theme.primaryColor }]}>
-          <Icon name="settings" size={20} color="#fff" />
-          <Text style={styles.userButtonText}>Ayarlar</Text>
-        </TouchableOpacity>
       </View>
 
       <Modal
@@ -258,6 +278,14 @@ const Home = ({ navigation }) => {
           <Text style={styles.toastText}>{toastMessage}</Text>
         </View>
       </Modal>
+      <View style={styles.languageContainer}>
+        <TouchableOpacity style={styles.languageButton} onPress={() => changeLanguage('en')}>
+          <Text style={styles.languageText}>English</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.languageButton, styles.languageButtonBorder]} onPress={() => changeLanguage('tr')}>
+          <Text style={styles.languageText}>Türkçe</Text>
+        </TouchableOpacity>
+      </View>
     </ScrollView>
   );
 };
@@ -364,52 +392,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  featuredScroll: {
-    marginBottom: 20,
-  },
-  featuredItem: {
-    backgroundColor: '#fff',
-    borderRadius: 10,
-    padding: 10,
-    marginRight: 10,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
-    shadowRadius: 5,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 3,
-    width: 160,
-    height: 220,
-  },
-  featuredImage: {
-    width: 150,
-    height: 150,
-    borderRadius: 10,
-  },
-  featuredText: {
-    marginTop: 10,
-    fontWeight: 'bold',
-  },
-  featuredPrice: {
-    marginTop: 5,
-  },
-  userSection: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 20,
-  },
-  userButton: {
-    padding: 10,
-    borderRadius: 5,
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  userButtonText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    marginLeft: 5,
-  },
   toastContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -425,6 +407,22 @@ const styles = StyleSheet.create({
   noDataText: {
     textAlign: 'center',
     marginTop: 20,
+  },
+  languageContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 20,
+  },
+  languageButton: {
+    padding: 10,
+    marginHorizontal: 5,
+  },
+  languageButtonBorder: {
+    borderWidth: 1,
+  },
+  languageText: {
+    fontSize: 16,
+    color: 'blue',
   },
 });
 

@@ -8,12 +8,14 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import { useLandscape } from '../Context/LandSpaceProvider';
 import { ThemeContext } from '../Context/ThemeContext';
-import { API_URL ,API_URL2 } from '../GroceryData/Constant';
+import { API_URL, API_URL2 } from '../GroceryData/Constant';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
-function AuthScreen({ navigation }) {
+function LoginScreen({ navigation }) {
   const { theme } = useContext(ThemeContext);
+  const { t, i18n } = useTranslation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const isLandscape = useLandscape();
@@ -26,7 +28,7 @@ function AuthScreen({ navigation }) {
     });
 
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   const handleLogin = async () => {
     try {
@@ -45,11 +47,11 @@ function AuthScreen({ navigation }) {
         await AsyncStorage.setItem('@user_' + username, password);
         navigation.navigate("MyTabs");
       } else {
-        Alert.alert('Error', 'Invalid username or password');
+        Alert.alert(t('error'), t('invalid_username_password'));
       }
     } catch (e) {
       console.log('Error:', e);
-      Alert.alert('Error', 'Failed to login');
+      Alert.alert(t('error'), t('failed_login'));
     }
   };
 
@@ -57,7 +59,7 @@ function AuthScreen({ navigation }) {
     const rnBiometrics = new ReactNativeBiometrics();
 
     try {
-      const resultObject = await rnBiometrics.simplePrompt({ promptMessage: 'Confirm fingerprint' });
+      const resultObject = await rnBiometrics.simplePrompt({ promptMessage: t('confirm_fingerprint') });
       const { success } = resultObject;
 
       if (success) {
@@ -65,22 +67,26 @@ function AuthScreen({ navigation }) {
         const password = await AsyncStorage.getItem('@biometric_password');
 
         if (username && password) {
-          Alert.alert('Authentication Successful', 'You have been authenticated successfully');
-          navigation.navigate('MyTabs'); // Successful authentication
+          Alert.alert(t('success'), t('biometric_auth_success'));
+          navigation.navigate('MyTabs');
         } else {
-          Alert.alert('Error', 'No biometric credentials found');
+          Alert.alert(t('error'), t('no_biometrics_enrolled'));
         }
       } else {
-        Alert.alert('Authentication Failed', 'Fingerprint authentication failed');
+        Alert.alert(t('error'), t('biometric_auth_failed'));
       }
     } catch (error) {
-      Alert.alert('Authentication Failed', `Fingerprint authentication failed: ${error.message}`);
+      Alert.alert(t('error'), `${t('biometric_auth_failed')}: ${error.message}`);
     }
+  };
+
+  const changeLanguage = async (lang) => {
+    await i18n.changeLanguage(lang);
   };
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: Animated.event(
         [
           null,
@@ -126,18 +132,26 @@ function AuthScreen({ navigation }) {
         <Image source={require('../../Image/logo2.png')} style={styles.logo} />
       </Animated.View>
       <View style={styles.textInputContainer}>
-        <MyTextInput onChangeText={setUsername} label1="Name" />
+        <MyTextInput onChangeText={setUsername} label1={t('username')} />
       </View>
       <View style={styles.textInputContainer}>
-        <MyTextInput onChangeText={setPassword} label1="Password" secureTextEntry />
+        <MyTextInput onChangeText={setPassword} label1={t('password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text="Giriş Yap" />
+        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text={t('login')} />
       </View>
       <View style={styles.biometricContainer}>
-        <Text style={[styles.text, { color: theme.textColor }]}>Biometric Authentication</Text>
+        <Text style={[styles.text, { color: theme.textColor }]}>{t('biometric_authentication')}</Text>
         <TouchableOpacity style={[styles.fingerprintButton, { backgroundColor: theme.secondaryColor }]} onPress={handleBiometricAuth}>
           <Ionicons name="finger-print" size={50} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.languageContainer}>
+        <TouchableOpacity style={styles.languageButton} onPress={() => changeLanguage('en')}>
+          <Text style={styles.languageText}>English</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={[styles.languageButton, styles.languageButtonBorder]} onPress={() => changeLanguage('tr')}>
+          <Text style={styles.languageText}>Türkçe</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -185,6 +199,21 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 50,
   },
+  languageContainer: {
+    flexDirection: 'row',
+    marginTop: 20,
+  },
+  languageButton: {
+    padding: 10,
+    marginHorizontal: 5,
+  },
+  languageButtonBorder: {
+    borderWidth: 1,
+  },
+  languageText: {
+    fontSize: 16,
+    color: 'blue',
+  },
 });
 
-export default AuthScreen;
+export default LoginScreen;

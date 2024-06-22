@@ -4,15 +4,25 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MyFlatlist from '../Component/MyFlatlist';
 import { ThemeContext } from '../Context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const Product = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
   const [productList, setProductList] = useState([]);
   const [favoriteList, setFavoriteList] = useState([]);
   const [cartList, setCartList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFavorites, setShowFavorites] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState('Tümü');
+
+  const groups = [
+    { label: 'Tümü', range: [] },
+    { label: 'A-F', range: ['A', 'B', 'C', 'D', 'E', 'F'] },
+    { label: 'G-T', range: ['G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T'] },
+    { label: 'U-Z', range: ['U', 'V', 'W', 'X', 'Y', 'Z'] },
+  ];
 
   useEffect(() => {
     fetchProducts();
@@ -57,7 +67,6 @@ const Product = ({ navigation }) => {
       return product;
     });
 
-    
     setProductList(updatedProductList);
     setFavoriteList(updatedProductList.filter(product => product.favori === 1));
   };
@@ -84,6 +93,14 @@ const Product = ({ navigation }) => {
     setCartList([...cartList, item]);
   };
 
+  const filterProductsByGroup = (group) => {
+    if (group.label === 'Tümü') return productList;
+    const filteredProducts = productList.filter(product =>
+      group.range.some(letter => product.name[0].toUpperCase() === letter)
+    );
+    return filteredProducts;
+  };
+
   if (loading) {
     return (
       <View style={[styles.centered, { backgroundColor: theme.backgroundColor }]}>
@@ -95,7 +112,7 @@ const Product = ({ navigation }) => {
   if (error) {
     return (
       <View style={[styles.centered, { backgroundColor: theme.backgroundColor }]}>
-        <Text style={[styles.errorText, { color: theme.textColor }]}>Error loading products</Text>
+        <Text style={[styles.errorText, { color: theme.textColor }]}>{t('error_loading_products')}</Text>
       </View>
     );
   }
@@ -103,16 +120,35 @@ const Product = ({ navigation }) => {
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <View style={styles.headerContainer}>
-        <Text style={[styles.header, { color: theme.primaryColor }]}>All Products</Text>
+        <Text style={[styles.header, { color: theme.primaryColor }]}>{t('all_products')}</Text>
         <TouchableOpacity style={styles.favoritesButton} onPress={() => setShowFavorites(!showFavorites)}>
           <Icon name="star" size={24} color={theme.accentColor} />
-          <Text style={[styles.favoritesButtonText, { color: theme.accentColor }]}>Favorites</Text>
+          <Text style={[styles.favoritesButtonText, { color: theme.accentColor }]}>{t('favorites')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Sales', { cartList })}>
           <Icon name="shopping-cart" size={24} color={theme.accentColor} />
-          <Text style={[styles.cartButtonText, { color: theme.accentColor }]}>Cart</Text>
+          <Text style={[styles.cartButtonText, { color: theme.accentColor }]}>{t('cart')}</Text>
         </TouchableOpacity>
       </View>
+      {!showFavorites && (
+        <View style={styles.groupButtonsContainer}>
+          {groups.map((group, index) => (
+            <TouchableOpacity
+              key={index}
+              style={[
+                styles.groupButton,
+                selectedGroup === group.label && styles.selectedGroupButton,
+                { backgroundColor: selectedGroup === group.label ? theme.primaryColor : theme.secondaryColor }
+              ]}
+              onPress={() => setSelectedGroup(group.label)}
+            >
+              <Text style={[styles.groupButtonText, { color: selectedGroup === group.label ? theme.backgroundColor : theme.textColor }]}>
+                {group.label}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
       {showFavorites ? (
         <MyFlatlist
           data={favoriteList}
@@ -122,7 +158,7 @@ const Product = ({ navigation }) => {
         />
       ) : (
         <MyFlatlist
-          data={productList}
+          data={filterProductsByGroup(groups.find(group => group.label === selectedGroup))}
           showSearchInput={true}
           onItemSelect={handleItemSelect}
           onAddToCart={handleAddToCart}
@@ -175,6 +211,22 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
+  },
+  groupButtonsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    marginBottom: 20,
+  },
+  groupButton: {
+    padding: 10,
+    borderRadius: 5,
+  },
+  selectedGroupButton: {
+    backgroundColor: '#888',
+  },
+  groupButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });
 

@@ -4,10 +4,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import { ThemeContext } from '../Context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 const Receipt = ({ route }) => {
   const { data2List, bagCount, bagCost } = route.params;
   const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
   const [modalVisible, setModalVisible] = useState(false);
   const [paymentType, setPaymentType] = useState('');
   const [cashAmount, setCashAmount] = useState('');
@@ -26,7 +28,7 @@ const Receipt = ({ route }) => {
     });
 
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   const calculateTotals = () => {
     let subtotal = 0;
@@ -63,19 +65,18 @@ const Receipt = ({ route }) => {
         cashAmount: parseFloat(cashAmount || 0),
         cardAmount: parseFloat(cardAmount || 0),
         change: totalPaid - total,
-        bagCount: bagCount, // Poşet sayısı
-        bagCost: bagCost, // Poşet maliyeti
-        campaignDiscount: campaignDiscount, // Kampanya indirimi
-        saleDate: currentDate.toLocaleString('tr-TR', options), // Satılma tarihi
+        bagCount: bagCount,
+        bagCost: bagCost,
+        campaignDiscount: campaignDiscount,
+        saleDate: currentDate.toLocaleString('tr-TR', options),
         centralSendTime: serviceStatus ? currentDate.toLocaleString('tr-TR', options) : null,
-        sentToCentral: serviceStatus, // Merkeze gönderildi durumu
-        pdfPath: null // Başlangıçta null olarak ayarlanmış PDF yolu
+        sentToCentral: serviceStatus,
+        pdfPath: null
       };
   
       try {
         await AsyncStorage.setItem('@payment_' + currentDate.getTime(), JSON.stringify(paymentDetails));
         if (!serviceStatus) {
-          // Servis durumu çevrim içi olduğunda güncellemek için AsyncStorage'da kaydet
           await AsyncStorage.setItem('@pendingPayment_' + currentDate.getTime(), JSON.stringify(paymentDetails));
         }
       } catch (e) {
@@ -85,7 +86,7 @@ const Receipt = ({ route }) => {
       setModalVisible(false);
       navigation.navigate('ReceiptPrint', { paymentDetails });
     } else {
-      alert("Ödenen miktar toplamdan az olamaz");
+      alert(t('error_paid_less_than_total'));
     }
   };
 
@@ -102,7 +103,7 @@ const Receipt = ({ route }) => {
     let discount = 0;
     data2List.forEach(item => {
       if (item.count >= 5) {
-        discount += item.price * 0.2 * item.count; // %20 indirim
+        discount += item.price * 0.2 * item.count;
       }
     });
     setCampaignDiscount(discount);
@@ -112,21 +113,21 @@ const Receipt = ({ route }) => {
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <View style={styles.campaignButtonContainer}>
         <TouchableOpacity style={[styles.campaignButton, { backgroundColor: theme.primaryColor }]} onPress={applyCampaign1}>
-          <Text style={styles.campaignButtonText}>3 Al 2 Öde</Text>
+          <Text style={styles.campaignButtonText}>{t('campaign_3for2')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.campaignButton, { backgroundColor: theme.primaryColor }]} onPress={applyCampaign2}>
-          <Text style={styles.campaignButtonText}>5 Al %20 İndirim</Text>
+          <Text style={styles.campaignButtonText}>{t('campaign_5for20')}</Text>
         </TouchableOpacity>
       </View>
       <View style={[styles.header, { backgroundColor: theme.headerBackground }]}>
         <View style={{ flex: 2 }}>
-          <Text style={[styles.headerText, { color: theme.primaryColor }]}>Product</Text>
+          <Text style={[styles.headerText, { color: theme.primaryColor }]}>{t('product')}</Text>
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={[styles.headerText, { color: theme.primaryColor }]}>Price</Text>
+          <Text style={[styles.headerText, { color: theme.primaryColor }]}>{t('price')}</Text>
         </View>
         <View style={{ flex: 0.5 }}>
-          <Text style={[styles.headerText, { color: theme.primaryColor }]}>Count</Text>
+          <Text style={[styles.headerText, { color: theme.primaryColor }]}>{t('count')}</Text>
         </View>
       </View>
 
@@ -151,27 +152,27 @@ const Receipt = ({ route }) => {
 
       <View style={[styles.totalContainer, isLandscape && styles.totalContainerLandscape, { backgroundColor: theme.totalBackground }]}>
         <View style={styles.totalItem}>
-          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Ara Toplam:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{t('subtotal')}:</Text>
           <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{subtotal.toFixed(2)}</Text>
         </View>
         <View style={styles.totalItem}>
-          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam Kampanya İndirimi:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{t('total_campaign_discount')}:</Text>
           <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{campaignDiscount.toFixed(2)}</Text>
         </View>
         <View style={styles.totalItem}>
-          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam Poşet Maliyeti:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{t('total_bag_cost')}:</Text>
           <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{bagCost.toFixed(2)}</Text>
         </View>
         <View style={styles.totalItem}>
-          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{t('total')}:</Text>
           <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{total.toFixed(2)}</Text>
         </View>
         <View style={styles.totalItem}>
-          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Toplam Ürün Sayısı:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{t('total_items')}:</Text>
           <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{totalItems}</Text>
         </View>
         <View style={styles.totalItem}>
-          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>Para Üstü:</Text>
+          <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{t('change')}:</Text>
           <Text style={[styles.totalText, isLandscape && styles.totalTextLandscape, { color: theme.textColor }]}>{change.toFixed(2)}</Text>
         </View>
       </View>
@@ -180,7 +181,7 @@ const Receipt = ({ route }) => {
         style={[styles.paymentButton, { backgroundColor: theme.primaryColor }]}
         onPress={() => setModalVisible(true)}
       >
-        <Text style={styles.paymentButtonText}>Ödeme Yap</Text>
+        <Text style={styles.paymentButtonText}>{t('make_payment')}</Text>
       </TouchableOpacity>
 
       <Modal
@@ -192,27 +193,27 @@ const Receipt = ({ route }) => {
         <View style={[styles.modalContainer, { paddingVertical: height * 0.05 }]}>
           <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingVertical: height * 0.1 }]}>
             <View style={[styles.modalContent, { height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%', backgroundColor: theme.modalBackground }]}>
-              <Text style={[styles.modalTitle, { color: theme.textColor }]}>Ödeme Yöntemi Seç</Text>
+              <Text style={[styles.modalTitle, { color: theme.textColor }]}>{t('select_payment_method')}</Text>
 
               <TouchableOpacity
                 style={[styles.modalButton, paymentType === 'cash' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
                 onPress={() => setPaymentType('cash')}
               >
-                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>Nakit</Text>
+                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('cash')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.modalButton, paymentType === 'card' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
                 onPress={() => setPaymentType('card')}
               >
-                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>Kart</Text>
+                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('card')}</Text>
               </TouchableOpacity>
 
               <TouchableOpacity
                 style={[styles.modalButton, paymentType === 'both' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
                 onPress={() => setPaymentType('both')}
               >
-                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>Hem Kart Hem Nakit</Text>
+                <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('both')}</Text>
               </TouchableOpacity>
 
               {paymentType !== '' && (
@@ -220,7 +221,7 @@ const Receipt = ({ route }) => {
                   {paymentType === 'cash' && (
                     <TextInput
                       style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-                      placeholder="Nakit Miktarı"
+                      placeholder={t('cash_amount')}
                       keyboardType="numeric"
                       value={cashAmount}
                       onChangeText={setCashAmount}
@@ -230,7 +231,7 @@ const Receipt = ({ route }) => {
                   {paymentType === 'card' && (
                     <TextInput
                       style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-                      placeholder="Kart Miktarı"
+                      placeholder={t('card_amount')}
                       keyboardType="numeric"
                       value={cardAmount}
                       onChangeText={setCardAmount}
@@ -241,7 +242,7 @@ const Receipt = ({ route }) => {
                     <View>
                       <TextInput
                         style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-                        placeholder="Nakit Miktarı"
+                        placeholder={t('cash_amount')}
                         keyboardType="numeric"
                         value={cashAmount}
                         onChangeText={setCashAmount}
@@ -249,7 +250,7 @@ const Receipt = ({ route }) => {
                       />
                       <TextInput
                         style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-                        placeholder="Kart Miktarı"
+                        placeholder={t('card_amount')}
                         keyboardType="numeric"
                         value={cardAmount}
                         onChangeText={setCardAmount}
@@ -261,7 +262,7 @@ const Receipt = ({ route }) => {
                     style={[styles.submitButton, { backgroundColor: theme.buttonBackground }]}
                     onPress={handlePayment}
                   >
-                    <Text style={[styles.submitButtonText, { color: theme.textColor }]}>Ödeme Yap</Text>
+                    <Text style={[styles.submitButtonText, { color: theme.textColor }]}>{t('make_payment')}</Text>
                   </TouchableOpacity>
                 </View>
               )}

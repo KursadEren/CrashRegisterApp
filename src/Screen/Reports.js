@@ -6,10 +6,12 @@ import FileViewer from 'react-native-file-viewer';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import { ThemeContext } from '../Context/ThemeContext';
 import MyButton from '../Component/MyButton';
-import MyFlatlist from '../Component/MyFlatlist'; // MyFlatlist bileşenini içeri aktarın
+import MyFlatlist from '../Component/MyFlatlist';
+import { useTranslation } from 'react-i18next';
 
 export default function Reports() {
   const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
   const [paymentRecords, setPaymentRecords] = useState([]);
   const { serviceStatus } = useServiceStatus();
   const { width, height } = useWindowDimensions();
@@ -55,33 +57,33 @@ export default function Reports() {
     try {
       const hasPermission = await requestExternalStoragePermission();
       if (!hasPermission) {
-        Alert.alert('Permission Denied', 'You need to give storage permission to access this file');
+        Alert.alert(t('permission_denied'), t('storage_permission_required'));
         return;
       }
       
       if (filePath && await RNFS.exists(filePath)) {
         await FileViewer.open(filePath);
       } else {
-        Alert.alert('Hata', 'PDF dosyası bulunamadı');
+        Alert.alert(t('error'), t('pdf_not_found'));
       }
     } catch (error) {
       if (error.message.includes('no app associated with this mime type')) {
         Alert.alert(
-          'Hata',
-          'PDF dosyası açılamadı çünkü cihazınızda PDF görüntüleyici uygulaması yüklü değil. Lütfen bir PDF görüntüleyici yükleyin.',
+          t('error'),
+          t('pdf_no_viewer'),
           [
             {
-              text: 'Tamam',
-              onPress: () => console.log('Tamam pressed'),
+              text: t('ok'),
+              onPress: () => console.log('Ok pressed'),
             },
             {
-              text: 'Uygulamayı Yükle',
+              text: t('install_app'),
               onPress: () => Linking.openURL('market://details?id=com.adobe.reader'), // Android için Google Play Store bağlantısı
             },
           ]
         );
       } else {
-        Alert.alert('Hata', `PDF dosyası açılamadı: ${error.message}`);
+        Alert.alert(t('error'), `${t('pdf_open_error')}: ${error.message}`);
       }
     }
   };
@@ -89,13 +91,13 @@ export default function Reports() {
   const renderItem = ({ item }) => {
     return (
       <View style={[styles.record, { backgroundColor: theme.cardBackground }]}>
-        <Text style={{ color: theme.textColor, fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>Tarih: {item.date}</Text>
-        <Text style={{ color: theme.textColor, marginBottom: 5 }}>Ara Toplam: {item.subtotal.toFixed(2)}</Text>
-        <Text style={{ color: theme.textColor, marginBottom: 5 }}>Toplam: {item.total.toFixed(2)}</Text>
-        <Text style={{ color: theme.textColor, marginBottom: 5 }}>Satılma Tarihi: {item.saleDate}</Text>
-        <Text style={{ color: theme.textColor, marginBottom: 5 }}>Adet: {item.totalItems}</Text>
-        <Text style={{ color: theme.textColor, marginBottom: 5 }}>Merkeze Gönderilme Tarihi: {item.centralSendTime}</Text>
-        <Text style={{ color: theme.textColor, marginBottom: 10 }}>Merkeze Gönderildi: {item.sentToCentral ? 'Evet' : 'Hayır'}</Text>
+        <Text style={{ color: theme.textColor, fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>{t('date')}: {item.date}</Text>
+        <Text style={{ color: theme.textColor, marginBottom: 5 }}>{t('subtotal')}: {item.subtotal.toFixed(2)}</Text>
+        <Text style={{ color: theme.textColor, marginBottom: 5 }}>{t('total')}: {item.total.toFixed(2)}</Text>
+        <Text style={{ color: theme.textColor, marginBottom: 5 }}>{t('sale_date')}: {item.saleDate}</Text>
+        <Text style={{ color: theme.textColor, marginBottom: 5 }}>{t('quantity')}: {item.totalItems}</Text>
+        <Text style={{ color: theme.textColor, marginBottom: 5 }}>{t('central_send_time')}: {item.centralSendTime}</Text>
+        <Text style={{ color: theme.textColor, marginBottom: 10 }}>{t('sent_to_central')}: {item.sentToCentral ? t('yes') : t('no')}</Text>
         <MyFlatlist
           data={item.items}
           showSearchInput={false}
@@ -103,15 +105,15 @@ export default function Reports() {
           renderItem={({ item }) => (
             <View style={styles.itemContainer}>
               <Text style={[styles.itemName, { color: theme.textColor }]}>{item.name}</Text>
-              <Text style={[styles.itemPrice, { color: theme.textColor }]}>Fiyat: {item.price}</Text>
-              <Text style={[styles.itemCount, { color: theme.textColor }]}>Adet: {item.count}</Text>
+              <Text style={[styles.itemPrice, { color: theme.textColor }]}>{t('price')}: {item.price}</Text>
+              <Text style={[styles.itemCount, { color: theme.textColor }]}>{t('quantity')}: {item.count}</Text>
             </View>
           )}
         />
         <MyButton
           visible={item.pdfPath !== null}
           OnChangeButton={() => openPDFFile(item.pdfPath)}
-          text="PDF Aç"
+          text={t('open_pdf')}
           icon="file-pdf"
           style={styles.pdfButton}
         />
@@ -121,7 +123,7 @@ export default function Reports() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-      <Text style={[styles.title, { color: theme.textColor }]}>Ödeme Raporları</Text>
+      <Text style={[styles.title, { color: theme.textColor }]}>{t('payment_reports')}</Text>
       <FlatList
         data={paymentRecords}
         keyExtractor={(item, index) => index.toString()}
