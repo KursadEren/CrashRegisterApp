@@ -173,7 +173,6 @@ const Home = ({ navigation }) => {
         />
       }
     >
-      {/* Başlık ve Hoşgeldiniz Mesajı */}
       <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
@@ -195,13 +194,11 @@ const Home = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Arama Çubuğu */}
       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color={theme.textColor} style={styles.searchIcon} />
         <TextInput style={[styles.searchBar, { borderColor: theme.secondaryColor }]} placeholder={t('search')} placeholderTextColor={theme.textColor} />
       </View>
 
-      {/* Kategoriler */}
       <View style={styles.content}>
         <View style={styles.row}>
           <MyCard navigation={navigation} CardName={t('sales')} CardPage="Sales" CardColor={theme.primaryColor} IconName="cash-register" />
@@ -221,7 +218,6 @@ const Home = ({ navigation }) => {
         </View>
       </View>
 
-      {/* Grafik */}
       {chartData.labels.length > 0 ? (
         <LineChart
           data={chartData}
@@ -248,7 +244,6 @@ const Home = ({ navigation }) => {
         <Text style={[styles.noDataText, { color: theme.textColor }]}>{t('no_data')}</Text>
       )}
 
-      {/* Öne Çıkanlar (Favoriler) */}
       <View style={styles.featuredSection}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('favorites')}</Text>
@@ -299,6 +294,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: '#f8f9fa', // Başlık arka plan rengi
+    padding: 10,
+    borderRadius: 10,
   },
   avatar: {
     width: 50,
@@ -363,15 +361,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
+    backgroundColor: '#f8f9fa', // Arama çubuğu arka plan rengi
+    borderRadius: 10,
+    padding: 10,
   },
   searchIcon: {
     position: 'absolute',
-    left: 10,
+    left: 20,
   },
   searchBar: {
     flex: 1,
     height: 40,
-    borderWidth: 1,
+    borderWidth: 0,
     borderRadius: 20,
     paddingLeft: 40,
     backgroundColor: '#fff',
