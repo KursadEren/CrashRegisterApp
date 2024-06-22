@@ -12,6 +12,7 @@ function MyTextInput({ label1, icon, onChangeText, value }) {
 
   useEffect(() => {
     const labelLower = label1.toLowerCase();
+    
     setIsSecureTextEntry(
       labelLower === t('password').toLowerCase() || labelLower === t('confirm_password').toLowerCase()
     );
