@@ -95,5 +95,10 @@
   "user_registered_successfully": "Kullanıcı başarıyla kaydedildi",
   "failed_to_register_user": "Kullanıcı kaydı başarısız oldu",
   "biometric_not_available": "Biyometrik kimlik doğrulama bu cihazda mevcut değil.",
-  "biometric_auth_setup_success": "Biyometrik kimlik doğrulama başarıyla kuruldu"
+  "biometric_auth_setup_success": "Biyometrik kimlik doğrulama başarıyla kuruldu",
+  "total_sales": "Toplam Satış",
+  "top_product": "En Çok Satan Ürün",
+  "pie_chart": "Pasta Grafiği",
+  "bar_chart": "Çubuk Grafiği",
+  "line_chart": "Çizgi Grafiği"
 }
