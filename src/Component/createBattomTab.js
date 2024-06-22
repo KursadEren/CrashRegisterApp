@@ -6,11 +6,13 @@ import BasketScreen from '../Screen/BasketScreen';
 import ProfileScreen from '../Screen/ProfileScreen';
 import SettingsScreen from '../Screen/SettingsScreen';
 import { useTheme } from '@react-navigation/native';
+import { useTranslation } from 'react-i18next';
 
 const Tab = createBottomTabNavigator();
 
 function MyTabs() {
   const { colors } = useTheme();
+  const { t } = useTranslation();
 
   return (
     <Tab.Navigator
@@ -47,22 +49,22 @@ function MyTabs() {
       <Tab.Screen
         name="Home"
         component={Home}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('home') }}
       />
       <Tab.Screen
         name="Basket"
         component={BasketScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('basket') }}
       />
       <Tab.Screen
         name="Profile"
         component={ProfileScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('profile') }}
       />
       <Tab.Screen
         name="Settings"
         component={SettingsScreen}
-        options={{ headerShown: false }}
+        options={{ headerShown: false, title: t('settings') }}
       />
     </Tab.Navigator>
   );

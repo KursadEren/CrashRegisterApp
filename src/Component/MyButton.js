@@ -2,10 +2,12 @@ import React, { useContext, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-paper';
 import { useLandscape } from '../Context/LandSpaceProvider';
-import { ThemeContext } from '../Context/ThemeContext'; // ThemeContext'i dahil edelim
+import { ThemeContext } from '../Context/ThemeContext';
+import { useTranslation } from 'react-i18next';
 
 export default function MyButton({ OnChangeButton, iconname, text, visible }) {
-  const { theme } = useContext(ThemeContext); // Tema renklerini kullanmak için context'i kullanalım
+  const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
   const isLandscape = useLandscape();
 
@@ -16,7 +18,7 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
   };
 
   if (!visible) {
-    return null; // Görünürlük false olduğunda bileşeni null olarak döndür ve hiçbir şey gösterme
+    return null;
   }
 
   return (
@@ -24,11 +26,11 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
       <Button
         mode="contained"
         onPress={onPress}
-        style={[styles.button, { backgroundColor: theme.primaryColor }]} // Buton rengini tema renklerine göre ayarlayalım
+        style={[styles.button, { backgroundColor: theme.primaryColor }]}
         labelStyle={styles.buttonText}
         disabled={loading}
       >
-        {loading ? <ActivityIndicator color="#fff" /> : text}
+        {loading ? <ActivityIndicator color="#fff" /> : t(text)}
       </Button>
     </View>
   );

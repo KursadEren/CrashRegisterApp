@@ -7,6 +7,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { API_URL, API_URL2 } from '../GroceryData/Constant';
 import ReactNativeBiometrics from 'react-native-biometrics';
+import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
 
@@ -16,6 +17,7 @@ const RegisterScreen = ({ navigation }) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const isLandscape = useLandscape();
   const translateX = useRef(new Animated.Value(0)).current;
+  const { t } = useTranslation();
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -38,46 +40,46 @@ const RegisterScreen = ({ navigation }) => {
       const { available, biometryType } = await rnBiometrics.isSensorAvailable();
 
       if (!available) {
-        Alert.alert('Error', 'Biometric authentication is not available on this device.');
+        Alert.alert(t('error'), t('biometric_not_available'));
         return;
       }
 
       if (!biometryType) {
-        Alert.alert('Error', 'No biometrics are enrolled on this device. Please enroll biometrics and try again.');
+        Alert.alert(t('error'), t('no_biometrics_enrolled'));
         return;
       }
 
-      const resultObject = await rnBiometrics.simplePrompt({ promptMessage: 'Confirm fingerprint' });
+      const resultObject = await rnBiometrics.simplePrompt({ promptMessage: t('confirm_fingerprint') });
       const { success } = resultObject;
 
       if (success) {
         await AsyncStorage.setItem('@biometric_user', username);
         await AsyncStorage.setItem('@biometric_password', password);
 
-        Alert.alert('Success', 'Biometric authentication setup successfully');
+        Alert.alert(t('success'), t('biometric_auth_setup_success'));
         navigation.navigate("LoginScreen");
       } else {
-        Alert.alert('Error', 'Biometric authentication failed');
+        Alert.alert(t('error'), t('biometric_auth_failed'));
       }
     } catch (error) {
       console.error('Biometric authentication failed:', error);
-      Alert.alert('Error', `Biometric authentication failed: ${error.message}`);
+      Alert.alert(t('error'), `${t('biometric_auth_failed')}: ${error.message}`);
     }
   };
 
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
-      Alert.alert('Error', 'Please fill in all fields');
+      Alert.alert(t('error'), t('fill_all_fields'));
       return;
     }
 
     if (password !== confirmPassword) {
-      Alert.alert('Error', 'Passwords do not match');
+      Alert.alert(t('error'), t('passwords_do_not_match'));
       return;
     }
 
     if (!isValidPassword(password)) {
-      Alert.alert('Error', 'Password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.');
+      Alert.alert(t('error'), t('invalid_password'));
       return;
     }
 
@@ -88,20 +90,20 @@ const RegisterScreen = ({ navigation }) => {
       });
 
       if (response.status !== 201) {
-        Alert.alert('Error', `User registration failed with status ${response.status}`);
+        Alert.alert(t('error'), `${t('user_registration_failed')} ${response.status}`);
         return;
       }
 
       await AsyncStorage.setItem('@biometric_user', username);
       await AsyncStorage.setItem('@biometric_password', password);
 
-      Alert.alert('Success', 'User registered successfully');
+      Alert.alert(t('success'), t('user_registered_successfully'));
 
       // Biometric enrollment
       handleBiometricEnrollment();
     } catch (e) {
       console.log('Kayıt hatası:', e);
-      Alert.alert('Error', 'Failed to register user');
+      Alert.alert(t('error'), t('failed_to_register_user'));
     }
   };
 
@@ -144,16 +146,16 @@ const RegisterScreen = ({ navigation }) => {
         <Image source={require('../../Image/logo1.png')} style={styles.logo} />
       </Animated.View>
       <View style={styles.textInputContainer}>
-        <MyTextInput onChangeText={setUsername} label1="Name" />
+        <MyTextInput onChangeText={setUsername} label1={t('username')} />
       </View>
       <View style={styles.textInputContainer}>
-        <MyTextInput onChangeText={setPassword} label1="Password" secureTextEntry />
+        <MyTextInput onChangeText={setPassword} label1={t('password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyTextInput onChangeText={setConfirmPassword} label1="Confirm Password" secureTextEntry />
+        <MyTextInput onChangeText={setConfirmPassword} label1={t('confirm_password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="account-plus" OnChangeButton={handleRegister} text="Kayıt Ol" />
+        <MyButton visible={true} iconname="account-plus" OnChangeButton={handleRegister} text={t('register')} />
       </View>
     </View>
   );

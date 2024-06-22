@@ -7,20 +7,22 @@ import MyButton from '../Component/MyButton';
 import { useWindowDimensions } from 'react-native';
 import { ThemeContext } from '../Context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useTranslation } from 'react-i18next';
 
 const ReceiptContent = ({ paymentDetails }) => {
   const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
 
   return (
     <View style={[styles.receiptContainer, { backgroundColor: theme.backgroundColor }]}>
-      <Text style={[styles.title, { color: theme.textColor }]}>Fiş</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Tarih: {paymentDetails.date}</Text>
+      <Text style={[styles.title, { color: theme.textColor }]}>{t('receipt')}</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('date')}: {paymentDetails.date}</Text>
       <View style={styles.tableContainer}>
         <View style={styles.tableRow}>
-          <Text style={[styles.tableHeader, { color: theme.textColor, flex: 2 }]}>Ürün</Text>
-          <Text style={[styles.tableHeader, { color: theme.textColor }]}>Fiyat</Text>
-          <Text style={[styles.tableHeader, { color: theme.textColor }]}>Adet</Text>
-          <Text style={[styles.tableHeader, { color: theme.textColor }]}>Toplam</Text>
+          <Text style={[styles.tableHeader, { color: theme.textColor, flex: 2 }]}>{t('product')}</Text>
+          <Text style={[styles.tableHeader, { color: theme.textColor }]}>{t('price')}</Text>
+          <Text style={[styles.tableHeader, { color: theme.textColor }]}>{t('count')}</Text>
+          <Text style={[styles.tableHeader, { color: theme.textColor }]}>{t('total')}</Text>
         </View>
         {paymentDetails.items.map((item, index) => (
           <View key={index} style={styles.tableRow}>
@@ -31,12 +33,12 @@ const ReceiptContent = ({ paymentDetails }) => {
           </View>
         ))}
       </View>
-      <Text style={[styles.info, { color: theme.textColor }]}>Ara Toplam: {paymentDetails.subtotal.toFixed(2)} TL</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Toplam: {paymentDetails.total.toFixed(2)} TL</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Ödeme Yöntemi: {paymentDetails.paymentType}</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Nakit: {paymentDetails.cashAmount.toFixed(2)} TL</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Kart: {paymentDetails.cardAmount.toFixed(2)} TL</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Para Üstü: {paymentDetails.change.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('subtotal')}: {paymentDetails.subtotal.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('total')}: {paymentDetails.total.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('payment_method')}: {paymentDetails.paymentType}</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('cash')}: {paymentDetails.cashAmount.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('card')}: {paymentDetails.cardAmount.toFixed(2)} TL</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('change')}: {paymentDetails.change.toFixed(2)} TL</Text>
     </View>
   );
 };
@@ -48,6 +50,7 @@ const ReceiptPrint = () => {
   const { paymentDetails } = route.params;
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+  const { t } = useTranslation();
 
   const handlePrint = async () => {
     try {
@@ -72,14 +75,14 @@ const ReceiptPrint = () => {
           </head>
           <body>
             <div class="receiptContainer">
-              <div class="title">Fiş</div>
-              <div class="info">Tarih: ${paymentDetails.date}</div>
+              <div class="title">${t('receipt')}</div>
+              <div class="info">${t('date')}: ${paymentDetails.date}</div>
               <div class="tableContainer">
                 <div class="tableRow">
-                  <div class="tableHeader" style="flex: 2;">Ürün</div>
-                  <div class="tableHeader">Fiyat</div>
-                  <div class="tableHeader">Adet</div>
-                  <div class="tableHeader">Toplam</div>
+                  <div class="tableHeader" style="flex: 2;">${t('product')}</div>
+                  <div class="tableHeader">${t('price')}</div>
+                  <div class="tableHeader">${t('count')}</div>
+                  <div class="tableHeader">${t('total')}</div>
                 </div>
                 ${paymentDetails.items.map((item) => `
                   <div class="tableRow">
@@ -90,12 +93,12 @@ const ReceiptPrint = () => {
                   </div>
                 `).join('')}
               </div>
-              <div class="info">Ara Toplam: ${paymentDetails.subtotal.toFixed(2)} TL</div>
-              <div class="info">Toplam: ${paymentDetails.total.toFixed(2)} TL</div>
-              <div class="info">Ödeme Yöntemi: ${paymentDetails.paymentType}</div>
-              <div class="info">Nakit: ${paymentDetails.cashAmount.toFixed(2)} TL</div>
-              <div class="info">Kart: ${paymentDetails.cardAmount.toFixed(2)} TL</div>
-              <div class="info">Para Üstü: ${paymentDetails.change.toFixed(2)} TL</div>
+              <div class="info">${t('subtotal')}: ${paymentDetails.subtotal.toFixed(2)} TL</div>
+              <div class="info">${t('total')}: ${paymentDetails.total.toFixed(2)} TL</div>
+              <div class="info">${t('payment_method')}: ${paymentDetails.paymentType}</div>
+              <div class="info">${t('cash')}: ${paymentDetails.cashAmount.toFixed(2)} TL</div>
+              <div class="info">${t('card')}: ${paymentDetails.cardAmount.toFixed(2)} TL</div>
+              <div class="info">${t('change')}: ${paymentDetails.change.toFixed(2)} TL</div>
             </div>
           </body>
         </html>
@@ -117,11 +120,11 @@ const ReceiptPrint = () => {
       const paymentKey = '@payment_' + new Date(paymentDetails.saleDate).getTime();
       await AsyncStorage.setItem(paymentKey, JSON.stringify(paymentDetails));
 
-      Alert.alert('Başarılı', `PDF dosyası başarıyla kaydedildi!\n\nDosya Yolu: ${file.filePath}`, [{ text: 'Tamam' }]);
+      Alert.alert(t('success'), `${t('pdf_saved_success')}\n\n${t('file_path')}: ${file.filePath}`, [{ text: t('ok') }]);
       navigation.navigate("Home");
     } catch (error) {
       console.error('Yazdırma başarısız oldu: ', error);
-      Alert.alert('Hata', 'PDF dosyası kaydedilemedi.', [{ text: 'Tamam' }]);
+      Alert.alert(t('error'), t('pdf_save_failed'), [{ text: t('ok') }]);
     }
   };
 
@@ -129,8 +132,8 @@ const ReceiptPrint = () => {
     <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <ReceiptContent paymentDetails={paymentDetails} />
       <View style={styles.buttonContainer}>
-        <MyButton visible={true} OnChangeButton={handlePrint} text="Yazdır" />
-        <MyButton visible={true} OnChangeButton={() => navigation.navigate('Home')} text="Ana Sayfa" />
+        <MyButton visible={true} OnChangeButton={handlePrint} text={t('print')} />
+        <MyButton visible={true} OnChangeButton={() => navigation.navigate('Home')} text={t('home_page')} />
       </View>
     </ScrollView>
   );

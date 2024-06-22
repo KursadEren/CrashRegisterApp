@@ -12,6 +12,7 @@ export default function AllReports({navigation}) {
         
         <MyCard navigation={navigation} CardName="Kullanıcılar" CardPage="Reports" CardColor={theme.primaryColor} IconName="file-chart-outline" />
         <MyCard navigation={navigation} CardName="Kampanyalar" CardPage="Reports" CardColor={theme.primaryColor} IconName="file-chart-outline" />
+        <MyCard navigation={navigation} CardName="Rapor Grafikleri" CardPage="SalesReport" CardColor={theme.primaryColor} IconName="file-chart-outline" />
          </View>
     </View>
   )
