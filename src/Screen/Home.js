@@ -13,7 +13,6 @@ import MyFlatlist from '../Component/MyFlatlist';
 
 const Home = ({ navigation }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
-  const { serviceStatus, setServiceStatus } = useServiceStatus();
   const { t, i18n } = useTranslation();
   const [productData, setProductData] = useState([]);
   const [favorites, setFavorites] = useState([]);
@@ -127,51 +126,6 @@ const Home = ({ navigation }) => {
     fetchPendingPayments();
   }, []);
 
-  useEffect(() => {
-    if (serviceStatus) {
-      sendUnsentPaymentsToCentral();
-    }
-  }, [serviceStatus]);
-
-  const sendUnsentPaymentsToCentral = async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
-      const paymentItems = await AsyncStorage.multiGet(paymentKeys);
-      const unsentPayments = paymentItems
-        .map(item => [item[0], JSON.parse(item[1])])
-        .filter(([key, payment]) => !payment.sentToCentral);
-
-      for (const [key, payment] of unsentPayments) {
-        const updatedPayment = {
-          ...payment,
-          sentToCentral: true,
-          centralSendTime: new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }),
-        };
-
-        await AsyncStorage.setItem(key, JSON.stringify(updatedPayment));
-      }
-
-      setToastMessage(t('all_payments_sent'));
-      setToastVisible(true);
-      setTimeout(() => setToastVisible(false), 2000);
-      console.log(t('all_payments_sent'));
-    } catch (e) {
-      console.log('Ödemeleri gönderme hatası:', e);
-    }
-  };
-
-  const toggleServiceStatus = () => {
-    setServiceStatus(!serviceStatus);
-    if (!serviceStatus) {
-      setToastMessage(t('service_opened'));
-    } else {
-      setToastMessage(t('service_closed'));
-    }
-    setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 2000);
-  };
-
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
   };
@@ -199,19 +153,7 @@ const Home = ({ navigation }) => {
         <View style={styles.headerTextContainer}>
           <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>{t('hello')},</Text>
           <Text style={[styles.userName, { color: theme.textColor }]}>Kursad</Text>
-          <TouchableOpacity style={[styles.themeButton, { backgroundColor: theme.primaryColor }]} onPress={toggleTheme}>
-            <Text style={styles.themeButtonText}>{t('change_theme')}</Text>
-          </TouchableOpacity>
-          <View style={styles.serviceStatusContainer}>
-            <Text style={[styles.serviceTitle, { color: theme.textColor }]}>{t('service')}</Text>
-            <View style={[styles.dot, serviceStatus ? { backgroundColor: theme.primaryColor } : { backgroundColor: theme.dangerColor }]} />
-            <Text style={[styles.statusText, serviceStatus ? { color: theme.primaryColor } : { color: theme.dangerColor }]}>
-              {serviceStatus ? t('ready') : t('not_working')}
-            </Text>
-          </View>
-          <TouchableOpacity style={[styles.serviceButton, { backgroundColor: theme.primaryColor }]} onPress={toggleServiceStatus}>
-            <Text style={styles.serviceButtonText}>{serviceStatus ? t('close') : t('open')}</Text>
-          </TouchableOpacity>
+         
         </View>
       </View>
        {/* Arama Çubuğu */}
@@ -307,9 +249,6 @@ const Home = ({ navigation }) => {
         )}
       </View>
 
-     
-
-     
       {/* Kategoriler */}
       <View style={styles.content}>
         <View style={styles.row}>
@@ -381,35 +320,6 @@ const styles = StyleSheet.create({
     alignSelf: 'flex-start',
   },
   themeButtonText: {
-    color: 'white',
-    fontSize: 14,
-  },
-  serviceStatusContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 5,
-  },
-  serviceTitle: {
-    marginRight: 5,
-    fontSize: 14,
-    fontWeight: 'bold',
-  },
-  dot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-    marginRight: 5,
-  },
-  statusText: {
-    fontSize: 14,
-  },
-  serviceButton: {
-    marginTop: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 5,
-  },
-  serviceButtonText: {
     color: 'white',
     fontSize: 14,
   },
