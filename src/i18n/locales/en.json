@@ -102,5 +102,14 @@
   "bar_chart": "Bar Chart",
   "line_chart": "Line Chart",
   "sales_per_day": "Sales/Day",
-  "recent_purchases": "Recent Purchases"
+  "recent_purchases": "Recent Purchases",
+  "settings_screen": "Settings",
+  "ingenico_settings": "Ingenico Settings",
+  "other_settings": "Other Settings",
+  "transfer_all_sales": "Transfer All Sales",
+  "printer_test": "Printer Test",
+  "reload_configuration": "Reload Configuration",
+  "operations": "Operations",
+  "scale_settings": "Scale Settings",
+  "change_language": "Change Language"
 }

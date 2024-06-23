@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
 import { View, StyleSheet, ActivityIndicator } from 'react-native';
 import { Button } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useLandscape } from '../Context/LandSpaceProvider';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -29,7 +30,13 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
         style={[styles.button, { backgroundColor: theme.primaryColor }]}
         labelStyle={styles.buttonText}
         disabled={loading}
-        icon={iconname} // İkonu burada ekliyoruz
+        icon={() => (
+          <MaterialCommunityIcons
+            name={iconname}
+            size={24}
+            color="#fff"
+          />
+        )} // İkonu burada ekliyoruz
       >
         {loading ? <ActivityIndicator color="#fff" /> : t(text)}
       </Button>
