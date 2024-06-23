@@ -34,6 +34,7 @@ function LoginScreen({ navigation }) {
     try {
       const storedPassword = await AsyncStorage.getItem('@user_' + username);
       if (storedPassword === password) {
+        await AsyncStorage.setItem('@current_user', username); // Şu anki kullanıcıyı kaydet
         navigation.navigate("MyTabs");
         return;
       }
@@ -45,6 +46,7 @@ function LoginScreen({ navigation }) {
 
       if (response.status === 200 && response.data) {
         await AsyncStorage.setItem('@user_' + username, password);
+        await AsyncStorage.setItem('@current_user', username); // Şu anki kullanıcıyı kaydet
         navigation.navigate("MyTabs");
       } else {
         Alert.alert(t('error'), t('invalid_username_password'));
@@ -63,15 +65,20 @@ function LoginScreen({ navigation }) {
       const { success } = resultObject;
 
       if (success) {
-        const username = await AsyncStorage.getItem('@biometric_user');
-        const password = await AsyncStorage.getItem('@biometric_password');
+        const keys = await AsyncStorage.getAllKeys();
+        const biometricKeys = keys.filter(key => key.startsWith('@biometric_user_'));
 
-        if (username && password) {
-          Alert.alert(t('success'), t('biometric_auth_success'));
-          navigation.navigate('MyTabs');
-        } else {
-          Alert.alert(t('error'), t('no_biometrics_enrolled'));
+        for (let key of biometricKeys) {
+          const user = JSON.parse(await AsyncStorage.getItem(key));
+          if (user) {
+            await AsyncStorage.setItem('@current_user', user.username); // Şu anki kullanıcıyı kaydet
+            Alert.alert(t('success'), t('biometric_auth_success'));
+            navigation.navigate('MyTabs');
+            return;
+          }
         }
+
+        Alert.alert(t('error'), t('no_biometrics_enrolled'));
       } else {
         Alert.alert(t('error'), t('biometric_auth_failed'));
       }

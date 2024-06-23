@@ -36,14 +36,14 @@ export default function Reports() {
   const requestExternalStoragePermission = async () => {
     try {
       if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.request(
+        const granted = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
           PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-          {
-            title: 'External Storage Write Permission',
-            message: 'App needs access to Storage data',
-          }
+        ]);
+        return (
+          granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
+          granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
         );
-        return granted === PermissionsAndroid.RESULTS.GRANTED;
       } else {
         return true;
       }
@@ -60,7 +60,7 @@ export default function Reports() {
         Alert.alert(t('permission_denied'), t('storage_permission_required'));
         return;
       }
-      
+
       if (filePath && await RNFS.exists(filePath)) {
         await FileViewer.open(filePath);
       } else {

@@ -23,6 +23,40 @@ const Home = ({ navigation }) => {
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const [refreshing, setRefreshing] = useState(false);
+  const [currentUser, setCurrentUser] = useState('');
+
+  const fetchPendingPayments = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
+      const paymentItems = await AsyncStorage.multiGet(paymentKeys);
+
+      const parsedData = paymentItems.map(item => JSON.parse(item[1]));
+      const aggregateSales = {};
+
+      parsedData.forEach(payment => {
+        const dateTime = payment.saleDate.split(' ')[0];
+        const day = dateTime.split('.')[0]; // Gün değerini almak için split işlemi
+        const totalItems = payment.items.reduce((total, item) => total + item.count, 0);
+
+        if (aggregateSales[day]) {
+          aggregateSales[day] += totalItems;
+        } else {
+          aggregateSales[day] = totalItems;
+        }
+      });
+
+      const sortedDays = Object.keys(aggregateSales).sort((a, b) => parseInt(a) - parseInt(b));
+      const data = sortedDays.map(day => aggregateSales[day]);
+
+      setChartData({
+        labels: sortedDays,
+        datasets: [{ data }]
+      });
+    } catch (error) {
+      console.error('Error fetching pending payments:', error);
+    }
+  };
 
   const fetchProductData = async () => {
     try {
@@ -75,55 +109,31 @@ const Home = ({ navigation }) => {
     }
   };
 
+  const fetchCurrentUser = async () => {
+    try {
+      const user = await AsyncStorage.getItem('@current_user');
+      setCurrentUser(user || '');
+    } catch (error) {
+      console.error('Error fetching current user:', error);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchProductData();
     await fetchFavorites();
     await fetchRecentPurchases();
+    await fetchPendingPayments();
+    await fetchCurrentUser();
     setRefreshing(false);
   };
 
   useEffect(() => {
     fetchProductData();
     fetchFavorites();
-    fetchRecentPurchases();
-  }, []);
-
-  useEffect(() => {
-    const fetchPendingPayments = async () => {
-      try {
-        const keys = await AsyncStorage.getAllKeys();
-        const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
-        const paymentItems = await AsyncStorage.multiGet(paymentKeys);
-
-        const parsedData = paymentItems.map(item => JSON.parse(item[1]));
-        const aggregateSales = {};
-
-        parsedData.forEach(payment => {
-          const dateTime = payment.saleDate.split(' ')[0];
-          const day = dateTime.split('.')[0]; // Gün değerini almak için split işlemi
-          const totalItems = payment.items.reduce((total, item) => total + item.count, 0);
-
-          if (aggregateSales[day]) {
-            aggregateSales[day] += totalItems;
-          } else {
-            aggregateSales[day] = totalItems;
-          }
-        });
-
-        const sortedDays = Object.keys(aggregateSales).sort((a, b) => parseInt(a) - parseInt(b));
-        const data = sortedDays.map(day => aggregateSales[day]);
-
-        setChartData({
-          labels: sortedDays,
-          datasets: [{ data }]
-        });
-      } catch (error) {
-        console.error('Error fetching pending payments:', error);
-      }
-    };
-
     fetchPendingPayments();
+    fetchRecentPurchases();
+    fetchCurrentUser();
   }, []);
 
   const changeLanguage = (lang) => {
@@ -152,8 +162,7 @@ const Home = ({ navigation }) => {
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
           <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>{t('hello')},</Text>
-          <Text style={[styles.userName, { color: theme.textColor }]}>Kursad</Text>
-         
+          <Text style={[styles.userName, { color: theme.textColor }]}>{currentUser}</Text>
         </View>
       </View>
        {/* Arama Çubuğu */}
