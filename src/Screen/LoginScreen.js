@@ -146,14 +146,6 @@ function LoginScreen({ navigation }) {
           <Ionicons name="finger-print" size={50} color="#fff" />
         </TouchableOpacity>
       </View>
-      <View style={styles.languageContainer}>
-        <TouchableOpacity style={styles.languageButton} onPress={() => changeLanguage('en')}>
-          <Text style={styles.languageText}>English</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.languageButton, styles.languageButtonBorder]} onPress={() => changeLanguage('tr')}>
-          <Text style={styles.languageText}>Türkçe</Text>
-        </TouchableOpacity>
-      </View>
     </View>
   );
 }

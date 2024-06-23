@@ -29,6 +29,7 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
         style={[styles.button, { backgroundColor: theme.primaryColor }]}
         labelStyle={styles.buttonText}
         disabled={loading}
+        icon={iconname} // İkonu burada ekliyoruz
       >
         {loading ? <ActivityIndicator color="#fff" /> : t(text)}
       </Button>
