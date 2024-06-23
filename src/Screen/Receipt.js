@@ -16,10 +16,20 @@ const Receipt = ({ route }) => {
   const [cardAmount, setCardAmount] = useState('');
   const [change, setChange] = useState(0);
   const [campaignDiscount, setCampaignDiscount] = useState(0);
+  const [sellerName, setSellerName] = useState('');
+  const [buyerName, setBuyerName] = useState('');
   const navigation = useNavigation();
   const { serviceStatus } = useServiceStatus();
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
+
+  useEffect(() => {
+    const fetchSellerName = async () => {
+      const name = await AsyncStorage.getItem('@seller_name');
+      setSellerName(name || '');
+    };
+    fetchSellerName();
+  }, []);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -71,7 +81,9 @@ const Receipt = ({ route }) => {
         saleDate: currentDate.toLocaleString('tr-TR', options),
         centralSendTime: serviceStatus ? currentDate.toLocaleString('tr-TR', options) : null,
         sentToCentral: serviceStatus,
-        pdfPath: null
+        pdfPath: null,
+        sellerName: sellerName,
+        buyerName: buyerName
       };
   
       try {
@@ -194,6 +206,22 @@ const Receipt = ({ route }) => {
           <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingVertical: height * 0.1 }]}>
             <View style={[styles.modalContent, { height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%', backgroundColor: theme.modalBackground }]}>
               <Text style={[styles.modalTitle, { color: theme.textColor }]}>{t('select_payment_method')}</Text>
+
+              <TextInput
+                style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
+                placeholder={t('seller_name')}
+                value={sellerName}
+                onChangeText={setSellerName}
+                placeholderTextColor={theme.placeholderTextColor}
+              />
+
+              <TextInput
+                style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
+                placeholder={t('buyer_name')}
+                value={buyerName}
+                onChangeText={setBuyerName}
+                placeholderTextColor={theme.placeholderTextColor}
+              />
 
               <TouchableOpacity
                 style={[styles.modalButton, paymentType === 'cash' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}

@@ -100,5 +100,7 @@
   "top_product": "Top Product",
   "pie_chart": "Pie Chart",
   "bar_chart": "Bar Chart",
-  "line_chart": "Line Chart"
+  "line_chart": "Line Chart",
+  "sales_per_day": "Sales/Day",
+  "recent_purchases": "Recent Purchases"
 }

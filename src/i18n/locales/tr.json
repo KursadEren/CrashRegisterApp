@@ -100,5 +100,7 @@
   "top_product": "En Çok Satan Ürün",
   "pie_chart": "Pasta Grafiği",
   "bar_chart": "Çubuk Grafiği",
-  "line_chart": "Çizgi Grafiği"
+  "line_chart": "Çizgi Grafiği",
+  "sales_per_day": "Satış/Gün",
+  "recent_purchases": "Son Alımlar"
 }
