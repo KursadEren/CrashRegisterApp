@@ -1,8 +1,7 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView, TouchableOpacity, Image, Modal, useWindowDimensions, RefreshControl } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, useWindowDimensions, RefreshControl, FlatList } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MyCard from '../Component/MyCard';
-import MyFlatlist from '../Component/MyFlatlist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { LineChart } from 'react-native-chart-kit';
@@ -10,6 +9,7 @@ import { useServiceStatus } from '../Context/ServiceStatusContext';
 import { ThemeContext } from '../Context/ThemeContext';
 import { API_URL2 } from '../GroceryData/Constant';
 import { useTranslation } from 'react-i18next';
+import MyFlatlist from '../Component/MyFlatlist';
 
 const Home = ({ navigation }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
@@ -17,6 +17,7 @@ const Home = ({ navigation }) => {
   const { t, i18n } = useTranslation();
   const [productData, setProductData] = useState([]);
   const [favorites, setFavorites] = useState([]);
+  const [recentPurchases, setRecentPurchases] = useState([]);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [chartData, setChartData] = useState({ labels: [], datasets: [{ data: [] }] });
@@ -62,19 +63,31 @@ const Home = ({ navigation }) => {
     }
   };
 
+  const fetchRecentPurchases = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const purchaseKeys = keys.filter(key => key.startsWith('@payment_'));
+      const purchaseItems = await AsyncStorage.multiGet(purchaseKeys);
+
+      const purchases = purchaseItems.map(item => JSON.parse(item[1])).slice(0, 5); // Show last 5 purchases
+      setRecentPurchases(purchases);
+    } catch (error) {
+      console.error('Error fetching recent purchases:', error);
+    }
+  };
+
   const onRefresh = async () => {
     setRefreshing(true);
     await fetchProductData();
     await fetchFavorites();
+    await fetchRecentPurchases();
     setRefreshing(false);
   };
 
   useEffect(() => {
     fetchProductData();
-  }, []);
-
-  useEffect(() => {
     fetchFavorites();
+    fetchRecentPurchases();
   }, []);
 
   useEffect(() => {
@@ -89,20 +102,21 @@ const Home = ({ navigation }) => {
 
         parsedData.forEach(payment => {
           const dateTime = payment.saleDate.split(' ')[0];
+          const day = dateTime.split('.')[0]; // Gün değerini almak için split işlemi
           const totalItems = payment.items.reduce((total, item) => total + item.count, 0);
 
-          if (aggregateSales[dateTime]) {
-            aggregateSales[dateTime] += totalItems;
+          if (aggregateSales[day]) {
+            aggregateSales[day] += totalItems;
           } else {
-            aggregateSales[dateTime] = totalItems;
+            aggregateSales[day] = totalItems;
           }
         });
 
-        const sortedDateTimes = Object.keys(aggregateSales).sort();
-        const data = sortedDateTimes.map(dateTime => aggregateSales[dateTime]);
+        const sortedDays = Object.keys(aggregateSales).sort((a, b) => parseInt(a) - parseInt(b));
+        const data = sortedDays.map(day => aggregateSales[day]);
 
         setChartData({
-          labels: sortedDateTimes,
+          labels: sortedDays,
           datasets: [{ data }]
         });
       } catch (error) {
@@ -162,6 +176,12 @@ const Home = ({ navigation }) => {
     i18n.changeLanguage(lang);
   };
 
+  const getMonthName = (monthNumber) => {
+    const date = new Date();
+    date.setMonth(monthNumber);
+    return date.toLocaleString('tr-TR', { month: 'long' });
+  };
+
   return (
     <ScrollView
       contentContainerStyle={[styles.container, { backgroundColor: theme.backgroundColor }]}
@@ -173,7 +193,8 @@ const Home = ({ navigation }) => {
         />
       }
     >
-      <View style={styles.header}>
+       {/* Başlık ve Hoşgeldiniz Mesajı */}
+       <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
           <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>{t('hello')},</Text>
@@ -193,57 +214,49 @@ const Home = ({ navigation }) => {
           </TouchableOpacity>
         </View>
       </View>
-
-      <View style={styles.searchContainer}>
+       {/* Arama Çubuğu */}
+       <View style={styles.searchContainer}>
         <Icon name="search" size={20} color={theme.textColor} style={styles.searchIcon} />
         <TextInput style={[styles.searchBar, { borderColor: theme.secondaryColor }]} placeholder={t('search')} placeholderTextColor={theme.textColor} />
       </View>
 
-      <View style={styles.content}>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName={t('sales')} CardPage="Sales" CardColor={theme.primaryColor} IconName="cash-register" />
-          <MyCard navigation={navigation} CardName={t('see_price')} CardPage="Product" CardColor={theme.primaryColor} IconName="tag" />
-        </View>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName={t('return')} CardPage="Return" CardColor={theme.primaryColor} IconName="backup-restore" />
-          <MyCard navigation={navigation} CardName={t('collections')} CardPage="Collections" CardColor={theme.primaryColor} IconName="credit-card-check-outline" />
-        </View>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName={t('reports')} CardPage="AllReports" CardColor={theme.primaryColor} IconName="file-chart-outline" />
-          <MyCard navigation={navigation} CardName={t('other_operations')} CardPage="SeePrice" CardColor={theme.primaryColor} IconName="cogs" />
-        </View>
-        <View style={styles.row}>
-          <MyCard navigation={navigation} CardName={t('direct_product_entry')} CardPage="Product" CardColor={theme.primaryColor} IconName="cart-plus" />
-          <MyCard navigation={navigation} CardName={t('www')} CardColor={theme.primaryColor} IconName="web" />
-        </View>
-      </View>
-
+      {/* Grafik */}
       {chartData.labels.length > 0 ? (
-        <LineChart
-          data={chartData}
-          width={width - 40}
-          height={isLandscape ? 180 : 220}
-          chartConfig={{
-            backgroundColor: theme.primaryColor,
-            backgroundGradientFrom: theme.primaryColor,
-            backgroundGradientTo: theme.secondaryColor,
-            decimalPlaces: 0,
-            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-            style: {
+        <View style={styles.chartContainer}>
+          <View style={styles.chartHeader}>
+            <Text style={[styles.chartTitle, { color: theme.textColor }]}>{getMonthName(new Date().getMonth())}</Text>
+          </View>
+          <LineChart
+            data={chartData}
+            width={width - 40}
+            height={isLandscape ? 180 : 220}
+            chartConfig={{
+              backgroundColor: theme.primaryColor,
+              backgroundGradientFrom: theme.primaryColor,
+              backgroundGradientTo: theme.secondaryColor,
+              decimalPlaces: 0,
+              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+              style: {
+                borderRadius: 16
+              }
+            }}
+            bezier
+            style={{
+              marginVertical: 8,
               borderRadius: 16
-            }
-          }}
-          bezier
-          style={{
-            marginVertical: 8,
-            borderRadius: 16
-          }}
-        />
+            }}
+            fromZero={true}
+          />
+          <View style={styles.chartInfoContainer}>
+            <Text style={[styles.chartInfoText, { color: theme.textColor }]}> {t('sales_per_day')} </Text>
+          </View>
+        </View>
       ) : (
         <Text style={[styles.noDataText, { color: theme.textColor }]}>{t('no_data')}</Text>
       )}
 
+      {/* Öne Çıkanlar (Favoriler) */}
       <View style={styles.featuredSection}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('favorites')}</Text>
@@ -261,6 +274,60 @@ const Home = ({ navigation }) => {
           information={"notremove"}
           isFavoriteList={true}
         />
+      </View>
+
+      {/* Son Alımlar */}
+      <View style={styles.recentPurchasesSection}>
+        <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+          <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('recent_purchases')}</Text>
+          
+        </View>
+        {recentPurchases.length > 0 ? (
+          <FlatList
+            data={recentPurchases}
+            horizontal={true}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={({ item: purchase }) => (
+              <View style={[styles.purchaseItem, { backgroundColor: theme.cardBackground }]}>
+                <Text style={[styles.purchaseText, { color: theme.textColor }]}>
+                  {t('date')}: {purchase.date}
+                </Text>
+                <MyFlatlist
+                  data={purchase.items}
+                  showSearchInput={false}
+                  onItemSelect={() => { }}
+                  onItemRemove={() => { }}
+                  isProductList={false}
+                />
+              </View>
+            )}
+          />
+        ) : (
+          <Text style={[styles.noDataText, { color: theme.textColor }]}>{t('no_recent_purchases')}</Text>
+        )}
+      </View>
+
+     
+
+     
+      {/* Kategoriler */}
+      <View style={styles.content}>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName={t('sales')} CardPage="Sales" CardColor={theme.primaryColor} IconName="cash-register" />
+          <MyCard navigation={navigation} CardName={t('see_price')} CardPage="Product" CardColor={theme.primaryColor} IconName="tag" />
+        </View>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName={t('return')} CardPage="Return" CardColor={theme.primaryColor} IconName="backup-restore" />
+          <MyCard navigation={navigation} CardName={t('collections')} CardPage="Collections" CardColor={theme.primaryColor} IconName="credit-card-check-outline" />
+        </View>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName={t('reports')} CardPage="AllReports" CardColor={theme.primaryColor} IconName="file-chart-outline" />
+          <MyCard navigation={navigation} CardName={t('other_operations')} CardPage="SeePrice" CardColor={theme.primaryColor} IconName="cogs" />
+        </View>
+        <View style={styles.row}>
+          <MyCard navigation={navigation} CardName={t('direct_product_entry')} CardPage="Product" CardColor={theme.primaryColor} IconName="cart-plus" />
+          <MyCard navigation={navigation} CardName={t('www')} CardColor={theme.primaryColor} IconName="web" />
+        </View>
       </View>
 
       <Modal
@@ -294,9 +361,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    backgroundColor: '#f8f9fa', // Başlık arka plan rengi
-    padding: 10,
-    borderRadius: 10,
   },
   avatar: {
     width: 50,
@@ -361,18 +425,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 20,
-    backgroundColor: '#f8f9fa', // Arama çubuğu arka plan rengi
-    borderRadius: 10,
-    padding: 10,
   },
   searchIcon: {
     position: 'absolute',
-    left: 20,
+    left: 10,
   },
   searchBar: {
     flex: 1,
     height: 40,
-    borderWidth: 0,
+    borderWidth: 1,
     borderRadius: 20,
     paddingLeft: 40,
     backgroundColor: '#fff',
@@ -385,6 +446,26 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     marginBottom: 10,
   },
+  chartContainer: {
+    marginVertical: 20,
+  },
+  chartHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  chartTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  chartInfoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  chartInfoText: {
+    fontSize: 14,
+  },
   featuredSection: {
     marginBottom: 20,
   },
@@ -393,19 +474,50 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 10,
   },
-  toastContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  recentPurchasesSection: {
+    marginBottom: 20,
   },
-  toastText: {
-    backgroundColor: '#333',
-    color: '#fff',
+  purchaseItem: {
+    marginHorizontal: 20,
+    backgroundColor: '#fff',
     padding: 10,
-    borderRadius: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    width: 200, // Uygun genişlik
+  },
+  purchaseText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 5,
+  },
+  itemContainerHorizontal: {
+    backgroundColor: '#fff',
+    padding: 10,
+    borderRadius: 5,
+    marginRight: 10,
+    alignItems: 'center',
+    width: 150, // uygun genişlik
+  },
+  itemImage: {
+    width: 50,
+    height: 50,
+    marginBottom: 5,
+  },
+  itemName: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  itemPrice: {
+    fontSize: 14,
+    textAlign: 'center',
+  },
+  itemCount: {
+    fontSize: 14,
+    textAlign: 'center',
   },
   noDataText: {
+    fontSize: 16,
     textAlign: 'center',
     marginTop: 20,
   },
@@ -424,6 +536,18 @@ const styles = StyleSheet.create({
   languageText: {
     fontSize: 16,
     color: 'blue',
+  },
+  toastContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  toastText: {
+    backgroundColor: '#333',
+    color: '#fff',
+    padding: 10,
+    borderRadius: 10,
   },
 });
 

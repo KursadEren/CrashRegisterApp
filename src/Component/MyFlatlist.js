@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -109,7 +109,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
       <FlatList
         data={filteredData}
         renderItem={renderItem}
-        keyExtractor={item => item.objectID.toString()}
+        keyExtractor={(item, index) => item.objectID ? item.objectID.toString() : index.toString()}
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.flatListContent}

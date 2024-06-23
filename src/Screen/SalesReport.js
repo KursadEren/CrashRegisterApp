@@ -1,16 +1,17 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, ScrollView, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { PieChart, BarChart, LineChart } from 'react-native-chart-kit';
+import { PieChart, BarChart } from 'react-native-chart-kit';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useWindowDimensions } from 'react-native';
+import { useTranslation } from 'react-i18next';
 
 const SalesReport = () => {
   const { theme } = useContext(ThemeContext);
+  const { t } = useTranslation();
   const [loading, setLoading] = useState(true);
   const [pieChartData, setPieChartData] = useState([]);
   const [barChartData, setBarChartData] = useState([]);
-  const [lineChartData, setLineChartData] = useState([]);
   const [totalSales, setTotalSales] = useState(0);
   const [topProduct, setTopProduct] = useState('');
   const { width } = useWindowDimensions();
@@ -104,11 +105,11 @@ const SalesReport = () => {
 
   return (
     <ScrollView contentContainerStyle={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-      <Text style={[styles.header, { color: theme.primaryColor }]}>Sales Report</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Total Sales: {totalSales}</Text>
-      <Text style={[styles.info, { color: theme.textColor }]}>Top Product: {topProduct}</Text>
+      <Text style={[styles.header, { color: theme.primaryColor }]}>{t('sales_report')}</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('total_sales')}: {totalSales}</Text>
+      <Text style={[styles.info, { color: theme.textColor }]}>{t('top_product')}: {topProduct}</Text>
 
-      <Text style={[styles.subHeader, { color: theme.primaryColor }]}>Pie Chart</Text>
+      <Text style={[styles.subHeader, { color: theme.primaryColor }]}>{t('pie_chart')}</Text>
       <PieChart
         data={pieChartData}
         width={width - 40}
@@ -129,11 +130,11 @@ const SalesReport = () => {
         absolute
       />
 
-      <Text style={[styles.subHeader, { color: theme.primaryColor }]}>Bar Chart</Text>
+      <Text style={[styles.subHeader, { color: theme.primaryColor }]}>{t('bar_chart')}</Text>
       <BarChart
         data={barChartData}
         width={width - 40}
-        height={220}
+        height={300}
         yAxisLabel=""
         chartConfig={{
           backgroundColor: theme.primaryColor,
@@ -146,24 +147,6 @@ const SalesReport = () => {
           }
         }}
         verticalLabelRotation={30}
-      />
-
-      <Text style={[styles.subHeader, { color: theme.primaryColor }]}>Sales Over Time</Text>
-      <LineChart
-        data={lineChartData}
-        width={width - 40}
-        height={220}
-        chartConfig={{
-          backgroundColor: theme.primaryColor,
-          backgroundGradientFrom: theme.primaryColor,
-          backgroundGradientTo: theme.secondaryColor,
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
-            borderRadius: 16
-          }
-        }}
-        bezier
       />
     </ScrollView>
   );
