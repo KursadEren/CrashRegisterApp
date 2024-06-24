@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
-const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
+const MyFlatlist = ({ data, showSearchInput,Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -84,7 +84,7 @@ const MyFlatlist = ({ data, showSearchInput, onItemSelect, onItemRemove, onAddTo
                   placeholder={t('quantity')}
                   value={item.count ? item.count.toString() : ''}
                   onChangeText={text => handleQuantityChange(item, text)}
-                  placeholderTextColor="#aaa"
+                  placeholderTextColor="#"
                 />
               </View>
               <Text style={[styles.total, { color: theme.textColor }]}>{t('total')}: ${calculateTotal(item)}</Text>

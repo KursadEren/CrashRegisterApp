@@ -2,7 +2,6 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Alert, useWindowDimensions, FlatList, Linking, PermissionsAndroid, Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNFS from 'react-native-fs';
-import FileViewer from 'react-native-file-viewer';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import { ThemeContext } from '../Context/ThemeContext';
 import MyButton from '../Component/MyButton';
@@ -36,14 +35,21 @@ export default function Reports() {
   const requestExternalStoragePermission = async () => {
     try {
       if (Platform.OS === 'android') {
-        const granted = await PermissionsAndroid.requestMultiple([
-          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
-          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
-        ]);
-        return (
-          granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
-          granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
-        );
+        const readGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE);
+        const writeGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE);
+  
+        if (!readGranted || !writeGranted) {
+          const granted = await PermissionsAndroid.requestMultiple([
+            PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+            PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          ]);
+          return (
+            granted['android.permission.READ_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED &&
+            granted['android.permission.WRITE_EXTERNAL_STORAGE'] === PermissionsAndroid.RESULTS.GRANTED
+          );
+        }
+  
+        return true;
       } else {
         return true;
       }
@@ -52,7 +58,7 @@ export default function Reports() {
       return false;
     }
   };
-
+  
   const openPDFFile = async (filePath) => {
     try {
       const hasPermission = await requestExternalStoragePermission();
@@ -60,9 +66,13 @@ export default function Reports() {
         Alert.alert(t('permission_denied'), t('storage_permission_required'));
         return;
       }
-
+  
       if (filePath && await RNFS.exists(filePath)) {
-        await FileViewer.open(filePath);
+        if (Platform.OS === 'android') {
+          Linking.openURL(`intent://?d=${filePath}#Intent;scheme=content;package=com.adobe.reader;end`);
+        } else {
+          Linking.openURL(filePath);
+        }
       } else {
         Alert.alert(t('error'), t('pdf_not_found'));
       }
@@ -87,6 +97,7 @@ export default function Reports() {
       }
     }
   };
+  
 
   const renderItem = ({ item }) => {
     return (
@@ -102,6 +113,7 @@ export default function Reports() {
           data={item.items}
           showSearchInput={false}
           isProductList={false}
+          Touch="false"
           renderItem={({ item }) => (
             <View style={styles.itemContainer}>
               <Text style={[styles.itemName, { color: theme.textColor }]}>{item.name}</Text>

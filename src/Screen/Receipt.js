@@ -5,6 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import MyTextInput from '../Component/MyTextınput';
 
 const Receipt = ({ route }) => {
   const { data2List, bagCount, bagCost } = route.params;
@@ -202,25 +203,20 @@ const Receipt = ({ route }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={[styles.modalContainer, { paddingVertical: height * 0.05 }]}>
+        <View style={[styles.modalContainer, { paddingVertical: height * 0.05,backgroundColor:theme.backgroundColor, }]}>
           <ScrollView contentContainerStyle={[styles.scrollViewContent, { paddingVertical: height * 0.1 }]}>
             <View style={[styles.modalContent, { height: isLandscape ? '100%' : '100%', width: isLandscape ? '100%' : '100%', backgroundColor: theme.modalBackground }]}>
               <Text style={[styles.modalTitle, { color: theme.textColor }]}>{t('select_payment_method')}</Text>
 
-              <TextInput
-                style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-                placeholder={t('seller_name')}
-                value={sellerName}
-                onChangeText={setSellerName}
-                placeholderTextColor={theme.placeholderTextColor}
-              />
+             
 
-              <TextInput
+              <MyTextInput
                 style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                 placeholder={t('buyer_name')}
+                label1=""
                 value={buyerName}
                 onChangeText={setBuyerName}
-                placeholderTextColor={theme.placeholderTextColor}
+                placeholderTextColor={theme.textColor}
               />
 
               <TouchableOpacity
@@ -247,20 +243,22 @@ const Receipt = ({ route }) => {
               {paymentType !== '' && (
                 <View>
                   {paymentType === 'cash' && (
-                    <TextInput
+                    <MyTextInput
                       style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                       placeholder={t('cash_amount')}
                       keyboardType="numeric"
+                      label1={""}
                       value={cashAmount}
                       onChangeText={setCashAmount}
                       placeholderTextColor={theme.placeholderTextColor}
                     />
                   )}
                   {paymentType === 'card' && (
-                    <TextInput
+                    <MyTextInput
                       style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                       placeholder={t('card_amount')}
                       keyboardType="numeric"
+                      label1={""}
                       value={cardAmount}
                       onChangeText={setCardAmount}
                       placeholderTextColor={theme.placeholderTextColor}
@@ -268,16 +266,18 @@ const Receipt = ({ route }) => {
                   )}
                   {paymentType === 'both' && (
                     <View>
-                      <TextInput
+                      <MyTextInput
                         style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                         placeholder={t('cash_amount')}
                         keyboardType="numeric"
+                        label1={""}
                         value={cashAmount}
                         onChangeText={setCashAmount}
                         placeholderTextColor={theme.placeholderTextColor}
                       />
-                      <TextInput
+                      <MyTextInput
                         style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
+                        label1={""}
                         placeholder={t('card_amount')}
                         keyboardType="numeric"
                         value={cardAmount}
@@ -377,6 +377,7 @@ const styles = StyleSheet.create({
   },
   modalContainer: {
     flex: 1,
+    
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
@@ -387,6 +388,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modalContent: {
+    
     padding: 30,
     borderRadius: 10,
     alignItems: "center",
@@ -407,9 +409,11 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   input: {
-    width: "100%",
+   flex:1,
+     justifyContent:"center",
+     alignItems:"center",
     padding: 15,
-    borderWidth: 1,
+    borderWidth: 3,
     marginTop: 15,
     borderRadius: 5,
     fontSize: 18,

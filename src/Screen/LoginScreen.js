@@ -20,15 +20,39 @@ function LoginScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const isLandscape = useLandscape();
   const translateX = useRef(new Animated.Value(0)).current;
-
+  const clearUserAndBiometricData = async () => {
+    try {
+      // Tüm anahtarları getir
+      const keys = await AsyncStorage.getAllKeys();
+  
+      // Kullanıcı ve biyometrik verileri içeren anahtarları filtrele
+      const userAndBiometricKeys = keys.filter(key => key.startsWith('@user_') || key.startsWith('@biometric_user_'));
+  
+      // Bu anahtarları sil
+      await AsyncStorage.multiRemove(userAndBiometricKeys);
+  
+      console.log('User and biometric data cleared successfully!');
+    } catch (error) {
+      console.error('Failed to clear user and biometric data:', error);
+    }
+  };
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
+      clearUserAndBiometricData()
       return true;
     });
 
     return () => backHandler.remove();
   }, [navigation]);
+  useEffect(() => {
+   
+      clearUserAndBiometricData()
+     
+
+    
+  }, []);
+
 
   const handleLogin = async () => {
     try {
@@ -133,7 +157,7 @@ function LoginScreen({ navigation }) {
         <MyTextInput onChangeText={setPassword} label1={t('password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text={t('login')} />
+        <MyButton visible={true} iconname="login" OnChangeButton={() => (navigation.navigate("MyTabs"))} text={t('login')} />
       </View>
       <View style={styles.biometricContainer}>
         <Text style={[styles.text, { color: theme.textColor }]}>{t('biometric_authentication')}</Text>
