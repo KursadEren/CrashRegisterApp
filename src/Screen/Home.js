@@ -212,7 +212,7 @@ const Home = ({ navigation }) => {
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('favorites')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate("Product")}>
-            <Text>{t('edit')}</Text>
+            <Text style={{color:theme.textColor}}>{t('edit')}</Text>
           </TouchableOpacity>
         </View>
         <MyFlatlist
@@ -239,7 +239,7 @@ const Home = ({ navigation }) => {
             horizontal={true}
             keyExtractor={(item, index) => index.toString()}
             renderItem={({ item: purchase }) => (
-              <View style={[styles.purchaseItem, { backgroundColor: theme.cardBackground }]}>
+              <View style={[styles.purchaseItem]}>
                 <Text style={[styles.purchaseText, { color: theme.textColor }]}>
                   {t('date')}: {purchase.date}
                 </Text>
@@ -387,27 +387,28 @@ const styles = StyleSheet.create({
   },
   recentPurchasesSection: {
     marginBottom: 20,
+  
   },
   purchaseItem: {
-    marginHorizontal: 20,
-    backgroundColor: '#fff',
+    marginHorizontal: 20, 
     padding: 10,
     borderRadius: 5,
     alignItems: 'center',
-    width: 200, // Uygun genişlik
+    width: 200, 
   },
   purchaseText: {
-    fontSize: 16,
+    fontSize: 14, 
     fontWeight: 'bold',
     marginBottom: 5,
+    textAlign: 'center', 
   },
   itemContainerHorizontal: {
-    backgroundColor: '#fff',
+    
     padding: 10,
     borderRadius: 5,
     marginRight: 10,
     alignItems: 'center',
-    width: 150, // uygun genişlik
+    width: 150, 
   },
   itemImage: {
     width: 50,

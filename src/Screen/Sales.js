@@ -45,7 +45,7 @@ const Sales = ({ navigation }) => {
     });
 
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   useEffect(() => {
     setIsItemListEmpty(data2List.length === 0);
@@ -65,17 +65,23 @@ const Sales = ({ navigation }) => {
   };
 
   const handleQuantityUpdate = () => {
-    if (selectedProduct) {
-      const updatedData2List = [...data2List];
-      const selectedItemIndex = updatedData2List.findIndex((item) => item.objectID === selectedProduct.objectID);
-      if (selectedItemIndex !== -1) {
-        updatedData2List[selectedItemIndex].count = parseInt(quantityInput, 10) || 0;
-      } else {
-        updatedData2List.push({ ...selectedProduct, count: parseInt(quantityInput, 10) || 0 });
+    const quantity = parseInt(quantityInput, 10) || 0;
+    if (quantity === 0 || !quantityInput) {
+      // Miktar 0 veya boş ise, ürünü listeden kaldır.
+      handleItemRemove(selectedProduct);
+    } else {
+      if (selectedProduct) {
+        const updatedData2List = [...data2List];
+        const selectedItemIndex = updatedData2List.findIndex((item) => item.objectID === selectedProduct.objectID);
+        if (selectedItemIndex !== -1) {
+          updatedData2List[selectedItemIndex].count = quantity;
+        } else {
+          updatedData2List.push({ ...selectedProduct, count: quantity });
+        }
+        setData2List(updatedData2List);
       }
-      setData2List(updatedData2List);
-      setQuantityInput('');
     }
+    setQuantityInput('');
     setQuantityModalVisible(false);
   };
 

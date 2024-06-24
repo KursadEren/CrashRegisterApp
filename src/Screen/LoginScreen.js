@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { View, StyleSheet, Image, BackHandler, Alert, Animated, PanResponder, Dimensions, Text, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
@@ -8,7 +8,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import { useLandscape } from '../Context/LandSpaceProvider';
 import { ThemeContext } from '../Context/ThemeContext';
-import { API_URL, API_URL2 } from '../GroceryData/Constant';
+import { API_URL2 } from '../GroceryData/Constant';
 import { useTranslation } from 'react-i18next';
 
 const { width } = Dimensions.get('window');
@@ -32,25 +32,17 @@ function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const storedPassword = await AsyncStorage.getItem('@user_' + username);
-      if (storedPassword === password) {
-        await AsyncStorage.setItem('@current_user', username); // Şu anki kullanıcıyı kaydet
-        navigation.navigate("MyTabs");
-        return;
+      const userData = await AsyncStorage.getItem('@biometric_user_' + username);
+      if (userData) {
+        const { password: storedPassword } = JSON.parse(userData);
+        if (storedPassword === password) {
+          await AsyncStorage.setItem('@current_user', username);
+          navigation.navigate("MyTabs");
+          return;
+        }
       }
 
-      const response = await axios.post(`${API_URL2}/users/users`, {
-        username,
-        password
-      });
-
-      if (response.status === 200 && response.data) {
-        await AsyncStorage.setItem('@user_' + username, password);
-        await AsyncStorage.setItem('@current_user', username); // Şu anki kullanıcıyı kaydet
-        navigation.navigate("MyTabs");
-      } else {
-        Alert.alert(t('error'), t('invalid_username_password'));
-      }
+      Alert.alert(t('error'), t('invalid_username_password'));
     } catch (e) {
       console.log('Error:', e);
       Alert.alert(t('error'), t('failed_login'));
@@ -71,7 +63,7 @@ function LoginScreen({ navigation }) {
         for (let key of biometricKeys) {
           const user = JSON.parse(await AsyncStorage.getItem(key));
           if (user) {
-            await AsyncStorage.setItem('@current_user', user.username); // Şu anki kullanıcıyı kaydet
+            await AsyncStorage.setItem('@current_user', user.username);
             Alert.alert(t('success'), t('biometric_auth_success'));
             navigation.navigate('MyTabs');
             return;
@@ -85,10 +77,6 @@ function LoginScreen({ navigation }) {
     } catch (error) {
       Alert.alert(t('error'), `${t('biometric_auth_failed')}: ${error.message}`);
     }
-  };
-
-  const changeLanguage = async (lang) => {
-    await i18n.changeLanguage(lang);
   };
 
   const panResponder = useRef(

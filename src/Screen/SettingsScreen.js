@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Alert, PermissionsAndroid, Platform } from 'react-native';
 import MyButton from '../Component/MyButton';
 import { ThemeContext } from '../Context/ThemeContext';
@@ -31,7 +31,7 @@ const SettingsScreen = () => {
         ) {
           console.log('Permissions granted');
         } else {
-          Alert.alert('İzinler gerekli', 'Bluetooth ve konum izinlerini vermeniz gerekmektedir.');
+          Alert.alert(t('permissions_needed'), t('permissions_message'));
         }
       } catch (err) {
         console.warn(err);
@@ -56,10 +56,10 @@ const SettingsScreen = () => {
       if (bondedDevices.length > 0) {
         connectToDevice(bondedDevices[0]);
       } else {
-        Alert.alert('Yazıcı Testi', 'Herhangi bir yazıcı bulunamadı.');
+        Alert.alert(t('printer_test'), t('no_printer_found'));
       }
     } catch (error) {
-      Alert.alert('Yazıcı Testi', 'Test sırasında bir hata oluştu.');
+      Alert.alert(t('printer_test'), t('printer_test_error'));
       console.error(error);
     }
   };
@@ -69,31 +69,31 @@ const SettingsScreen = () => {
       const connected = await RNBluetoothClassic.connectToDevice(device.address);
       if (connected) {
         await sendTestPrint(device);
-        Alert.alert('Yazıcı Testi', 'Test başarılı!');
+        Alert.alert(t('printer_test'), t('test_successful'));
         await RNBluetoothClassic.disconnectFromDevice(device.address);
       } else {
-        Alert.alert('Yazıcı Testi', 'Yazıcıya bağlanılamadı.');
+        Alert.alert(t('printer_test'), t('printer_not_connected'));
       }
     } catch (error) {
-      Alert.alert('Yazıcı Testi', 'Test başarısız oldu.');
+      Alert.alert(t('printer_test'), t('test_failed'));
       console.error(error);
     }
   };
 
   const sendTestPrint = async (device) => {
     try {
-      const message = 'Yazıcı Testi\nBaşarılı!\n\n';
+      const message = `${t('printer_test')}\n${t('test_successful')}\n\n`;
       await RNBluetoothClassic.writeToDevice(device.address, message);
       return true;
     } catch (error) {
-      console.error('Yazdırma hatası:', error);
+      console.error('Print error:', error);
       return false;
     }
   };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-      <Text style={[styles.header, { color: theme.textColor }]}>SettingsScreen</Text>
+      <Text style={[styles.header, { color: theme.textColor }]}>{t('settings')}</Text>
       <View style={styles.buttonContainer}>
         <View style={styles.buttonWrapper}>
           <MyButton visible={true} iconname="translate" OnChangeButton={handleLanguageChange} text={t('change_language')} />
@@ -102,7 +102,7 @@ const SettingsScreen = () => {
           <MyButton visible={true} iconname="theme-light-dark" OnChangeButton={toggleTheme} text={t('change_theme')} />
         </View>
         <View style={styles.buttonWrapper}>
-          <MyButton visible={true} OnChangeButton={handlePrinterTest} text="Yazıcı Testi" />
+          <MyButton visible={true} OnChangeButton={handlePrinterTest} text={t('printer_test')} />
         </View>
       </View>
     </View>
