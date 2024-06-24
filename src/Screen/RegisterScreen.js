@@ -5,7 +5,7 @@ import MyButton from '../Component/MyButton';
 import { useLandscape } from '../Context/LandSpaceProvider';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import { API_URL, API_URL2 } from '../GroceryData/Constant';
+import { API_URL2 } from '../GroceryData/Constant';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import { useTranslation } from 'react-i18next';
 
@@ -26,36 +26,32 @@ const RegisterScreen = ({ navigation }) => {
     });
 
     return () => backHandler.remove();
-  }, []);
+  }, [navigation]);
 
   const isValidPassword = (password) => {
     const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
     return regex.test(password);
   };
 
-  const handleBiometricEnrollment = async () => {
+  const handleBiometricEnrollment = async (user) => {
     const rnBiometrics = new ReactNativeBiometrics();
 
     try {
       const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+      console.log(`Biometric sensor available: ${available}, Biometry type: ${biometryType}`);
 
       if (!available) {
         Alert.alert(t('error'), t('biometric_not_available'));
         return;
       }
 
-      if (!biometryType) {
-        Alert.alert(t('error'), t('no_biometrics_enrolled'));
-        return;
-      }
-
-      const resultObject = await rnBiometrics.simplePrompt({ promptMessage: t('confirm_fingerprint') });
-      const { success } = resultObject;
+      const resultObject = await rnBiometrics.createKeys();
+      const { success, publicKey } = resultObject;
+      console.log(`Biometric enrollment success: ${success}, Public Key: ${publicKey}`);
 
       if (success) {
-        await AsyncStorage.setItem('@biometric_user', username);
-        await AsyncStorage.setItem('@biometric_password', password);
-
+        user.publicKey = publicKey;
+        await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
         Alert.alert(t('success'), t('biometric_auth_setup_success'));
         navigation.navigate("LoginScreen");
       } else {
@@ -94,13 +90,12 @@ const RegisterScreen = ({ navigation }) => {
         return;
       }
 
-      await AsyncStorage.setItem('@biometric_user', username);
-      await AsyncStorage.setItem('@biometric_password', password);
-
       Alert.alert(t('success'), t('user_registered_successfully'));
 
+      const user = { username, password };
+      
       // Biometric enrollment
-      handleBiometricEnrollment();
+      await handleBiometricEnrollment(user);
     } catch (e) {
       console.log('Kayıt hatası:', e);
       Alert.alert(t('error'), t('failed_to_register_user'));
@@ -109,7 +104,7 @@ const RegisterScreen = ({ navigation }) => {
 
   const panResponder = useRef(
     PanResponder.create({
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
+      onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: Animated.event(
         [
           null,
@@ -164,7 +159,7 @@ const RegisterScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa', // updated background color
+    backgroundColor: '#f8f9fa',
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,

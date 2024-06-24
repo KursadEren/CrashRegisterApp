@@ -31,13 +31,12 @@ function MyTextInput({ label1, icon, onChangeText, value }) {
         secureTextEntry={isSecureTextEntry}
         onChangeText={handleTextChange}
         right={icon ? <TextInput.Icon icon={icon} /> : null}
-        style={[styles.input, { backgroundColor: theme.secondaryColor }]}
+        style={[styles.input, { backgroundColor: theme.secondaryColor,textColor:theme.textColor }]}
         theme={{
           colors: {
             text: theme.textColor,
-            placeholder: theme.textColor,
-            primary: theme.primaryColor,
-            background: theme.secondaryColor,
+            primary: theme.placeholderTextColor,
+            background: theme.itemBackground,
           },
         }}
       />
@@ -51,6 +50,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderRadius: 5,
+   
   },
 });
 
