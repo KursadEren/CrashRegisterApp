@@ -33,7 +33,7 @@ const RegisterScreen = ({ navigation }) => {
     return regex.test(password);
   };
 
-  const handleBiometricEnrollment = async (user) => {
+  const handleBiometricEnrollment = async () => {
     const rnBiometrics = new ReactNativeBiometrics();
 
     try {
@@ -42,24 +42,15 @@ const RegisterScreen = ({ navigation }) => {
 
       if (!available) {
         Alert.alert(t('error'), t('biometric_not_available'));
-        return;
+        return false;
       }
 
-      const resultObject = await rnBiometrics.createKeys();
-      const { success, publicKey } = resultObject;
-      console.log(`Biometric enrollment success: ${success}, Public Key: ${publicKey}`);
-
-      if (success) {
-        user.publicKey = publicKey;
-        await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
-        Alert.alert(t('success'), t('biometric_auth_setup_success'));
-        navigation.navigate("LoginScreen");
-      } else {
-        Alert.alert(t('error'), t('biometric_auth_failed'));
-      }
+      const { success } = await rnBiometrics.simplePrompt({ promptMessage: t('confirm_biometric') });
+      return success;
     } catch (error) {
       console.error('Biometric authentication failed:', error);
       Alert.alert(t('error'), `${t('biometric_auth_failed')}: ${error.message}`);
+      return false;
     }
   };
 
@@ -79,23 +70,23 @@ const RegisterScreen = ({ navigation }) => {
       return;
     }
 
-    try {
-      const response = await axios.post(`${API_URL2}/users/users`, {
-        username,
-        password
-      });
+    const biometricSuccess = await handleBiometricEnrollment();
+    if (!biometricSuccess) {
+      return;
+    }
 
+    const user = { username, password };
+
+    try {
+      const response = await axios.post(`${API_URL2}/users/users`, user);
       if (response.status !== 201) {
         Alert.alert(t('error'), `${t('user_registration_failed')} ${response.status}`);
         return;
       }
 
+      await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
       Alert.alert(t('success'), t('user_registered_successfully'));
-
-      const user = { username, password };
-      
-      // Biometric enrollment
-      await handleBiometricEnrollment(user);
+      navigation.navigate("LoginScreen");
     } catch (e) {
       console.log('Kayıt hatası:', e);
       Alert.alert(t('error'), t('failed_to_register_user'));

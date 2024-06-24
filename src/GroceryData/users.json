@@ -1,134 +1,62 @@
 {
   "users": [
     {
-      "id": "1",
-      "username": "user1",
-      "password": "Password123!"
-    },
-    {
-      "id": "a86c",
-      "username": "Kursadd",
-      "password": "Kursad2512!"
-    },
-    {
       "id": "e183",
       "username": "Maden",
-      "password": "Maden2512!"
+      "password": "Maden2512!",
+      "publicKey": "public_key_generated_by_biometrics"
     },
     {
-      "id": "e5a3",
+      "id": "d572",
       "username": "Mansur",
-      "password": "Mansur2512!"
+      "password": "Mansur2512!",
+      "publicKey": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2tg82llGCrZjwUFcLcahBF6lhH3SyvYLbTTBJ34aaXkX0JynqLq3JiqUV5tKaYDdRcLTdL6aW57AtIfxlogXpXSSy4Xibm9T4wcriC4zssmwBYwhzMprN6ZkzfqICBExDJhZ1pI6vbBS+uU4dSQwHe2NU/s1xH0FF6qEbQ3f86XOb2ZWqsPjpAPuaV+pNXNKryxrUcjwRV/FkktOKcuebRCZNrAsMNAX/NgmeGacIiLPrDK5XCuZJBhRxeZ8VSbjUwEe8rD/QcCxtloawVPuQgaPC3WQ6en9pKv55HDTSkBvwMD3gnkmJQn2Jbci9WHFcx6w7XHeAECYDgPuLsTDOQIDAQAB"
     },
     {
-      "id": "a16c",
-      "username": "Mansur",
-      "password": "Mansur2512!"
+      "id": "e34e",
+      "username": "Fikret",
+      "password": "Fikret2512!"
     },
     {
-      "id": "b15c",
-      "username": "Mansur",
-      "password": "Mansur2512!"
+      "id": "b4bb",
+      "username": "Fikret",
+      "password": "Fikret2512!",
+      "publicKey": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7GdlgpLIaWF9NCYYef3XRhF+0DDlCqTrNs9VvNGwhZSTBDlYumIimcmMuxjdloN478qkN33gRh5n07VmCWubRPbYQOMW1RyabUEXBQJhi4IyA+v/bTryAqFvXyNRmj+6ojmnwf/SZszbZl6G99nGJTTGfjuFRE9wW8s5XLwmv1VPeXsxCEY81ooneRcFGFAsmGq6v8MGophlSTcY46kBLPnc/+yLiqnoVCz09KVjEYPnOMvkERQwGQxDJmzckDjK77isJnjn6btOdt+b+nGqyJ/WT6943qcmlV7Hrow+zCKE9m0AmSpvEceofE/22bY4lfyMV6ZctOgbFvm0JCiZzwIDAQAB"
     },
     {
-      "id": "10d4",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "b9c9",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "970d",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "a35d",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "b9ad",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "6a42",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "b2f8",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "71a3",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "709a",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "b685",
+      "id": "720a",
       "username": "Maden",
       "password": "Maden2512!"
     },
     {
-      "id": "3b65",
+      "id": "b901",
       "username": "Maden",
       "password": "Maden2512!"
     },
     {
-      "id": "e124",
+      "id": "b3d9",
+      "username": "Zikriye",
+      "password": "Zikriye2512!"
+    },
+    {
+      "id": "c9bb",
+      "username": "Zikriye",
+      "password": "Zikriye2512!"
+    },
+    {
+      "id": "4b51",
       "username": "Maden",
       "password": "Maden2512!"
     },
     {
-      "id": "fa23",
-      "username": "Maden",
-      "password": "Maden2512!"
+      "id": "063e",
+      "username": "Madem",
+      "password": "Madem2512!"
     },
     {
-      "id": "cf0a",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "3f14",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "b3a2",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "aa8f",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "5744",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "db6a",
-      "username": "Kutsi",
-      "password": "Kutsi2512!"
-    },
-    {
-      "id": "52e6",
-      "username": "Maden",
-      "password": "Maden2512!"
+      "id": "8365",
+      "username": "Turşu",
+      "password": "Tursu2512!"
     }
   ]
 }

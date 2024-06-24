@@ -56,7 +56,7 @@ const ReceiptPrint = () => {
     try {
       const currentDate = new Date();
       const reportNumber = "12345";
-      const fileName = `Receipt_${reportNumber}_${currentDate.getTime()}.pdf`;
+      const fileName = `Receipt_${reportNumber}_${currentDate.getTime()}`;
       const destPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
       const htmlContent = `
