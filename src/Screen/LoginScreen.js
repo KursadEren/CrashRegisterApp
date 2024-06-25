@@ -1,16 +1,17 @@
 import React, { useState, useContext, useEffect, useRef } from 'react';
-import { View, StyleSheet, Image, BackHandler, Alert, Animated, PanResponder, Dimensions, Text, TouchableOpacity, Modal } from 'react-native';
+import { View, StyleSheet, Platform, Image, BackHandler, Alert, Animated, PanResponder, Dimensions, Text, TouchableOpacity, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import axios from 'axios';
 import MyTextInput from '../Component/MyTextınput';
 import MyButton from '../Component/MyButton';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import ReactNativeBiometrics from 'react-native-biometrics';
 import { useLandscape } from '../Context/LandSpaceProvider';
 import { ThemeContext } from '../Context/ThemeContext';
-import { API_URL2 } from '../GroceryData/Constant';
 import { useTranslation } from 'react-i18next';
 import { useEducation } from '../Context/EducationContext';
+import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
+
+NfcManager.start();
 
 const { width } = Dimensions.get('window');
 
@@ -22,7 +23,14 @@ function LoginScreen({ navigation }) {
   const [password, setPassword] = useState("");
   const isLandscape = useLandscape();
   const translateX = useRef(new Animated.Value(0)).current;
-  
+
+  useEffect(() => {
+    NfcManager.start();
+    return () => {
+      NfcManager.setEventListener(NfcTech.Ndef, null);
+    };
+  }, []);
+
   const clearUserAndBiometricData = async () => {
     try {
       const keys = await AsyncStorage.getAllKeys();
@@ -97,6 +105,32 @@ function LoginScreen({ navigation }) {
     }
   };
 
+  const readNfcTag = async () => {
+    try {
+      await NfcManager.requestTechnology(NfcTech.Ndef);
+      const tag = await NfcManager.getTag();
+      if (tag && tag.ndefMessage) {
+        const payload = tag.ndefMessage[0].payload;
+        const text = Ndef.text.decodePayload(payload);
+        const data = text.slice(3); // Skip language code
+        const [nfcUsername, nfcPassword] = data.split(':');
+        if (nfcUsername && nfcPassword) {
+          console.log(nfcPassword);
+          console.log(nfcUsername);
+          setUsername(nfcUsername);
+          setPassword(nfcPassword);
+        } else {
+          Alert.alert(t('error'), t('invalid_nfc_data'));
+        }
+      }
+    } catch (ex) {
+      console.warn('Oops!', ex);
+      Alert.alert(t('error'), t('nfc_read_error'));
+    } finally {
+      NfcManager.cancelTechnologyRequest();
+    }
+  };
+
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
@@ -145,13 +179,13 @@ function LoginScreen({ navigation }) {
         <Image source={require('../../Image/logo2.png')} style={styles.logo} />
       </Animated.View>
       <View style={styles.textInputContainer}>
-        <MyTextInput onChangeText={setUsername} label1={t('username')} />
+        <MyTextInput onChangeText={setUsername} value={username} label1={t('username')} />
       </View>
       <View style={styles.textInputContainer}>
-        <MyTextInput onChangeText={setPassword} label1={t('password')} secureTextEntry />
+        <MyTextInput onChangeText={setPassword} value={password} label1={t('password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="login" OnChangeButton={()=>(navigation.navigate("MyTabs"))} text={t('login')} />
+        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text={t('login')} />
       </View>
       <View style={styles.biometricContainer}>
         <Text style={[styles.text, { color: theme.textColor }]}>{t('biometric_authentication')}</Text>
@@ -159,7 +193,9 @@ function LoginScreen({ navigation }) {
           <Ionicons name="finger-print" size={50} color="#fff" />
         </TouchableOpacity>
       </View>
-
+      <TouchableOpacity style={styles.nfcButton} onPress={readNfcTag}>
+        <Text style={styles.nfcButtonText}>{t('scan_nfc')}</Text>
+      </TouchableOpacity>
       {educationStep === 0 && (
         <Modal transparent={true} animationType="fade" visible={true}>
           <View style={styles.overlay}>
@@ -221,20 +257,15 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 50,
   },
-  languageContainer: {
-    flexDirection: 'row',
+  nfcButton: {
     marginTop: 20,
-  },
-  languageButton: {
     padding: 10,
-    marginHorizontal: 5,
+    borderRadius: 5,
+    backgroundColor: '#4CAF50',
   },
-  languageButtonBorder: {
-    borderWidth: 1,
-  },
-  languageText: {
+  nfcButtonText: {
+    color: '#fff',
     fontSize: 16,
-    color: 'blue',
   },
   overlay: {
     position: 'absolute',

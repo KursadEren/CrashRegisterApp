@@ -1,18 +1,27 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, Alert, PermissionsAndroid, Platform } from 'react-native';
+import { View, Text, StyleSheet, Alert, PermissionsAndroid, Platform, Modal } from 'react-native';
 import MyButton from '../Component/MyButton';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { useServiceStatus } from '../Context/ServiceStatusContext';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNBluetoothClassic from 'react-native-bluetooth-classic';
 
 const SettingsScreen = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, i18n } = useTranslation();
+  const { serviceStatus, setServiceStatus } = useServiceStatus();
   const [devices, setDevices] = useState([]);
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [isProcessing, setIsProcessing] = useState(false); // İşleme durumunu kontrol etmek için
 
   useEffect(() => {
     requestPermissions();
-  }, []);
+    if (serviceStatus) {
+      sendUnsentPaymentsToCentral();
+    }
+  }, [serviceStatus]);
 
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
@@ -36,6 +45,57 @@ const SettingsScreen = () => {
       } catch (err) {
         console.warn(err);
       }
+    }
+  };
+
+  const toggleServiceStatus = () => {
+    setServiceStatus(prevStatus => !prevStatus);
+    if (!serviceStatus) {
+      setToastMessage(t('service_opened'));
+    } else {
+      setToastMessage(t('service_closed'));
+    }
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 2000);
+    if (!serviceStatus) {
+      sendUnsentPaymentsToCentral();
+    }
+  };
+
+  const sendUnsentPaymentsToCentral = async () => {
+    if (isProcessing) {
+      return; // Eğer işlem halindeyse tekrar çalıştırma
+    }
+    setIsProcessing(true); // İşlem başladığında durumu güncelle
+
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
+      const paymentItems = await AsyncStorage.multiGet(paymentKeys);
+      const unsentPayments = paymentItems
+        .map(item => [item[0], JSON.parse(item[1])])
+        .filter(([key, payment]) => !payment.sentToCentral);
+
+      const updatePromises = unsentPayments.map(async ([key, payment]) => {
+        const updatedPayment = {
+          ...payment,
+          sentToCentral: true,
+          centralSendTime: new Date().toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul' }),
+        };
+
+        await AsyncStorage.setItem(key, JSON.stringify(updatedPayment));
+      });
+
+      await Promise.all(updatePromises);
+
+      setToastMessage(t('all_payments_sent'));
+      setToastVisible(true);
+      setTimeout(() => setToastVisible(false), 2000);
+      console.log(t('all_payments_sent'));
+    } catch (e) {
+      console.log('Ödemeleri gönderme hatası:', e);
+    } finally {
+      setIsProcessing(false); // İşlem tamamlandığında durumu sıfırla
     }
   };
 
@@ -102,9 +162,22 @@ const SettingsScreen = () => {
           <MyButton visible={true} iconname="theme-light-dark" OnChangeButton={toggleTheme} text={t('change_theme')} />
         </View>
         <View style={styles.buttonWrapper}>
+          <MyButton visible={true} OnChangeButton={toggleServiceStatus} text={serviceStatus ? t('close_service') : t('open_service')} />
+        </View>
+        <View style={styles.buttonWrapper}>
           <MyButton visible={true} OnChangeButton={handlePrinterTest} text={t('printer_test')} />
         </View>
       </View>
+      <Modal
+        visible={toastVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setToastVisible(false)}
+      >
+        <View style={styles.toastContainer}>
+          <Text style={styles.toastText}>{toastMessage}</Text>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -127,6 +200,18 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     marginBottom: 10,
     width: '100%',
+  },
+  toastContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  toastText: {
+    backgroundColor: '#333',
+    color: '#fff',
+    padding: 10,
+    borderRadius: 10,
   },
 });
 
