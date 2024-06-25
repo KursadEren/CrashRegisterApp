@@ -31,31 +31,18 @@ function LoginScreen({ navigation }) {
     };
   }, []);
 
-  const clearUserAndBiometricData = async () => {
-    try {
-      const keys = await AsyncStorage.getAllKeys();
-      const userAndBiometricKeys = keys.filter(key => key.startsWith('@user_') || key.startsWith('@biometric_user_'));
-      await AsyncStorage.multiRemove(userAndBiometricKeys);
-      console.log('User and biometric data cleared successfully!');
-    } catch (error) {
-      console.error('Failed to clear user and biometric data:', error);
-    }
-  };
-
+  
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
-      clearUserAndBiometricData();
+ 
       return true;
     });
 
     return () => backHandler.remove();
   }, [navigation]);
 
-  useEffect(() => {
-    clearUserAndBiometricData();
-  }, []);
-
+  
   const handleLogin = async () => {
     try {
       const userData = await AsyncStorage.getItem('@biometric_user_' + username);

@@ -1,13 +1,50 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions } from 'react-native';
+import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions, Alert, TouchableOpacity } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
 import MyButton from '../Component/MyButton';
 import MyTextInput from '../Component/MyTextınput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-
+import { CameraHighlights, useBarcodeScanner } from "@mgcrea/vision-camera-barcode-scanner";
+import { useCameraDevices, Camera } from "react-native-vision-camera";
+import BarcodeCamera from '../Component/BarcodeCamera';
 const DATA2 = [];
+
+const CameraComponent = ({ onBarcodeRead, onClose }) => {
+  const { props: cameraProps, highlights } = useBarcodeScanner({
+    fps: 5,
+    barcodeTypes: ["qr", "ean-13"],
+    onBarcodeScanned: (barcodes) => {
+      "worklet";
+      if (barcodes.length > 0) {
+        onBarcodeRead(barcodes[0].value);
+      }
+    },
+  });
+
+  const devices = useCameraDevices();
+  const device = devices.back;
+
+  if (!device) {
+    return <Text>Loading...</Text>;
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      <Camera
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive
+        {...cameraProps}
+      />
+      <CameraHighlights highlights={highlights} color="peachpuff" />
+      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+        <Text style={styles.closeButtonText}>Kapat</Text>
+      </TouchableOpacity>
+    </View>
+  );
+};
 
 const Sales = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
@@ -21,6 +58,7 @@ const Sales = ({ navigation }) => {
   const [bagModalVisible, setBagModalVisible] = useState(false);
   const [bagQuantity, setBagQuantity] = useState('');
   const [bagCost, setBagCost] = useState(0);
+  const [barcodeModalVisible, setBarcodeModalVisible] = useState(false);
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -33,7 +71,7 @@ const Sales = ({ navigation }) => {
           setData1List(JSON.parse(storedData));
         }
       } catch (error) {
-        console.error('Error fetching data from AsyncStorage:', error);
+        console.error("AsyncStorage'den veri alırken hata:", error);
       }
     };
 
@@ -67,7 +105,6 @@ const Sales = ({ navigation }) => {
   const handleQuantityUpdate = () => {
     const quantity = parseInt(quantityInput, 10) || 0;
     if (quantity === 0 || !quantityInput) {
-      // Miktar 0 veya boş ise, ürünü listeden kaldır.
       handleItemRemove(selectedProduct);
     } else {
       if (selectedProduct) {
@@ -110,6 +147,17 @@ const Sales = ({ navigation }) => {
     setData2List(updatedData2List);
     setBagModalVisible(false);
     navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
+  };
+
+  const handleBarcodeRead = (barcodeData) => {
+    setBarcodeModalVisible(false);
+    const product = data1List.find((item) => item.barcode === barcodeData);
+    if (product) {
+      setSelectedProduct({ ...product, quantityInput: '1' });
+      setQuantityModalVisible(true);
+    } else {
+      Alert.alert(t('error'), t('product_not_found'));
+    }
   };
 
   const totalCost = data2List.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
@@ -186,12 +234,25 @@ const Sales = ({ navigation }) => {
         </View>
       </Modal>
 
+      <Modal
+        visible={barcodeModalVisible}
+        animationType="slide"
+        transparent={true}
+      >
+        <BarcodeCamera onBarcodeRead={handleBarcodeRead} onClose={() => setBarcodeModalVisible(false)} />
+      </Modal>
+
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
         <Text style={[styles.totalText, { color: theme.textColor }]}>{t('total_cost')}: ${totalCost.toFixed(2)}</Text>
         <MyButton
           visible={!isItemListEmpty}
           OnChangeButton={handleRouteReceipt}
           text={t('go_receipt')}
+        />
+        <MyButton
+          visible={true}
+          OnChangeButton={() => setBarcodeModalVisible(true)}
+          text={t('scan_barcode')}
         />
       </View>
     </ScrollView>
@@ -238,6 +299,24 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 18,
     marginBottom: 10,
+  },
+  cameraContainer: {
+    flex: 1,
+  },
+  camera: {
+    width: '100%',
+    height: '80%',
+  },
+  closeButton: {
+    position: 'absolute',
+    bottom: 20,
+    padding: 10,
+    backgroundColor: 'red',
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 
