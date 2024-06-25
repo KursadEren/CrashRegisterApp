@@ -1,12 +1,12 @@
-import React, { useContext, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator } from 'react-native';
+import React, { useContext, useState, useEffect } from 'react';
+import { View, StyleSheet, ActivityIndicator, Vibration } from 'react-native';
 import { Button } from 'react-native-paper';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useLandscape } from '../Context/LandSpaceProvider';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
-export default function MyButton({ OnChangeButton, iconname, text, visible }) {
+export default function MyButton({ OnChangeButton, iconname, text, visible, hasError }) {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -17,6 +17,12 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
     await OnChangeButton();
     setLoading(false);
   };
+
+  useEffect(() => {
+    if (hasError) {
+      Vibration.vibrate();
+    }
+  }, [hasError]);
 
   if (!visible) {
     return null;
@@ -36,7 +42,7 @@ export default function MyButton({ OnChangeButton, iconname, text, visible }) {
             size={24}
             color="#fff"
           />
-        )} // İkonu burada ekliyoruz
+        )}
       >
         {loading ? <ActivityIndicator color="#fff" /> : t(text)}
       </Button>

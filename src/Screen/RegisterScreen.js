@@ -18,6 +18,7 @@ const RegisterScreen = ({ navigation }) => {
   const isLandscape = useLandscape();
   const translateX = useRef(new Animated.Value(0)).current;
   const { t } = useTranslation();
+  const [hasError, setHasError] = useState(false);
 
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
@@ -41,13 +42,16 @@ const RegisterScreen = ({ navigation }) => {
       console.log(`Biometric sensor available: ${available}, Biometry type: ${biometryType}`);
 
       if (!available) {
+        setHasError(true);
         Alert.alert(t('error'), t('biometric_not_available'));
         return false;
       }
 
       const { success } = await rnBiometrics.simplePrompt({ promptMessage: t('confirm_biometric') });
+      setHasError(false);
       return success;
     } catch (error) {
+      setHasError(true);
       console.error('Biometric authentication failed:', error);
       Alert.alert(t('error'), `${t('biometric_auth_failed')}: ${error.message}`);
       return false;
@@ -56,22 +60,26 @@ const RegisterScreen = ({ navigation }) => {
 
   const handleRegister = async () => {
     if (!username || !password || !confirmPassword) {
+      setHasError(true);
       Alert.alert(t('error'), t('fill_all_fields'));
       return;
     }
 
     if (password !== confirmPassword) {
+      setHasError(true);
       Alert.alert(t('error'), t('passwords_do_not_match'));
       return;
     }
 
     if (!isValidPassword(password)) {
+      setHasError(true);
       Alert.alert(t('error'), t('invalid_password'));
       return;
     }
 
     const biometricSuccess = await handleBiometricEnrollment();
     if (!biometricSuccess) {
+      setHasError(true);
       return;
     }
 
@@ -80,14 +88,17 @@ const RegisterScreen = ({ navigation }) => {
     try {
       const response = await axios.post(`${API_URL2}/users/users`, user);
       if (response.status !== 201) {
+        setHasError(true);
         Alert.alert(t('error'), `${t('user_registration_failed')} ${response.status}`);
         return;
       }
 
       await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
+      setHasError(false);
       Alert.alert(t('success'), t('user_registered_successfully'));
       navigation.navigate("LoginScreen");
     } catch (e) {
+      setHasError(true);
       console.log('Kayıt hatası:', e);
       Alert.alert(t('error'), t('failed_to_register_user'));
     }
@@ -141,7 +152,7 @@ const RegisterScreen = ({ navigation }) => {
         <MyTextInput onChangeText={setConfirmPassword} label1={t('confirm_password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="account-plus" OnChangeButton={handleRegister} text={t('register')} />
+        <MyButton hasError={hasError} visible={true} iconname="account-plus" OnChangeButton={handleRegister} text={t('register')} />
       </View>
     </View>
   );
