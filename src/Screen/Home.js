@@ -212,7 +212,7 @@ const Home = ({ navigation }) => {
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('favorites')}</Text>
           <TouchableOpacity onPress={() => navigation.navigate("Product")}>
-            <Text style={{col:theme.textColor}}>{t('edit')}</Text>
+            <Text style={{color:theme.textColor}}>{t('edit')}</Text>
           </TouchableOpacity>
         </View>
         <MyFlatlist

@@ -111,5 +111,6 @@
   "reload_configuration": "Reload Configuration",
   "operations": "Operations",
   "scale_settings": "Scale Settings",
-  "change_language": "Change Language"
+  "change_language": "Change Language",
+  "scan_nfc":"Scan Nfc"
 }

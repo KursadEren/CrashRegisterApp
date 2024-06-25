@@ -103,5 +103,6 @@
   "line_chart": "Çizgi Grafiği",
   "sales_per_day": "Satış/Gün",
   "recent_purchases": "Son Alımlar",
-  "change_language": "Dili Değiştir"
+  "change_language": "Dili Değiştir",
+  "scan_nfc":"Nfc Oku"
 }
