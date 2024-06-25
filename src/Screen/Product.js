@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, ScrollView, BackHandler, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ActivityIndicator,Platform, Text, ScrollView, BackHandler, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MyFlatlist from '../Component/MyFlatlist';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-
+import { BasketContext } from '../Context/BasketContext';
 const Product = ({ navigation }) => {
+  
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const [productList, setProductList] = useState([]);
@@ -160,6 +161,7 @@ const Product = ({ navigation }) => {
         <MyFlatlist
           data={filterProductsByGroup(groups.find(group => group.label === selectedGroup))}
           showSearchInput={true}
+          Basket={true}
           onItemSelect={handleItemSelect}
           onAddToCart={handleAddToCart}
           favoriteList={favoriteList}

@@ -5,7 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
-const MyFlatlist = ({ data, showSearchInput,Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
+const MyFlatlist = ({ data,Basket, showSearchInput,Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
@@ -73,8 +73,14 @@ const MyFlatlist = ({ data, showSearchInput,Touch, onItemSelect, onItemRemove, o
               <Text style={[styles.name, isProductList && styles.nameLarge, { color: theme.textColor }]}>{item.name}</Text>
             </View>
           </View>
-          <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>{t('price')}: ${item.price}</Text>
-          {information === 'update' && (
+          <View style={{flexDirection:"row"}}>
+            <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>{t('price')}: ${item.price}</Text>
+            {Basket === true && (
+          <TouchableOpacity style={{width:40,height:40,backgroundColor:theme.secondaryColor}}> 
+           <Icon name="cash-register" size={10} color="#fff" /> 
+          </TouchableOpacity> )}
+          </View>
+           {information === 'update' && (
             <View style={styles.updateContainer}>
               <View style={styles.quantityContainer}>
                 <Text style={[styles.label, { color: theme.textColor }]}>{t('quantity')}: </Text>
@@ -90,6 +96,7 @@ const MyFlatlist = ({ data, showSearchInput,Touch, onItemSelect, onItemRemove, o
               <Text style={[styles.total, { color: theme.textColor }]}>{t('total')}: ${calculateTotal(item)}</Text>
             </View>
           )}
+          
         </TouchableOpacity>
       </View>
     );

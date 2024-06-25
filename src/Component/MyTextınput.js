@@ -11,8 +11,11 @@ function MyTextInput({ label1, icon, onChangeText, value }) {
   const [isSecureTextEntry, setIsSecureTextEntry] = useState(false);
 
   useEffect(() => {
+    setText(value);
+  }, [value]);
+
+  useEffect(() => {
     const labelLower = label1.toLowerCase();
-    
     setIsSecureTextEntry(
       labelLower === t('password').toLowerCase() || labelLower === t('confirm_password').toLowerCase()
     );
@@ -31,7 +34,7 @@ function MyTextInput({ label1, icon, onChangeText, value }) {
         secureTextEntry={isSecureTextEntry}
         onChangeText={handleTextChange}
         right={icon ? <TextInput.Icon icon={icon} /> : null}
-        style={[styles.input, { backgroundColor: theme.secondaryColor,textColor:theme.textColor }]}
+        style={[styles.input, { backgroundColor: theme.secondaryColor }]}
         theme={{
           colors: {
             text: theme.textColor,
@@ -50,7 +53,6 @@ const styles = StyleSheet.create({
   },
   input: {
     borderRadius: 5,
-   
   },
 });
 
