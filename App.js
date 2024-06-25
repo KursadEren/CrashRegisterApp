@@ -26,6 +26,8 @@ import i18n from './src/i18n/i18n';
 import 'intl';
 import 'intl/locale-data/jsonp/en'; // İhtiyacınıza göre farklı dilleri de ekleyebilirsiniz
 import 'intl-pluralrules';
+import UserListScreen from './src/Screen/UserListScreen';
+import { EducationProvider } from './src/Context/EducationContext';
 
 
 const Stack = createStackNavigator();
@@ -41,6 +43,7 @@ function CustomHeader({ title }) {
 function App() {
   return (
     <I18nextProvider i18n={i18n}>
+      <EducationProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProvider>
         <NavigationContainer>
@@ -60,10 +63,12 @@ function App() {
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }}/>
             <Stack.Screen name="AllReports" component={AllReports} options={{ headerShown: false }}/>
             <Stack.Screen name="SalesReport" component={SalesReport} options={{ headerShown: false }}/>
+           <Stack.Screen name="UserListScreen" component={UserListScreen} options={{ headerShown: false }}/>
           </Stack.Navigator>
         </NavigationContainer>
       </AppProvider>    
     </GestureHandlerRootView>
+    </EducationProvider>
     </I18nextProvider>
   );
 }

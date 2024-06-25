@@ -1,0 +1,8 @@
+{
+  "campaigns":[
+    { "id": 1, "name": "Summer Sale", "discount": "20%" },
+    { "id": 2, "name": "Winter Sale", "discount": "30%" },
+    { "id": 3, "name": "Black Friday", "discount": "50%" }
+  ]
+}
+  
