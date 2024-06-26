@@ -6,45 +6,9 @@ import MyTextInput from '../Component/MyTextınput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { CameraHighlights, useBarcodeScanner } from "@mgcrea/vision-camera-barcode-scanner";
-import { useCameraDevices, Camera } from "react-native-vision-camera";
 import BarcodeCamera from '../Component/BarcodeCamera';
+
 const DATA2 = [];
-
-const CameraComponent = ({ onBarcodeRead, onClose }) => {
-  const { props: cameraProps, highlights } = useBarcodeScanner({
-    fps: 5,
-    barcodeTypes: ["qr", "ean-13"],
-    onBarcodeScanned: (barcodes) => {
-      "worklet";
-      if (barcodes.length > 0) {
-        onBarcodeRead(barcodes[0].value);
-      }
-    },
-  });
-
-  const devices = useCameraDevices();
-  const device = devices.back;
-
-  if (!device) {
-    return <Text>Loading...</Text>;
-  }
-
-  return (
-    <View style={{ flex: 1 }}>
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive
-        {...cameraProps}
-      />
-      <CameraHighlights highlights={highlights} color="peachpuff" />
-      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-        <Text style={styles.closeButtonText}>Kapat</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
 
 const Sales = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);

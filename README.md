@@ -77,3 +77,92 @@ To learn more about React Native, take a look at the following resources:
 - [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
 - [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
 - [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+
+
+
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, PermissionsAndroid, Platform } from 'react-native';
+import { useCameraDevices, Camera } from 'react-native-vision-camera';
+import { useBarcodeScanner, CameraHighlights } from '@mgcrea/vision-camera-barcode-scanner';
+
+const requestCameraPermission = async () => {
+  if (Platform.OS === 'android') {
+    const granted = await PermissionsAndroid.request(
+      PermissionsAndroid.PERMISSIONS.CAMERA,
+      {
+        title: 'Camera Permission',
+        message: 'This app needs access to your camera',
+        buttonNeutral: 'Ask Me Later',
+        buttonNegative: 'Cancel',
+        buttonPositive: 'OK',
+      },
+    );
+    return granted === PermissionsAndroid.RESULTS.GRANTED;
+  } else {
+    const status = await Camera.requestCameraPermission();
+    return status === 'authorized';
+  }
+};
+
+const BarcodeCamera = () => {
+  const [isCameraActive, setIsCameraActive] = useState(true);
+  const [hasPermission, setHasPermission] = useState(false);
+  const devices = useCameraDevices();
+
+  useEffect(() => {
+    const checkPermission = async () => {
+      const permission = await requestCameraPermission();
+      setHasPermission(permission);
+    };
+    checkPermission();
+  }, []);
+
+  useEffect(() => {
+    if (devices && devices.length > 0) {
+      console.log('Camera devices available:', devices);
+    } else {
+      console.log('No camera devices available.');
+    }
+  }, [devices]);
+
+  const device = devices.find((device) => device.position === 'back');
+
+  const onBarcodeScanned = (barcodes) => {
+    console.log('onBarcodeScanned triggered');
+    console.log(
+      `Scanned ${barcodes.length} codes with values=${JSON.stringify(
+        barcodes.map(({ value }) => value)
+      )} !`
+    );
+    setIsCameraActive(false);
+  };
+
+  const { props: cameraProps, highlights } = useBarcodeScanner({
+    fps: 5,
+    barcodeTypes: ["qr", "ean-13"],
+    onBarcodeScanned: onBarcodeScanned,
+  });
+
+  if (!device || !hasPermission) {
+    console.log('No camera device found or no permission granted');
+    return null;
+  }
+
+  return (
+    <View style={{ flex: 1 }}>
+      {isCameraActive && (
+        <>
+          <Camera
+            style={StyleSheet.absoluteFill}
+            device={device}
+            isActive={isCameraActive}
+            {...cameraProps}
+          />
+          <CameraHighlights highlights={highlights} color="peachpuff" />
+        </>
+      )}
+    </View>
+  );
+};
+
+export default BarcodeCamera;

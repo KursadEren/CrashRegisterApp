@@ -2,6 +2,8 @@ import 'intl';
 import 'intl/locale-data/jsonp/en';
 import 'intl/locale-data/jsonp/tr';
 import 'intl-pluralrules';
+import 'react-native-gesture-handler';
+
 
 
 import { AppRegistry } from 'react-native';

@@ -2,17 +2,23 @@ import React, { createContext, useState } from 'react';
 
 export const BasketContext = createContext();
 
-
-
 export const BasketProvider = ({ children }) => {
-  const [Basket, setBasket] = useState(lightTheme);
+  const [basket, setBasket] = useState([]);
 
-  const toggleBasket = () => {
-    setBasket=[];
+  const addToBasket = (item) => {
+    setBasket([...basket, item]);
+  };
+
+  const removeFromBasket = (item) => {
+    setBasket(basket.filter(basketItem => basketItem.objectID !== item.objectID));
+  };
+
+  const isItemInBasket = (item) => {
+    return basket.some(basketItem => basketItem.objectID === item.objectID);
   };
 
   return (
-    <BasketContext.Provider value={{ theme, toggleTheme }}>
+    <BasketContext.Provider value={{ basket, addToBasket, removeFromBasket, isItemInBasket }}>
       {children}
     </BasketContext.Provider>
   );
