@@ -24,25 +24,38 @@ function LoginScreen({ navigation }) {
   const isLandscape = useLandscape();
   const translateX = useRef(new Animated.Value(0)).current;
 
+  const checkNfcSupport = async () => {
+    try {
+      const isSupported = await NfcManager.isSupported();
+      if (!isSupported) {
+        throw new Error('NFC is not supported');
+      }
+
+      const isEnabled = await NfcManager.isEnabled();
+      if (!isEnabled) {
+        Alert.alert('NFC Error', 'NFC is disabled');
+      }
+    } catch (error) {
+      Alert.alert('NFC Error', error.message);
+    }
+  };
+
   useEffect(() => {
-    NfcManager.start();
+    checkNfcSupport();
     return () => {
       NfcManager.setEventListener(NfcTech.Ndef, null);
     };
   }, []);
 
-  
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
- 
       return true;
     });
 
     return () => backHandler.remove();
   }, [navigation]);
 
-  
   const handleLogin = async () => {
     try {
       const userData = await AsyncStorage.getItem('@biometric_user_' + username);
@@ -94,6 +107,8 @@ function LoginScreen({ navigation }) {
 
   const readNfcTag = async () => {
     try {
+      await checkNfcSupport(); // NFC desteğini kontrol edin
+
       await NfcManager.requestTechnology(NfcTech.Ndef);
       const tag = await NfcManager.getTag();
       if (tag && tag.ndefMessage) {
@@ -102,8 +117,6 @@ function LoginScreen({ navigation }) {
         const data = text.slice(3); // Skip language code
         const [nfcUsername, nfcPassword] = data.split(':');
         if (nfcUsername && nfcPassword) {
-          console.log(nfcPassword);
-          console.log(nfcUsername);
           setUsername(nfcUsername);
           setPassword(nfcPassword);
         } else {
@@ -248,7 +261,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     borderRadius: 5,
-    backgroundColor: '#4CAF50',
+    backgroundColor: 'white',
   },
   nfcButtonText: {
     color: '#fff',

@@ -8,9 +8,9 @@ const lightTheme = {
   accentColor: '#17a2b8',
   backgroundColor: '#f8f9fa',
   textColor: '#343a40',
-  placeholderTextColor: '#fff',
-  inputBackground: '#fff',
-  cardBackground: '#fff',
+  placeholderTextColor: '#999999', // Geçerli renk formatı
+  inputBackground: '#ffffff',
+  cardBackground: '#ffffff',
   itemBackground: '#e9ecef',
   priceColor: '#e9ecef'
 };
@@ -21,12 +21,13 @@ const darkTheme = {
   accentColor: '#17a2b8',
   backgroundColor: '#212529',
   textColor: '#f8f9fa',
-  placeholderTextColor: '#fff',
+  placeholderTextColor: '#999999', // Geçerli renk formatı
   inputBackground: '#495057',
   cardBackground: '#495057',
   itemBackground: '#6c757d',
   priceColor: '#e9ecef'
 };
+
 
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(lightTheme);

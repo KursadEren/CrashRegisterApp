@@ -42,8 +42,8 @@ function CustomHeader({ title }) {
 
 function App() {
   return (
-    <I18nextProvider i18n={i18n}>
-      <EducationProvider>
+<I18nextProvider i18n={i18n}>
+  <EducationProvider>
     <GestureHandlerRootView style={{ flex: 1 }}>
       <AppProvider>
         <NavigationContainer>
@@ -68,8 +68,8 @@ function App() {
         </NavigationContainer>
       </AppProvider>    
     </GestureHandlerRootView>
-    </EducationProvider>
-    </I18nextProvider>
+  </EducationProvider>
+</I18nextProvider>
   );
 }
 

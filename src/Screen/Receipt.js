@@ -126,10 +126,8 @@ const Receipt = ({ route }) => {
       };
 
       try {
-        await AsyncStorage.setItem('@payment_' + currentDate.getTime(), JSON.stringify(paymentDetails));
-        if (!serviceStatus) {
-          await AsyncStorage.setItem('@pendingPayment_' + currentDate.getTime(), JSON.stringify(paymentDetails));
-        }
+        const paymentKey = '@payment_' + currentDate.getTime();
+        await AsyncStorage.setItem(paymentKey, JSON.stringify(paymentDetails));
       } catch (e) {
         console.log('Error saving payment details:', e);
       }

@@ -40,6 +40,7 @@ function MyTextInput({ label1, icon, onChangeText, value }) {
             text: theme.textColor,
             primary: theme.placeholderTextColor,
             background: theme.itemBackground,
+            placeholder:theme.placeholderTextColor,
           },
         }}
       />

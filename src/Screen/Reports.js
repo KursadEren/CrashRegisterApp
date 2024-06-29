@@ -23,12 +23,23 @@ export default function Reports() {
         const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
         const paymentItems = await AsyncStorage.multiGet(paymentKeys);
         const payments = paymentItems.map(item => JSON.parse(item[1])).filter(payment => payment.items.every(item => item.name));
-        setPaymentRecords(payments);
+        
+        // Tekrarlanan kayıtları filtrele
+        const uniquePaymentsMap = new Map();
+        payments.forEach(payment => {
+          const uniqueKey = `${payment.date}-${payment.total}`;
+          if (!uniquePaymentsMap.has(uniqueKey)) {
+            uniquePaymentsMap.set(uniqueKey, payment);
+          }
+        });
+        const uniquePayments = Array.from(uniquePaymentsMap.values());
+  
+        setPaymentRecords(uniquePayments);
       } catch (e) {
         console.log('Error loading payment records:', e);
       }
     };
-
+  
     loadPaymentRecords();
   }, [serviceStatus]);
 
@@ -97,11 +108,12 @@ export default function Reports() {
       }
     }
   };
-  
 
   const renderItem = ({ item }) => {
+    const borderColor = item.sentToCentral ? 'green' : 'red';
+
     return (
-      <View style={[styles.record, { backgroundColor: theme.cardBackground }]}>
+      <View style={[styles.record, { backgroundColor: theme.cardBackground, borderColor }]}>
         <Text style={{ color: theme.textColor, fontWeight: 'bold', fontSize: 18, marginBottom: 10 }}>{t('date')}: {item.date}</Text>
         <Text style={{ color: theme.textColor, marginBottom: 5 }}>{t('subtotal')}: {item.subtotal.toFixed(2)}</Text>
         <Text style={{ color: theme.textColor, marginBottom: 5 }}>{t('total')}: {item.total.toFixed(2)}</Text>
@@ -138,7 +150,7 @@ export default function Reports() {
       <Text style={[styles.title, { color: theme.textColor }]}>{t('payment_reports')}</Text>
       <FlatList
         data={paymentRecords}
-        keyExtractor={(item, index) => index.toString()}
+        keyExtractor={(item, index) => item.id || index.toString()}
         renderItem={renderItem}
       />
     </View>
@@ -159,8 +171,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     padding: 10,
     borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#ddd',
+    borderWidth: 2,
+    // Kenarlık rengi dinamik olarak ayarlandı
   },
   itemContainer: {
     flexDirection: 'row',

@@ -1,6 +1,6 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image } from 'react-native';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
@@ -54,7 +54,7 @@ const MyFlatlist = ({ data,Basket, showSearchInput,Touch, onItemSelect, onItemRe
         {isProductList && (
           <TouchableOpacity style={styles.favoriteIcon} onPress={() => toggleFavorite(item)}>
             <Icon
-              name={item.favori === 1 ? 'star' : 'star-o'}
+              name={item.favori === 1 ? 'star' : 'star-outline'}
               size={24}
               color={theme.accentColor}
             />
@@ -76,8 +76,8 @@ const MyFlatlist = ({ data,Basket, showSearchInput,Touch, onItemSelect, onItemRe
           <View style={{flexDirection:"row"}}>
             <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>{t('price')}: ${item.price}</Text>
             {Basket === true && (
-          <TouchableOpacity style={{width:40,height:40,backgroundColor:theme.secondaryColor}}> 
-           <Icon name="cash-register" size={10} color="#fff" /> 
+          <TouchableOpacity style={{width:40,height:40}}> 
+           <Icon name="cart" size={40} color="#fff" /> 
           </TouchableOpacity> )}
           </View>
            {information === 'update' && (

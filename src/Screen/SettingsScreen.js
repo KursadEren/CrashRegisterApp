@@ -6,7 +6,8 @@ import { useTranslation } from 'react-i18next';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNBluetoothClassic from 'react-native-bluetooth-classic';
-
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useIsFocused } from '@react-navigation/native';
 const SettingsScreen = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, i18n } = useTranslation();
@@ -14,15 +15,18 @@ const SettingsScreen = () => {
   const [devices, setDevices] = useState([]);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [unsentPaymentsCount, setUnsentPaymentsCount] = useState(0); // Yeni state
   const [isProcessing, setIsProcessing] = useState(false); // İşleme durumunu kontrol etmek için
-
+  const isFocused = useIsFocused();
   useEffect(() => {
-    requestPermissions();
+    
+    loadUnsentPaymentsCount(); // Sayfa açıldığında unsent payments count'u yükle
     if (serviceStatus) {
       sendUnsentPaymentsToCentral();
     }
-  }, [serviceStatus]);
+  }, [isFocused]);
 
+           {/* inactive */}
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -45,6 +49,21 @@ const SettingsScreen = () => {
       } catch (err) {
         console.warn(err);
       }
+    }
+  };
+
+  const loadUnsentPaymentsCount = async () => {
+    try {
+      const keys = await AsyncStorage.getAllKeys();
+      const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
+      const paymentItems = await AsyncStorage.multiGet(paymentKeys);
+      const unsentPayments = paymentItems
+        .map(item => [item[0], JSON.parse(item[1])])
+        .filter(([key, payment]) => !payment.sentToCentral);
+
+      setUnsentPaymentsCount(unsentPayments.length); // Unsent payments count'u güncelle
+    } catch (e) {
+      console.log('Unsent payments count yüklenirken hata:', e);
     }
   };
 
@@ -92,6 +111,9 @@ const SettingsScreen = () => {
       setToastVisible(true);
       setTimeout(() => setToastVisible(false), 2000);
       console.log(t('all_payments_sent'));
+
+      // Unsent payments count'u güncelle
+      loadUnsentPaymentsCount();
     } catch (e) {
       console.log('Ödemeleri gönderme hatası:', e);
     } finally {
@@ -163,6 +185,12 @@ const SettingsScreen = () => {
         </View>
         <View style={styles.buttonWrapper}>
           <MyButton visible={true} OnChangeButton={toggleServiceStatus} text={serviceStatus ? t('close_service') : t('open_service')} />
+          {unsentPaymentsCount > 0 && (
+            <View style={styles.badgeContainer}>
+              <MaterialCommunityIcons name="alert-circle"  style={{height:17,width:17}} color="red" />
+              <Text style={styles.badgeText}>{unsentPaymentsCount}</Text>
+            </View>
+          )}
         </View>
         <View style={styles.buttonWrapper}>
           <MyButton visible={true} OnChangeButton={handlePrinterTest} text={t('printer_test')} />
@@ -200,6 +228,21 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     marginBottom: 10,
     width: '100%',
+    position: 'relative', // Badge için konumlandırma
+  },
+  badgeContainer: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    backgroundColor: 'red',
+    borderRadius: 10,
+    paddingHorizontal: 6,
+    paddingVertical: 3,
+  },
+  badgeText: {
+    color: 'white',
+    fontWeight: 'bold',
+    fontSize: 12,
   },
   toastContainer: {
     flex: 1,
