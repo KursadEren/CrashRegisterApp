@@ -40,6 +40,7 @@ function LoginScreen({ navigation }) {
       Alert.alert('NFC Error', error.message);
     }
   };
+  
 
   useEffect(() => {
     checkNfcSupport();
@@ -181,6 +182,8 @@ function LoginScreen({ navigation }) {
       }
     })
   ).current;
+
+
 
   return (
     <View style={[styles.container, isLandscape ? styles.containerLandscape : styles.containerPortrait, { backgroundColor: theme.backgroundColor }]}>
