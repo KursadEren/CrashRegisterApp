@@ -74,7 +74,7 @@ Cash Register App is a mobile platform application designed to manage shopping a
 
 -  node version : v21.6.2
 
-   
+    ```bash
    cd cash_register_app
    npm install
    npm start
