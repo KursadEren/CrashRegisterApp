@@ -93,32 +93,40 @@ Usage
 2. **Home Screen**
 - Displays a welcome message with the logged-in user's name.
 - Provides quick access to various functionalities such as the product catalog, sales, and reports.
-![Alt Text](./Image/HomeScreen.png)
-![Alt Text](./Image/HomeScreen2.png)
+<img src="./Image/HomeScreen.png" alt="Home Screen" width="300"/>
+<img src="./Image/HomeScreen2.png" alt="Home Screen2" width="300"/>
 
 3. **Product Catalog**
 - Lists all available products with details.
 - Users can check prices and add products to the cart.
+<img src="./Image/Product.png" alt="Product" width="300"/>
 
-![Alt Text](./Image/Product.png)
+
 
 4.  **Sales and Return Processing**
 - Facilitates the sales process, including adding items to the basket and completing transactions.
 - Supports return operations with proper validation.
-![Alt Text](./Image/Sales.png)
+<img src="./Image/Sales.png" alt="Sales" width="300"/>
+
+
 
 
 5. **Reports**
 - Generates sales reports and analytics.
 - Users can view detailed reports and export them as PDFs.
-![Alt Text](./Image/Report.png)
-![Alt Text](./Image/Report2.png)
-![Alt Text](./Image/GraphicReport.png)
+<img src="./Image/Report.png" alt="Report" width="300"/>
+
+<img src="./Image/Report2.png" alt="Report2" width="300"/>
+
+<img src="./Image/GraphicReport.png" alt="GraphicReport" width="300"/>
+
+
+
 
 6. **Settings**
 - Allows users to change application settings, including theme and language preferences.
+<img src="./Image/Settings.png" alt="Settings" width="300"/>
 
-![Alt Text](./Image/Settings.png)
 
 
 
