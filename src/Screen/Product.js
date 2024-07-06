@@ -1,18 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, ActivityIndicator,Platform, Text, ScrollView, BackHandler, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, ScrollView, BackHandler, TouchableOpacity } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MyFlatlist from '../Component/MyFlatlist';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { BasketContext } from '../Context/BasketContext';
+import BasketBalloon from '../Component/BasketBalloon';
+
 const Product = ({ navigation }) => {
-  
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
+  const { basket, addToBasket } = useContext(BasketContext);
   const [productList, setProductList] = useState([]);
   const [favoriteList, setFavoriteList] = useState([]);
-  const [cartList, setCartList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [showFavorites, setShowFavorites] = useState(false);
@@ -91,7 +92,7 @@ const Product = ({ navigation }) => {
   };
 
   const handleAddToCart = (item) => {
-    setCartList([...cartList, item]);
+    addToBasket(item);
   };
 
   const filterProductsByGroup = (group) => {
@@ -119,57 +120,57 @@ const Product = ({ navigation }) => {
   }
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
-      <View style={styles.headerContainer}>
-        <Text style={[styles.header, { color: theme.primaryColor }]}>{t('all_products')}</Text>
-        <TouchableOpacity style={styles.favoritesButton} onPress={() => setShowFavorites(!showFavorites)}>
-          <Icon name="star" size={24} color={theme.accentColor} />
-          <Text style={[styles.favoritesButtonText, { color: theme.accentColor }]}>{t('favorites')}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Sales', { cartList })}>
-          <Icon name="shopping-cart" size={24} color={theme.accentColor} />
-          <Text style={[styles.cartButtonText, { color: theme.accentColor }]}>{t('cart')}</Text>
-        </TouchableOpacity>
-      </View>
-      {!showFavorites && (
-        <View style={styles.groupButtonsContainer}>
-          {groups.map((group, index) => (
-            <TouchableOpacity
-              key={index}
-              style={[
-                styles.groupButton,
-                selectedGroup === group.label && styles.selectedGroupButton,
-                { backgroundColor: selectedGroup === group.label ? theme.primaryColor : theme.secondaryColor }
-              ]}
-              onPress={() => setSelectedGroup(group.label)}
-            >
-              <Text style={[styles.groupButtonText, { color: selectedGroup === group.label ? theme.backgroundColor : theme.textColor }]}>
-                {group.label}
-              </Text>
-            </TouchableOpacity>
-          ))}
+    <View style={{ flex: 1 }}>
+      <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
+        <View style={styles.headerContainer}>
+          <Text style={[styles.header, { color: theme.primaryColor }]}>{t('all_products')}</Text>
+          <TouchableOpacity style={styles.favoritesButton} onPress={() => setShowFavorites(!showFavorites)}>
+            <Icon name="star" size={24} color={theme.accentColor} />
+            <Text style={[styles.favoritesButtonText, { color: theme.accentColor }]}>{t('favorites')}</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cartButton} onPress={() => navigation.navigate('Sales', { cartList: basket })}>
+            <Icon name="shopping-cart" size={24} color={theme.accentColor} />
+            <Text style={[styles.cartButtonText, { color: theme.accentColor }]}>{t('cart')}</Text>
+          </TouchableOpacity>
         </View>
-      )}
-      {showFavorites ? (
-        <MyFlatlist
-          data={favoriteList}
-          showSearchInput={false}
-          onItemSelect={handleItemRemove}
-          isProductList={true}
-        />
-      ) : (
-        <MyFlatlist
-          data={filterProductsByGroup(groups.find(group => group.label === selectedGroup))}
-          showSearchInput={true}
-          Basket={true}
-          onItemSelect={handleItemSelect}
-          onAddToCart={handleAddToCart}
-          favoriteList={favoriteList}
-          isProductList={true}
-          information={"notremove"}
-        />
-      )}
-    </ScrollView>
+        {!showFavorites && (
+          <View style={styles.groupButtonsContainer}>
+            {groups.map((group, index) => (
+              <TouchableOpacity
+                key={index}
+                style={[
+                  styles.groupButton,
+                  selectedGroup === group.label && styles.selectedGroupButton,
+                  { backgroundColor: selectedGroup === group.label ? theme.primaryColor : theme.secondaryColor }
+                ]}
+                onPress={() => setSelectedGroup(group.label)}
+              >
+                <Text style={[styles.groupButtonText, { color: selectedGroup === group.label ? theme.backgroundColor : theme.textColor }]}>
+                  {group.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+        {showFavorites ? (
+          <MyFlatlist
+            data={favoriteList}
+            showSearchInput={false}
+            onItemSelect={handleItemRemove}
+            isProductList={true}
+          />
+        ) : (
+          <MyFlatlist
+            data={filterProductsByGroup(groups.find(group => group.label === selectedGroup))}
+            showSearchInput={true}
+            Basket={true}
+            onItemSelect={handleItemSelect}
+            onAddToCart={handleAddToCart}
+          />
+        )}
+      </ScrollView>
+      <BasketBalloon navigation={navigation} />
+    </View>
   );
 };
 

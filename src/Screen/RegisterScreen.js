@@ -48,6 +48,18 @@ const RegisterScreen = ({ navigation }) => {
       }
 
       const { success } = await rnBiometrics.simplePrompt({ promptMessage: t('confirm_biometric') });
+      if (!success) {
+        setHasError(true);
+        Alert.alert(t('error'), t('biometric_auth_failed'));
+        return false;
+      }
+
+      const { publicKey } = await rnBiometrics.createKeys();
+      console.log('Generated biometric keys:', publicKey);
+
+      const newUser = { username, password, biometricData: publicKey };
+      await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(newUser));
+
       setHasError(false);
       return success;
     } catch (error) {
@@ -93,7 +105,6 @@ const RegisterScreen = ({ navigation }) => {
         return;
       }
 
-      await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
       setHasError(false);
       Alert.alert(t('success'), t('user_registered_successfully'));
       navigation.navigate("LoginScreen");

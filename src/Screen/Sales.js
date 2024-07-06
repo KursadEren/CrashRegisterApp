@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { CameraHighlights, useBarcodeScanner } from "@mgcrea/vision-camera-barcode-scanner";
 import { useCameraDevices, Camera } from "react-native-vision-camera";
 import BarcodeCamera from '../Component/BarcodeCamera';
+import { BasketContext } from '../Context/BasketContext';
+
 const DATA2 = [];
 
 const CameraComponent = ({ onBarcodeRead, onClose }) => {
@@ -49,9 +51,9 @@ const CameraComponent = ({ onBarcodeRead, onClose }) => {
 const Sales = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
+  const { basket, clearBasket } = useContext(BasketContext);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [data1List, setData1List] = useState([]);
-  const [data2List, setData2List] = useState(DATA2);
   const [quantityModalVisible, setQuantityModalVisible] = useState(false);
   const [quantityInput, setQuantityInput] = useState('');
   const [isItemListEmpty, setIsItemListEmpty] = useState(true);
@@ -86,8 +88,8 @@ const Sales = ({ navigation }) => {
   }, [navigation]);
 
   useEffect(() => {
-    setIsItemListEmpty(data2List.length === 0);
-  }, [data2List]);
+    setIsItemListEmpty(basket.length === 0);
+  }, [basket]);
 
   const handleItemSelect = (item) => {
     setSelectedProduct({ ...item, quantityInput: quantityInput });
@@ -95,8 +97,8 @@ const Sales = ({ navigation }) => {
   };
 
   const handleItemRemove = (item) => {
-    const updatedData2List = data2List.filter((product) => product.objectID !== item.objectID);
-    setData2List(updatedData2List);
+    const updatedBasket = basket.filter((product) => product.objectID !== item.objectID);
+    setBasket(updatedBasket);
     if (selectedProduct && selectedProduct.objectID === item.objectID) {
       setSelectedProduct(null);
     }
@@ -108,14 +110,14 @@ const Sales = ({ navigation }) => {
       handleItemRemove(selectedProduct);
     } else {
       if (selectedProduct) {
-        const updatedData2List = [...data2List];
-        const selectedItemIndex = updatedData2List.findIndex((item) => item.objectID === selectedProduct.objectID);
+        const updatedBasket = [...basket];
+        const selectedItemIndex = updatedBasket.findIndex((item) => item.objectID === selectedProduct.objectID);
         if (selectedItemIndex !== -1) {
-          updatedData2List[selectedItemIndex].count = quantity;
+          updatedBasket[selectedItemIndex].count = quantity;
         } else {
-          updatedData2List.push({ ...selectedProduct, count: quantity });
+          updatedBasket.push({ ...selectedProduct, count: quantity });
         }
-        setData2List(updatedData2List);
+        setBasket(updatedBasket);
       }
     }
     setQuantityInput('');
@@ -143,10 +145,10 @@ const Sales = ({ navigation }) => {
     const bagCount = parseInt(bagQuantity, 10) || 0;
     const bagCost = bagCount * 0.25;
     setBagCost(bagCost);
-    const updatedData2List = data2List.map(item => ({ ...item, bagCount, bagCost }));
-    setData2List(updatedData2List);
+    const updatedBasket = basket.map(item => ({ ...item, bagCount, bagCost }));
+    setBasket(updatedBasket);
     setBagModalVisible(false);
-    navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
+    navigation.navigate("Receipt", { data2List: updatedBasket, bagCount, bagCost });
   };
 
   const handleBarcodeRead = (barcodeData) => {
@@ -160,7 +162,7 @@ const Sales = ({ navigation }) => {
     }
   };
 
-  const totalCost = data2List.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
+  const totalCost = basket.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
 
   return (
     <ScrollView style={[styles.scrollView, { padding: width * 0.05, backgroundColor: theme.backgroundColor }]}>
@@ -172,7 +174,7 @@ const Sales = ({ navigation }) => {
       />
 
       <MyFlatlist
-        data={data2List}
+        data={basket}
         showSearchInput={false}
         onItemSelect={handleItemSelect}
         onItemRemove={handleItemRemove}

@@ -4,10 +4,12 @@ import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
+import { BasketContext } from '../Context/BasketContext';
 
-const MyFlatlist = ({ data,Basket, showSearchInput,Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
+const MyFlatlist = ({ data, Basket, showSearchInput, Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
+  const { addToBasket } = useContext(BasketContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState(data);
 
@@ -73,14 +75,15 @@ const MyFlatlist = ({ data,Basket, showSearchInput,Touch, onItemSelect, onItemRe
               <Text style={[styles.name, isProductList && styles.nameLarge, { color: theme.textColor }]}>{item.name}</Text>
             </View>
           </View>
-          <View style={{flexDirection:"row"}}>
+          <View style={{ flexDirection: "row" }}>
             <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>{t('price')}: ${item.price}</Text>
             {Basket === true && (
-          <TouchableOpacity style={{width:40,height:40}}> 
-           <Icon name="cart" size={40} color="#fff" /> 
-          </TouchableOpacity> )}
+              <TouchableOpacity style={{ width: 40, height: 40 }} onPress={() => addToBasket(item)}>
+                <Icon name="cart" size={40} color="#fff" />
+              </TouchableOpacity>
+            )}
           </View>
-           {information === 'update' && (
+          {information === 'update' && (
             <View style={styles.updateContainer}>
               <View style={styles.quantityContainer}>
                 <Text style={[styles.label, { color: theme.textColor }]}>{t('quantity')}: </Text>
@@ -96,7 +99,6 @@ const MyFlatlist = ({ data,Basket, showSearchInput,Touch, onItemSelect, onItemRe
               <Text style={[styles.total, { color: theme.textColor }]}>{t('total')}: ${calculateTotal(item)}</Text>
             </View>
           )}
-          
         </TouchableOpacity>
       </View>
     );

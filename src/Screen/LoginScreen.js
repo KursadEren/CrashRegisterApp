@@ -10,7 +10,8 @@ import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useEducation } from '../Context/EducationContext';
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
-
+import axios from 'axios';
+import { API_URL2 } from "../GroceryData/Constant";
 NfcManager.start();
 
 const { width } = Dimensions.get('window');
@@ -62,6 +63,17 @@ function LoginScreen({ navigation }) {
       if (userData) {
         const { password: storedPassword } = JSON.parse(userData);
         if (storedPassword === password) {
+          await AsyncStorage.setItem('@current_user', username);
+          navigation.navigate("MyTabs");
+          return;
+        }
+      }
+
+      const response = await axios.get(`${API_URL2}/users/users?username=${username}&password=${password}`);
+      if (response.status === 200 && response.data) {
+        const user = response.data;
+        if (user.username === username && user.password === password) {
+          await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
           await AsyncStorage.setItem('@current_user', username);
           navigation.navigate("MyTabs");
           return;

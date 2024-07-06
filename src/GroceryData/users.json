@@ -1,95 +1,49 @@
 {
   "users": [
     {
-      "id": "e183",
-      "username": "Maden",
-      "password": "Maden2512!",
-      "publicKey": "public_key_generated_by_biometrics"
+      "id": "0e28",
+      "username": "Kursad",
+      "password": "Kursad2512!"
     },
     {
-      "id": "d572",
+      "id": "7302",
+      "username": "Mansur",
+      "password": "Mansur2512!"
+    },
+    {
+      "id": "f2e9",
+      "username": "Kursad",
+      "password": "Kursad2512!",
+      "biometricData": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwNhIRIraVK+Y+ySqukXgd6FYq7vMrgFeuDGeLxWfg4HjizAaEbrMJt7Yq9ORaGgBx0dLJIut/6f705wLqc4LVYpdKcx5QA+EJPK/xWR+Rp7OfDFMM7Py0rfOsKMptyYLOLIgi08rL/ttx9QAxhYn7U4UhQ4lVsvgjSyeArcAYj00riQD7+JV9QYcdaKR/WZgtX0T05+RYX1hUqqijt5rkutV8JClLmI2cN3tVDnPZdQ9ZT0WpGCGL/4hdxgnyeRuowKbOEnYb09RHqLBHEY432DL+NVI59BBT/9ctkkDBDYiLaR7POavNBynjDhpuSWfhPrKmTJvf0Qm3RosFY6wtwIDAQAB"
+    },
+    {
+      "id": "2fd3",
+      "username": "Kursad",
+      "password": "Kursad2512!"
+    },
+    {
+      "id": "adc6",
+      "username": "Maden",
+      "password": "Maden2512!"
+    },
+    {
+      "id": "cc5d",
       "username": "Mansur",
       "password": "Mansur2512!",
-      "publicKey": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA2tg82llGCrZjwUFcLcahBF6lhH3SyvYLbTTBJ34aaXkX0JynqLq3JiqUV5tKaYDdRcLTdL6aW57AtIfxlogXpXSSy4Xibm9T4wcriC4zssmwBYwhzMprN6ZkzfqICBExDJhZ1pI6vbBS+uU4dSQwHe2NU/s1xH0FF6qEbQ3f86XOb2ZWqsPjpAPuaV+pNXNKryxrUcjwRV/FkktOKcuebRCZNrAsMNAX/NgmeGacIiLPrDK5XCuZJBhRxeZ8VSbjUwEe8rD/QcCxtloawVPuQgaPC3WQ6en9pKv55HDTSkBvwMD3gnkmJQn2Jbci9WHFcx6w7XHeAECYDgPuLsTDOQIDAQAB"
+      "biometricData": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmv7npqOP9f323gxIFtR0LbFnNv6SEuYp58h02aJ/Ff1iSDRIJMK6vBaEI71/MDXA8CjOaskmD7+Fxtd0NVpo7I/twqK5Xi4duRn8sW67R/Oqexdclq5IfSI+qZMj+HAd0rp65+C6TAZ/NCDmN+aNz3hkiRLnUtF7fhfnHPzKu6Ijb3IBi2k18QDOYSwqpooeest73cAMtsf6o9Fa4o8XfTwHNIppYJqrHh4py6A4Im8aZ2NJG78lSRaLZU0Etp46p0cuYegyLMZMjvZuSolziDxnl0MM9nP16YZU6rJVpAoxaTZis4KNUdzY2hGr/2koGlVamg8/UhyNZp1g758QwIDAQAB"
     },
     {
-      "id": "e34e",
-      "username": "Fikret",
-      "password": "Fikret2512!"
+      "id": "94c8",
+      "username": "Mansur",
+      "password": "Mansur2512!"
     },
     {
-      "id": "b4bb",
-      "username": "Fikret",
-      "password": "Fikret2512!",
-      "publicKey": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA7GdlgpLIaWF9NCYYef3XRhF+0DDlCqTrNs9VvNGwhZSTBDlYumIimcmMuxjdloN478qkN33gRh5n07VmCWubRPbYQOMW1RyabUEXBQJhi4IyA+v/bTryAqFvXyNRmj+6ojmnwf/SZszbZl6G99nGJTTGfjuFRE9wW8s5XLwmv1VPeXsxCEY81ooneRcFGFAsmGq6v8MGophlSTcY46kBLPnc/+yLiqnoVCz09KVjEYPnOMvkERQwGQxDJmzckDjK77isJnjn6btOdt+b+nGqyJ/WT6943qcmlV7Hrow+zCKE9m0AmSpvEceofE/22bY4lfyMV6ZctOgbFvm0JCiZzwIDAQAB"
+      "id": "0842",
+      "username": "Hatice",
+      "password": "Hatice2512!"
     },
     {
-      "id": "720a",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "b901",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "b3d9",
-      "username": "Zikriye",
-      "password": "Zikriye2512!"
-    },
-    {
-      "id": "c9bb",
-      "username": "Zikriye",
-      "password": "Zikriye2512!"
-    },
-    {
-      "id": "4b51",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "063e",
-      "username": "Madem",
-      "password": "Madem2512!"
-    },
-    {
-      "id": "8365",
-      "username": "Turşu",
-      "password": "Tursu2512!"
-    },
-    {
-      "id": "dd9b",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "35c8",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "c3b4",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "0a3c",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "b772",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "aee6",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "99fc",
+      "id": "4cfb",
       "username": "Kursad",
       "password": "Kursad2512!"
     }
