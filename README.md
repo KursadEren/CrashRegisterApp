@@ -87,7 +87,7 @@ Usage
 - Users can log in using their credentials.
 - Supports biometric authentication for faster login.
 
-![Alt Text](./Image/loginscreen.png)
+<img src="./Image/loginscreen.png" alt="Login Screen" width="300"/>
 
 
 2. **Home Screen**
