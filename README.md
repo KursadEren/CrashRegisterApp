@@ -28,7 +28,7 @@ Cash Register App is a mobile platform application designed to manage shopping a
 
 1. **Clone the repository, navigate to the project directory, install the dependencies, and start the application:**
    ```bash
-
+    git clone https://github.com/KursadEren/CrashRegisterApp.git
 -  **dependencies**
     "@babel/preset-react": "^7.24.7",
     "@babel/preset-typescript": "^7.24.7",
@@ -74,7 +74,7 @@ Cash Register App is a mobile platform application designed to manage shopping a
 
 -  node version : v21.6.2
 
-   git clone https://github.com/KursadEren/CrashRegisterApp.git
+   
    cd cash_register_app
    npm install
    npm start
@@ -87,38 +87,38 @@ Usage
 - Users can log in using their credentials.
 - Supports biometric authentication for faster login.
 
-![Alt Text](images/loginscreen.png)
+![Alt Text](./Image/loginscreen.png)
 
 
 2. **Home Screen**
 - Displays a welcome message with the logged-in user's name.
 - Provides quick access to various functionalities such as the product catalog, sales, and reports.
-![Alt Text](images/HomeScreen.png)
-![Alt Text](images/HomeScreen2.png)
+![Alt Text](./Image/HomeScreen.png)
+![Alt Text](./Image/HomeScreen2.png)
 
 3. **Product Catalog**
 - Lists all available products with details.
 - Users can check prices and add products to the cart.
 
-![Alt Text](images/Product.png)
+![Alt Text](./Image/Product.png)
 
 4.  **Sales and Return Processing**
 - Facilitates the sales process, including adding items to the basket and completing transactions.
 - Supports return operations with proper validation.
-![Alt Text](images/Sales.png)
+![Alt Text](./Image/Sales.png)
 
 
 5. **Reports**
 - Generates sales reports and analytics.
 - Users can view detailed reports and export them as PDFs.
-![Alt Text](images/Report.png)
-![Alt Text](images/Report2.png)
-![Alt Text](images/GraphicReport.png)
+![Alt Text](./Image/Report.png)
+![Alt Text](./Image/Report2.png)
+![Alt Text](./Image/GraphicReport.png)
 
 6. **Settings**
 - Allows users to change application settings, including theme and language preferences.
 
-![Alt Text](images/Settings.png)
+![Alt Text](./Image/Settings.png)
 
 
 
