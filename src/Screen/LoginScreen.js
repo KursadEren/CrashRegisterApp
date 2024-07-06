@@ -61,18 +61,27 @@ function LoginScreen({ navigation }) {
   const handleLogin = async () => {
     try {
       // AsyncStorage'den kullanıcı verisini al
-      
+      const userData = await AsyncStorage.getItem('@biometric_user_' + username);
+      if (userData) {
+        const { password: storedPassword } = JSON.parse(userData);
+        if (storedPassword === password) {
+          await AsyncStorage.setItem('@current_user', username);
+          navigation.navigate("MyTabs");
+          return;
+        }
+      }
   
-      // Kullanıcıyı mock servisten al
+      // AsyncStorage'de kullanıcı verisi yoksa mock servisten al
       const response = await axios.get(`${API_URL2}/users/users`, {
         params: {
           username: username,
           password: password
         }
       });
-      
-      if (response.status === 200 && response.data) {
-        const user = response.data;
+  
+      // response.data'nın doğru yapıda olup olmadığını kontrol et
+      if (response.status === 200 && response.data && Array.isArray(response.data) && response.data.length > 0) {
+        const user = response.data[0]; // response.data bir dizi olduğundan, ilk öğeyi al
         if (user.username === username && user.password === password) {
           await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
           await AsyncStorage.setItem('@current_user', username);
@@ -88,6 +97,8 @@ function LoginScreen({ navigation }) {
       Alert.alert(t('error'), t('failed_login'));
     }
   };
+  
+  
   
   
 
@@ -203,7 +214,7 @@ function LoginScreen({ navigation }) {
         <MyTextInput onChangeText={setPassword} value={password} label1={t('password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="login" OnChangeButton={()=>(navigation.navigate("MyTabs"))} text={t('login')} />
+        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text={t('login')} />
       </View>
       <View style={styles.biometricContainer}>
         <Text style={[styles.text, { color: theme.textColor }]}>{t('biometric_authentication')}</Text>

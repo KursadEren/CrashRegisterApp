@@ -1,61 +1,10 @@
 {
   "users": [
     {
-      "id": "0e28",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "7302",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
       "id": "f2e9",
       "username": "Kursad",
       "password": "Kursad2512!",
       "biometricData": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwNhIRIraVK+Y+ySqukXgd6FYq7vMrgFeuDGeLxWfg4HjizAaEbrMJt7Yq9ORaGgBx0dLJIut/6f705wLqc4LVYpdKcx5QA+EJPK/xWR+Rp7OfDFMM7Py0rfOsKMptyYLOLIgi08rL/ttx9QAxhYn7U4UhQ4lVsvgjSyeArcAYj00riQD7+JV9QYcdaKR/WZgtX0T05+RYX1hUqqijt5rkutV8JClLmI2cN3tVDnPZdQ9ZT0WpGCGL/4hdxgnyeRuowKbOEnYb09RHqLBHEY432DL+NVI59BBT/9ctkkDBDYiLaR7POavNBynjDhpuSWfhPrKmTJvf0Qm3RosFY6wtwIDAQAB"
-    },
-    {
-      "id": "2fd3",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "adc6",
-      "username": "Maden",
-      "password": "Maden2512!"
-    },
-    {
-      "id": "cc5d",
-      "username": "Mansur",
-      "password": "Mansur2512!",
-      "biometricData": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAwmv7npqOP9f323gxIFtR0LbFnNv6SEuYp58h02aJ/Ff1iSDRIJMK6vBaEI71/MDXA8CjOaskmD7+Fxtd0NVpo7I/twqK5Xi4duRn8sW67R/Oqexdclq5IfSI+qZMj+HAd0rp65+C6TAZ/NCDmN+aNz3hkiRLnUtF7fhfnHPzKu6Ijb3IBi2k18QDOYSwqpooeest73cAMtsf6o9Fa4o8XfTwHNIppYJqrHh4py6A4Im8aZ2NJG78lSRaLZU0Etp46p0cuYegyLMZMjvZuSolziDxnl0MM9nP16YZU6rJVpAoxaTZis4KNUdzY2hGr/2koGlVamg8/UhyNZp1g758QwIDAQAB"
-    },
-    {
-      "id": "94c8",
-      "username": "Mansur",
-      "password": "Mansur2512!"
-    },
-    {
-      "id": "0842",
-      "username": "Hatice",
-      "password": "Hatice2512!"
-    },
-    {
-      "id": "4cfb",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "3d22",
-      "username": "Kursad",
-      "password": "Kursad2512!"
-    },
-    {
-      "id": "ba0b",
-      "username": "Mansur",
-      "password": "Mansur2512!"
     }
   ]
 }

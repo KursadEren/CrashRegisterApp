@@ -76,35 +76,49 @@ const RegisterScreen = ({ navigation }) => {
       Alert.alert(t('error'), t('fill_all_fields'));
       return;
     }
-
+  
     if (password !== confirmPassword) {
       setHasError(true);
       Alert.alert(t('error'), t('passwords_do_not_match'));
       return;
     }
-
+  
     if (!isValidPassword(password)) {
       setHasError(true);
       Alert.alert(t('error'), t('invalid_password'));
       return;
     }
-
+  
     const biometricSuccess = await handleBiometricEnrollment();
     if (!biometricSuccess) {
       setHasError(true);
       return;
     }
-
+  
     const user = { username, password };
-
+  
     try {
+      // Kullanıcı adının zaten mevcut olup olmadığını kontrol et
+      const existingUserResponse = await axios.get(`${API_URL2}/users/users`, {
+        params: {
+          username: username
+        }
+      });
+  
+      if (existingUserResponse.data && existingUserResponse.data.length > 0) {
+        setHasError(true);
+        Alert.alert(t('error'), t('username_already_exists'));
+        return;
+      }
+  
+      // Yeni kullanıcı kaydı yap
       const response = await axios.post(`${API_URL2}/users/users`, user);
       if (response.status !== 201) {
         setHasError(true);
         Alert.alert(t('error'), `${t('user_registration_failed')} ${response.status}`);
         return;
       }
-
+  
       setHasError(false);
       Alert.alert(t('success'), t('user_registered_successfully'));
       navigation.navigate("LoginScreen");
@@ -114,6 +128,7 @@ const RegisterScreen = ({ navigation }) => {
       Alert.alert(t('error'), t('failed_to_register_user'));
     }
   };
+  
 
   const panResponder = useRef(
     PanResponder.create({

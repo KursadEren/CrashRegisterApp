@@ -121,7 +121,6 @@ Usage
 
 
 
-
 6. **Settings**
 - Allows users to change application settings, including theme and language preferences.
 <img src="./Image/Settings.png" alt="Settings" width="300"/>
@@ -129,8 +128,4 @@ Usage
 
 
 
-Contributing
-
-Contributions are welcome! Please follow these steps:
-
-
+ **Author** : Kürşad Eren Maden
