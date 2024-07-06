@@ -60,17 +60,17 @@ function LoginScreen({ navigation }) {
 
   const handleLogin = async () => {
     try {
-      const userData = await AsyncStorage.getItem('@biometric_user_' + username);
-      if (userData) {
-        const { password: storedPassword } = JSON.parse(userData);
-        if (storedPassword === password) {
-          await AsyncStorage.setItem('@current_user', username);
-          navigation.navigate("MyTabs");
-          return;
+      // AsyncStorage'den kullanıcı verisini al
+      
+  
+      // Kullanıcıyı mock servisten al
+      const response = await axios.get(`${API_URL2}/users/users`, {
+        params: {
+          username: username,
+          password: password
         }
-      }
-
-      const response = await axios.get(`${API_URL2}/users/users?username=${username}&password=${password}`);
+      });
+      
       if (response.status === 200 && response.data) {
         const user = response.data;
         if (user.username === username && user.password === password) {
@@ -80,13 +80,16 @@ function LoginScreen({ navigation }) {
           return;
         }
       }
-
+  
+      // Kullanıcı bulunamazsa hata mesajı göster
       Alert.alert(t('error'), t('invalid_username_password'));
     } catch (e) {
       console.log('Error:', e);
       Alert.alert(t('error'), t('failed_login'));
     }
   };
+  
+  
 
   const handleBiometricAuth = async () => {
     const rnBiometrics = new ReactNativeBiometrics();
@@ -200,7 +203,7 @@ function LoginScreen({ navigation }) {
         <MyTextInput onChangeText={setPassword} value={password} label1={t('password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text={t('login')} />
+        <MyButton visible={true} iconname="login" OnChangeButton={()=>(navigation.navigate("MyTabs"))} text={t('login')} />
       </View>
       <View style={styles.biometricContainer}>
         <Text style={[styles.text, { color: theme.textColor }]}>{t('biometric_authentication')}</Text>
@@ -208,7 +211,7 @@ function LoginScreen({ navigation }) {
           <Ionicons name="finger-print" size={50} color="#fff" />
         </TouchableOpacity>
       </View>
-      <TouchableOpacity style={styles.nfcButton} onPress={readNfcTag}>
+      <TouchableOpacity style={[styles.nfcButton,{backgroundColor:theme.primaryColor}]} onPress={readNfcTag}>
         <Text style={styles.nfcButtonText}>{t('scan_nfc')}</Text>
       </TouchableOpacity>
       {educationStep === 0 && (
@@ -276,7 +279,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     borderRadius: 5,
-    backgroundColor: 'white',
+    
   },
   nfcButtonText: {
     color: '#fff',

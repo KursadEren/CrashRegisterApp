@@ -13,40 +13,7 @@ import { BasketContext } from '../Context/BasketContext';
 
 const DATA2 = [];
 
-const CameraComponent = ({ onBarcodeRead, onClose }) => {
-  const { props: cameraProps, highlights } = useBarcodeScanner({
-    fps: 5,
-    barcodeTypes: ["qr", "ean-13"],
-    onBarcodeScanned: (barcodes) => {
-      "worklet";
-      if (barcodes.length > 0) {
-        onBarcodeRead(barcodes[0].value);
-      }
-    },
-  });
 
-  const devices = useCameraDevices();
-  const device = devices.back;
-
-  if (!device) {
-    return <Text>Loading...</Text>;
-  }
-
-  return (
-    <View style={{ flex: 1 }}>
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive
-        {...cameraProps}
-      />
-      <CameraHighlights highlights={highlights} color="peachpuff" />
-      <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-        <Text style={styles.closeButtonText}>Kapat</Text>
-      </TouchableOpacity>
-    </View>
-  );
-};
 
 const Sales = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
@@ -168,16 +135,7 @@ const Sales = ({ navigation }) => {
     navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
   };
 
-  const handleBarcodeRead = (barcodeData) => {
-    setBarcodeModalVisible(false);
-    const product = data1List.find((item) => item.barcode === barcodeData);
-    if (product) {
-      setSelectedProduct({ ...product, quantityInput: '1' });
-      setQuantityModalVisible(true);
-    } else {
-      Alert.alert(t('error'), t('product_not_found'));
-    }
-  };
+  
 
   const totalCost = data2List.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
 
@@ -258,7 +216,7 @@ const Sales = ({ navigation }) => {
         animationType="slide"
         transparent={true}
       >
-        <BarcodeCamera onBarcodeRead={handleBarcodeRead} onClose={() => setBarcodeModalVisible(false)} />
+      
       </Modal>
 
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
@@ -268,11 +226,7 @@ const Sales = ({ navigation }) => {
           OnChangeButton={handleRouteReceipt}
           text={t('go_receipt')}
         />
-        <MyButton
-          visible={true}
-          OnChangeButton={() => setBarcodeModalVisible(true)}
-          text={t('scan_barcode')}
-        />
+       
       </View>
     </ScrollView>
   );
