@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import axios from 'axios';
-import MyFlatlist from "../Component/MyFlatlist"; // MyFlatlist bileşeninizin doğru yolu ile içe aktarın
-import API_URL2 from "../GroceryData/Constant"
+import MyFlatlist from "../Component/MyFlatlist";
+import { API_URL2 } from "../GroceryData/Constant";
+
 const UserListScreen = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +15,15 @@ const UserListScreen = () => {
         setUsers(response.data);
         setLoading(false);
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching data:", error.message);
+        if (error.response) {
+          console.error("Response data:", error.response.data);
+          console.error("Response status:", error.response.status);
+        } else if (error.request) {
+          console.error("Request data:", error.request);
+        } else {
+          console.error("Error message:", error.message);
+        }
         setLoading(false);
       }
     };
@@ -35,7 +44,7 @@ const UserListScreen = () => {
       <MyFlatlist
         data={users}
         showSearchInput={true}
-        Touch={true}
+        users={true}
         onItemSelect={(item) => console.log('Selected:', item)}
         onItemRemove={(item) => console.log('Removed:', item)}
         onAddToCart={(item) => console.log('Added to Cart:', item)}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, ActivityIndicator, Text, ScrollView, BackHandler, TouchableOpacity } from 'react-native';
+import { View, StyleSheet, ActivityIndicator, Text, ScrollView, BackHandler, TouchableOpacity, Modal, TextInput, Button } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import MyFlatlist from '../Component/MyFlatlist';
@@ -18,6 +18,9 @@ const Product = ({ navigation }) => {
   const [error, setError] = useState(null);
   const [showFavorites, setShowFavorites] = useState(false);
   const [selectedGroup, setSelectedGroup] = useState('Tümü');
+  const [quantityModalVisible, setQuantityModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   const groups = [
     { label: 'Tümü', range: [] },
@@ -92,7 +95,16 @@ const Product = ({ navigation }) => {
   };
 
   const handleAddToCart = (item) => {
-    addToBasket(item);
+    setSelectedItem(item);
+    setQuantity(1);
+    setQuantityModalVisible(true);
+  };
+
+  const handleConfirmAddToCart = () => {
+    if (selectedItem) {
+      addToBasket({ ...selectedItem, count: quantity });
+    }
+    setQuantityModalVisible(false);
   };
 
   const filterProductsByGroup = (group) => {
@@ -121,6 +133,7 @@ const Product = ({ navigation }) => {
 
   return (
     <View style={{ flex: 1 }}>
+      <BasketBalloon navigation={navigation} />
       <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
         <View style={styles.headerContainer}>
           <Text style={[styles.header, { color: theme.primaryColor }]}>{t('all_products')}</Text>
@@ -169,7 +182,26 @@ const Product = ({ navigation }) => {
           />
         )}
       </ScrollView>
-      <BasketBalloon navigation={navigation} />
+      <Modal
+        visible={quantityModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setQuantityModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundColor }]}>
+            <Text style={[styles.modalText, { color: theme.textColor }]}>{t('enter_quantity')}</Text>
+            <TextInput
+              style={[styles.input, { borderColor: theme.primaryColor, color: theme.textColor }]}
+              keyboardType="numeric"
+              value={quantity.toString()}
+              onChangeText={(text) => setQuantity(Number(text))}
+            />
+            <Button title={t('add_to_cart')} onPress={handleConfirmAddToCart} />
+            <Button title={t('cancel')} onPress={() => setQuantityModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -230,6 +262,29 @@ const styles = StyleSheet.create({
   groupButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalText: {
+    marginBottom: 10,
+    fontSize: 18,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
   },
 });
 

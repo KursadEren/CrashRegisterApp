@@ -1,17 +1,20 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image } from 'react-native';
+import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image, Modal, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { BasketContext } from '../Context/BasketContext';
 
-const MyFlatlist = ({ data, Basket, showSearchInput, Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
+const MyFlatlist = ({ data, Basket, showSearchInput,users, Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const { addToBasket } = useContext(BasketContext);
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredData, setFilteredData] = useState(data);
+  const [quantityModalVisible, setQuantityModalVisible] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [quantity, setQuantity] = useState(1);
 
   useEffect(() => {
     setFilteredData(data);
@@ -50,59 +53,82 @@ const MyFlatlist = ({ data, Basket, showSearchInput, Touch, onItemSelect, onItem
     setFilteredData(updatedData);
   };
 
-  const renderItem = ({ item }) => {
-    return (
-      <View style={[styles.card, isProductList && styles.cardLarge, { backgroundColor: theme.primaryColor }]}>
-        {isProductList && (
-          <TouchableOpacity style={styles.favoriteIcon} onPress={() => toggleFavorite(item)}>
-            <Icon
-              name={item.favori === 1 ? 'star' : 'star-outline'}
-              size={24}
-              color={theme.accentColor}
-            />
-          </TouchableOpacity>
-        )}
-        <TouchableOpacity style={styles.touch} onPress={() => {
-          if (information === 'update') {
-            onItemRemove(item);
-          } else {
-            onItemSelect(item);
-          }
-        }}>
-          <View style={[styles.item, { backgroundColor: theme.itemBackground }]}>
-            <View style={styles.textContainer}>
-              <Image source={{ uri: item.image }} resizeMode="contain" style={[styles.image, isProductList && styles.imageLarge]} />
-              <Text style={[styles.name, isProductList && styles.nameLarge, { color: theme.textColor }]}>{item.name}</Text>
-            </View>
-          </View>
-          <View style={{ flexDirection: "row" }}>
-            <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>{t('price')}: ${item.price}</Text>
-            {Basket === true && (
-              <TouchableOpacity style={{ width: 40, height: 40 }} onPress={() => addToBasket(item)}>
-                <Icon name="cart" size={40} color="#fff" />
-              </TouchableOpacity>
-            )}
-          </View>
-          {information === 'update' && (
-            <View style={styles.updateContainer}>
-              <View style={styles.quantityContainer}>
-                <Text style={[styles.label, { color: theme.textColor }]}>{t('quantity')}: </Text>
-                <TextInput
-                  style={[styles.quantityInput, { borderColor: theme.secondaryColor, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-                  keyboardType="numeric"
-                  placeholder={t('quantity')}
-                  value={item.count ? item.count.toString() : ''}
-                  onChangeText={text => handleQuantityChange(item, text)}
-                  placeholderTextColor="#"
-                />
-              </View>
-              <Text style={[styles.total, { color: theme.textColor }]}>{t('total')}: ${calculateTotal(item)}</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-      </View>
-    );
+  const handleAddToCart = (item) => {
+    setSelectedItem(item);
+    setQuantity(1);
+    setQuantityModalVisible(true);
   };
+
+  const handleConfirmAddToCart = () => {
+    if (selectedItem) {
+      addToBasket({ ...selectedItem, count: quantity });
+    }
+    setQuantityModalVisible(false);
+  };
+
+  const renderItem = ({ item }) => {
+    if (users) {
+      return (
+        <View style={[styles.card, { backgroundColor: theme.primaryColor , alignItems:"center",justifyContent:"center"}]}>
+           <Image source={require('../../Image/logo2.png')} style={styles.logo} />
+          <Text style={[styles.name, { color: theme.textColor }]}>{item.username}</Text>
+        </View>
+      );
+    } else {
+      return (
+        <View style={[styles.card, isProductList && styles.cardLarge, { backgroundColor: theme.primaryColor }]}>
+          {isProductList && (
+            <TouchableOpacity style={styles.favoriteIcon} onPress={() => toggleFavorite(item)}>
+              <Icon
+                name={item.favori === 1 ? 'star' : 'star-outline'}
+                size={24}
+                color={theme.accentColor}
+              />
+            </TouchableOpacity>
+          )}
+          <TouchableOpacity style={styles.touch} onPress={() => {
+            if (information === 'update') {
+              onItemRemove(item);
+            } else {
+              onItemSelect(item);
+            }
+          }}>
+            <View style={[styles.item, { backgroundColor: theme.itemBackground }]}>
+              <View style={styles.textContainer}>
+                <Image source={{ uri: item.image }} resizeMode="contain" style={[styles.image, isProductList && styles.imageLarge]} />
+                <Text style={[styles.name, isProductList && styles.nameLarge, { color: theme.textColor }]}>{item.name}</Text>
+              </View>
+            </View>
+            <View style={{ flexDirection: "row" }}>
+              <Text style={[styles.price, isProductList && styles.priceLarge, { color: theme.priceColor }]}>{t('price')}: ${item.price}</Text>
+              {Basket === true && (
+                <TouchableOpacity style={{ width: 40, height: 40 }} onPress={() => handleAddToCart(item)}>
+                  <Icon name="cart" size={40} color="#fff" />
+                </TouchableOpacity>
+              )}
+            </View>
+            {information === 'update' && (
+              <View style={styles.updateContainer}>
+                <View style={styles.quantityContainer}>
+                  <Text style={[styles.label, { color: theme.textColor }]}>{t('quantity')}: </Text>
+                  <TextInput
+                    style={[styles.quantityInput, { borderColor: theme.secondaryColor, color: theme.textColor, backgroundColor: theme.inputBackground }]}
+                    keyboardType="numeric"
+                    placeholder={t('quantity')}
+                    value={item.count ? item.count.toString() : ''}
+                    onChangeText={text => handleQuantityChange(item, text)}
+                    placeholderTextColor={theme.placeholderTextColor}
+                  />
+                </View>
+                <Text style={[styles.total, { color: theme.textColor }]}>{t('total')}: ${calculateTotal(item)}</Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        </View>
+      );
+    }
+  };
+  
 
   return (
     <View style={isProductList ? styles.FovoriContainer : styles.container}>
@@ -123,6 +149,26 @@ const MyFlatlist = ({ data, Basket, showSearchInput, Touch, onItemSelect, onItem
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.flatListContent}
       />
+      <Modal
+        visible={quantityModalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setQuantityModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundColor }]}>
+            <Text style={[styles.modalText, { color: theme.textColor }]}>{t('enter_quantity')}</Text>
+            <TextInput
+              style={[styles.input, { borderColor: theme.primaryColor, color: theme.textColor }]}
+              keyboardType="numeric"
+              value={quantity.toString()}
+              onChangeText={(text) => setQuantity(Number(text))}
+            />
+            <Button title={t('add_to_cart')} onPress={handleConfirmAddToCart} />
+            <Button title={t('cancel')} onPress={() => setQuantityModalVisible(false)} />
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 };
@@ -229,7 +275,35 @@ const styles = StyleSheet.create({
   FovoriContainer: {
     flex: 1,
     height: 300,
-  }
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalText: {
+    marginBottom: 10,
+    fontSize: 18,
+  },
+  input: {
+    width: '100%',
+    padding: 10,
+    borderWidth: 1,
+    borderRadius: 5,
+    marginBottom: 10,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: 40,
+  },
 });
 
 export default MyFlatlist;

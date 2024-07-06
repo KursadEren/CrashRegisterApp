@@ -7,7 +7,7 @@ import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import MyTextInput from '../Component/MyTextınput';
 import axios from 'axios';
-
+import { API_URL2 } from '../GroceryData/Constant';
 const Receipt = ({ route }) => {
   const { data2List, bagCount, bagCost } = route.params;
   const { theme } = useContext(ThemeContext);
@@ -22,7 +22,6 @@ const Receipt = ({ route }) => {
   const [sellerName, setSellerName] = useState('');
   const [buyerName, setBuyerName] = useState('');
   const [campaigns, setCampaigns] = useState([]);
-  const [showHelp, setShowHelp] = useState(false);
   const navigation = useNavigation();
   const { serviceStatus } = useServiceStatus();
   const { width, height } = useWindowDimensions();
@@ -35,7 +34,7 @@ const Receipt = ({ route }) => {
         if (storedCampaigns) {
           setCampaigns(JSON.parse(storedCampaigns).campaigns);
         } else {
-          const response = await axios.get('http://localhost:3003/campaigns');
+          const response = await axios.get(`${API_URL2}/campaigns`);
           const campaignsData = response.data;
           await AsyncStorage.setItem('@campaigns', JSON.stringify(campaignsData));
           setCampaigns(campaignsData.campaigns);
@@ -234,7 +233,7 @@ const Receipt = ({ route }) => {
         <Text style={styles.paymentButtonText}>{t('make_payment')}</Text>
       </TouchableOpacity>
 
-      <Button title="Help" onPress={() => setShowHelp(true)} />
+      
 
       <Modal
         animationType="slide"
@@ -242,36 +241,37 @@ const Receipt = ({ route }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: 'rgba(0, 0, 0, 0.7)' }]}>
-          <View style={[styles.modalContent, { backgroundColor: theme.modalBackground }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.backgroundColor}]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.modalBackground}]}>
             <Text style={[styles.modalTitle, { color: theme.textColor }]}>{t('select_payment_method')}</Text>
             
             <Text style={[styles.label, { color: theme.textColor }]}>{t('buyer_name')}</Text>
+            <View style={styles.inputContainer}>
             <MyTextInput
-              style={[styles.input, styles.buyerNameInput, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
+              style={[,styles.input, styles.buyerNameInput, { borderColor: theme.primaryColor, color: theme.textColor, backgroundColor: theme.inputBackground ,flex:1}]}
               placeholder={t('enter_buyer_name')}
-              label1=""
+              label1="'buyer_name'"
               value={buyerName}
               onChangeText={setBuyerName}
               placeholderTextColor={theme.placeholderTextColor}
             />
-
+            </View>
             <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'cash' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
+              style={[styles.modalButton, paymentType === 'cash' && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
               onPress={() => setPaymentType('cash')}
             >
               <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('cash')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'card' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
+              style={[styles.modalButton, paymentType === 'card' && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
               onPress={() => setPaymentType('card')}
             >
               <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('card')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'both' && styles.selectedButton, { backgroundColor: theme.buttonBackground }]}
+              style={[styles.modalButton, paymentType === 'both' && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
               onPress={() => setPaymentType('both')}
             >
               <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('both')}</Text>
@@ -335,22 +335,7 @@ const Receipt = ({ route }) => {
         </View>
       </Modal>
 
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={showHelp}
-        onRequestClose={() => setShowHelp(false)}
-      >
-        <View style={styles.helpOverlay}>
-          <View style={[styles.helpContent, { backgroundColor: theme.backgroundColor }]}>
-            <Text style={[styles.helpTitle, { color: theme.textColor }]}>{t('help')}</Text>
-            <Text style={[styles.helpText, { color: theme.textColor }]}>
-              {t('help_text')}
-            </Text>
-            <Button title="Close" onPress={() => setShowHelp(false)} />
-          </View>
-        </View>
-      </Modal>
+      
     </View>
   );
 };
@@ -500,28 +485,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  helpOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  helpContent: {
-    padding: 20,
-    borderRadius: 10,
-    alignItems: 'center',
-    width: '90%',
-    maxWidth: 400,
-  },
-  helpTitle: {
-    fontSize: 24,
-    marginBottom: 20,
-    fontWeight: 'bold',
-  },
-  helpText: {
-    fontSize: 18,
-    marginBottom: 20,
-  },
+  
 });
 
 export default Receipt;

@@ -20,7 +20,7 @@ const BasketBalloon = ({ navigation }) => {
       onPanResponderGrant: () => {
         position.setOffset({
           x: position.x._value,
-          y: position.y._value
+          y: position.y._value,
         });
         position.setValue({ x: 0, y: 0 });
       },
@@ -43,11 +43,11 @@ const BasketBalloon = ({ navigation }) => {
         Animated.spring(position, {
           toValue: {
             x: Math.abs(finalX - closestX) < Math.abs(finalY - closestY) ? closestX : finalX,
-            y: Math.abs(finalX - closestX) < Math.abs(finalY - closestY) ? finalY : closestY
+            y: Math.abs(finalX - closestX) < Math.abs(finalY - closestY) ? finalY : closestY,
           },
-          useNativeDriver: false
+          useNativeDriver: false,
         }).start();
-      }
+      },
     })
   ).current;
 
@@ -73,7 +73,8 @@ const BasketBalloon = ({ navigation }) => {
           {
             backgroundColor: theme.accentColor,
             transform: position.getTranslateTransform(),
-          }
+            zIndex: 1000, // Z-index değerini artırarak diğer bileşenlerin üstünde görünmesini sağlıyoruz
+          },
         ]}
       >
         <TouchableOpacity onPress={() => navigation.navigate('Sales')}>
@@ -110,12 +111,12 @@ const styles = StyleSheet.create({
     position: 'absolute',
     padding: 10,
     borderRadius: 30,
-    zIndex: 1000,
+    zIndex: 1000, // Z-index değerini artırarak diğer bileşenlerin üstünde görünmesini sağlıyoruz
     flexDirection: 'row',
     alignItems: 'center',
     width: 60,
     height: 60,
-    justifyContent: 'center'
+    justifyContent: 'center',
   },
   text: {
     marginLeft: 5,

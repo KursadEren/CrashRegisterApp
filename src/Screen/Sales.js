@@ -51,9 +51,10 @@ const CameraComponent = ({ onBarcodeRead, onClose }) => {
 const Sales = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
-  const { basket, clearBasket } = useContext(BasketContext);
+  const { basket, setBasket, clearBasket } = useContext(BasketContext);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [data1List, setData1List] = useState([]);
+  const [data2List, setData2List] = useState(DATA2);
   const [quantityModalVisible, setQuantityModalVisible] = useState(false);
   const [quantityInput, setQuantityInput] = useState('');
   const [isItemListEmpty, setIsItemListEmpty] = useState(true);
@@ -88,8 +89,24 @@ const Sales = ({ navigation }) => {
   }, [navigation]);
 
   useEffect(() => {
-    setIsItemListEmpty(basket.length === 0);
-  }, [basket]);
+    setIsItemListEmpty(data2List.length === 0);
+  }, [data2List]);
+
+  useEffect(() => {
+    // BasketContext'teki verileri data2List'e ekleme ve sepeti temizleme
+    if (basket.length > 0) {
+      setData2List((prevData2List) => {
+        const newData2List = [...prevData2List];
+        basket.forEach(item => {
+          if (!newData2List.find(product => product.objectID === item.objectID)) {
+            newData2List.push(item);
+          }
+        });
+        return newData2List;
+      });
+      clearBasket(); // Sepeti temizleme
+    }
+  }, [basket, clearBasket]);
 
   const handleItemSelect = (item) => {
     setSelectedProduct({ ...item, quantityInput: quantityInput });
@@ -97,8 +114,8 @@ const Sales = ({ navigation }) => {
   };
 
   const handleItemRemove = (item) => {
-    const updatedBasket = basket.filter((product) => product.objectID !== item.objectID);
-    setBasket(updatedBasket);
+    const updatedData2List = data2List.filter((product) => product.objectID !== item.objectID);
+    setData2List(updatedData2List);
     if (selectedProduct && selectedProduct.objectID === item.objectID) {
       setSelectedProduct(null);
     }
@@ -110,14 +127,14 @@ const Sales = ({ navigation }) => {
       handleItemRemove(selectedProduct);
     } else {
       if (selectedProduct) {
-        const updatedBasket = [...basket];
-        const selectedItemIndex = updatedBasket.findIndex((item) => item.objectID === selectedProduct.objectID);
+        const updatedData2List = [...data2List];
+        const selectedItemIndex = updatedData2List.findIndex((item) => item.objectID === selectedProduct.objectID);
         if (selectedItemIndex !== -1) {
-          updatedBasket[selectedItemIndex].count = quantity;
+          updatedData2List[selectedItemIndex].count = quantity;
         } else {
-          updatedBasket.push({ ...selectedProduct, count: quantity });
+          updatedData2List.push({ ...selectedProduct, count: quantity });
         }
-        setBasket(updatedBasket);
+        setData2List(updatedData2List);
       }
     }
     setQuantityInput('');
@@ -145,10 +162,10 @@ const Sales = ({ navigation }) => {
     const bagCount = parseInt(bagQuantity, 10) || 0;
     const bagCost = bagCount * 0.25;
     setBagCost(bagCost);
-    const updatedBasket = basket.map(item => ({ ...item, bagCount, bagCost }));
-    setBasket(updatedBasket);
+    const updatedData2List = data2List.map(item => ({ ...item, bagCount, bagCost }));
+    setData2List(updatedData2List);
     setBagModalVisible(false);
-    navigation.navigate("Receipt", { data2List: updatedBasket, bagCount, bagCost });
+    navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
   };
 
   const handleBarcodeRead = (barcodeData) => {
@@ -162,7 +179,7 @@ const Sales = ({ navigation }) => {
     }
   };
 
-  const totalCost = basket.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
+  const totalCost = data2List.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
 
   return (
     <ScrollView style={[styles.scrollView, { padding: width * 0.05, backgroundColor: theme.backgroundColor }]}>
@@ -174,7 +191,7 @@ const Sales = ({ navigation }) => {
       />
 
       <MyFlatlist
-        data={basket}
+        data={data2List}
         showSearchInput={false}
         onItemSelect={handleItemSelect}
         onItemRemove={handleItemRemove}
