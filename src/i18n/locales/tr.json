@@ -104,5 +104,9 @@
   "sales_per_day": "Satış/Gün",
   "recent_purchases": "Son Alımlar",
   "change_language": "Dili Değiştir",
-  "scan_nfc":"Nfc Oku"
+  "scan_nfc":"Nfc Oku",
+  "service_unavailable": "Servis Mevcut Değil", 
+  "service_available": "Servis Mevcut",
+  "open_service":"Servisi Aç",
+  "close_service":"Servisi Kapat"
 }

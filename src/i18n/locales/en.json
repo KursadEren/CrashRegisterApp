@@ -112,5 +112,9 @@
   "operations": "Operations",
   "scale_settings": "Scale Settings",
   "change_language": "Change Language",
-  "scan_nfc":"Scan Nfc"
+  "scan_nfc":"Scan Nfc",
+  "service_unavailable": "Service Unavailable", 
+  "service_available": "Service Available",
+  "open_service":"Open Service",
+  "close_service":"Close Service"
 }

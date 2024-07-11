@@ -6,9 +6,7 @@ import MyTextInput from '../Component/MyTextınput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-import { CameraHighlights, useBarcodeScanner } from "@mgcrea/vision-camera-barcode-scanner";
-import { useCameraDevices, Camera } from "react-native-vision-camera";
-import BarcodeCamera from '../Component/BarcodeCamera';
+
 import { BasketContext } from '../Context/BasketContext';
 
 const DATA2 = [];
@@ -28,7 +26,7 @@ const Sales = ({ navigation }) => {
   const [bagModalVisible, setBagModalVisible] = useState(false);
   const [bagQuantity, setBagQuantity] = useState('');
   const [bagCost, setBagCost] = useState(0);
-  const [barcodeModalVisible, setBarcodeModalVisible] = useState(false);
+
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -211,14 +209,7 @@ const Sales = ({ navigation }) => {
         </View>
       </Modal>
 
-      <Modal
-        visible={barcodeModalVisible}
-        animationType="slide"
-        transparent={true}
-      >
-      
-      </Modal>
-
+     
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
         <Text style={[styles.totalText, { color: theme.textColor }]}>{t('total_cost')}: ${totalCost.toFixed(2)}</Text>
         <MyButton

@@ -8,7 +8,6 @@ import Product from './src/Screen/Product';
 import Reports from './src/Screen/Reports';
 import OtherOp from './src/Screen/OtherOp';
 import Sales from './src/Screen/Sales';
-import SeePrice from './src/Screen/SeePrice';
 import Collections from './src/Screen/Collections';
 import Deneme from './src/Screen/Deneme';
 import Receipt from './src/Screen/Receipt';
@@ -32,13 +31,7 @@ import { EducationProvider } from './src/Context/EducationContext';
 
 const Stack = createStackNavigator();
 
-function CustomHeader({ title }) {
-  return (
-    <View style={styles.headerContainer}>
-      <Text style={styles.headerText}>{title}</Text>
-    </View>
-  );
-}
+
 
 function App() {
   return (
@@ -57,7 +50,6 @@ function App() {
             <Stack.Screen name="Sales" component={Sales} options={{ headerShown: false }} />
             <Stack.Screen name="Receipt" component={Receipt} options={{ headerShown: false }} />
             <Stack.Screen name="ReceiptPrint" component={ReceiptPrint} options={{ headerShown: false }} />
-            <Stack.Screen name="SeePrice" component={SeePrice} options={{ headerShown: false }} />
             <Stack.Screen name="Collections" component={Collections} options={{ headerShown: false }} />
             <Stack.Screen name="Deneme" component={Deneme} options={{ headerShown: false }} />
             <Stack.Screen name="RegisterScreen" component={RegisterScreen} options={{ headerShown: false }}/>

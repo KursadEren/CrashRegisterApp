@@ -4,34 +4,36 @@ import { ThemeContext } from '../Context/ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
+import axios from 'axios';
+import { API_URL2 } from '../GroceryData/Constant'; // Mock servis URL'ini buradan alıyoruz
 
 export default function ProfileScreen() {
   const { theme } = useContext(ThemeContext);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
   const [userData, setUserData] = useState({
-    name: '',
-    email: '',
+    id: '',
     username: '',
-    joined: '',
-    profileImage: ''
+    password: '',
+    biometricData: '',
+    image: ''
   });
 
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const name = await AsyncStorage.getItem('@current_user');
-        const email = await AsyncStorage.getItem('@user_email');
+        const id = await AsyncStorage.getItem('@user_id'); // Kullanıcı ID'sini alıyoruz
         const username = await AsyncStorage.getItem('@user_username');
-        const joined = await AsyncStorage.getItem('@user_joined');
-        const profileImage = await AsyncStorage.getItem('@user_profile_image');
+        const password = await AsyncStorage.getItem('@user_password');
+        const biometricData = await AsyncStorage.getItem('@user_biometricData');
+        const image = await AsyncStorage.getItem('@user_profile_image');
 
         setUserData({
-          name: name || 'N/A',
-          email: email || 'N/A',
-          username: username || 'N/A',
-          joined: joined || 'N/A',
-          profileImage: profileImage || 'https://via.placeholder.com/100'
+          id: id || '',
+          username: username || '',
+          password: password || '',
+          biometricData: biometricData || '',
+          image: image || 'https://via.placeholder.com/100'
         });
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -75,8 +77,25 @@ export default function ProfileScreen() {
       console.log('ImagePicker Error: ', result.error);
     } else {
       const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setUserData(prevState => ({ ...prevState, profileImage: base64Image }));
+      setUserData(prevState => ({ ...prevState, image: base64Image }));
       await AsyncStorage.setItem('@user_profile_image', base64Image);
+      saveProfileImage(base64Image);
+    }
+  };
+
+  const saveProfileImage = async (image) => {
+    try {
+      const response = await axios.post(`${API_URL2}/users/updateProfileImage`, {
+        id: userData.id,
+        image: image,
+      });
+      if (response.status === 200) {
+        console.log('Profile image updated successfully');
+      } else {
+        console.log('Error updating profile image');
+      }
+    } catch (error) {
+      console.error('Error saving profile image:', error);
     }
   };
 
@@ -85,11 +104,11 @@ export default function ProfileScreen() {
       <View style={styles.header}>
         <TouchableOpacity onPress={handleProfileImageChange}>
           <Image
-            source={{ uri: userData.profileImage }}
+            source={{ uri: userData.image }}
             style={styles.profileImage}
           />
         </TouchableOpacity>
-        <Text style={[styles.name, { color: theme.textColor }]}>{userData.name}</Text>
+        <Text style={[styles.name, { color: theme.textColor }]}>{userData.username}</Text>
         <Text style={[styles.email, { color: theme.textColor }]}>{userData.email}</Text>
       </View>
 
@@ -99,8 +118,12 @@ export default function ProfileScreen() {
           <Text style={[styles.infoText, { color: theme.textColor }]}>Username: {userData.username}</Text>
         </View>
         <View style={styles.infoRow}>
-          <Icon name="calendar" size={24} color={theme.textColor} />
-          <Text style={[styles.infoText, { color: theme.textColor }]}>Joined: {userData.joined}</Text>
+          <Icon name="lock-closed" size={24} color={theme.textColor} />
+          <Text style={[styles.infoText, { color: theme.textColor }]}>Password: {userData.password}</Text>
+        </View>
+        <View style={styles.infoRow}>
+          <Icon name="finger-print" size={24} color={theme.textColor} />
+          <Text style={[styles.infoText, { color: theme.textColor }]}>Biometric Data: {userData.biometricData}</Text>
         </View>
       </View>
 

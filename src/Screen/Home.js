@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, TextInput, Image, Modal, useWindowDimensions, RefreshControl, FlatList } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, useWindowDimensions, RefreshControl, FlatList,ActivityIndicator } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MyCard from '../Component/MyCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -14,6 +14,7 @@ import MyFlatlist from '../Component/MyFlatlist';
 const Home = ({ navigation }) => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, i18n } = useTranslation();
+  const { serviceStatus } = useServiceStatus();
   const [productData, setProductData] = useState([]);
   const [favorites, setFavorites] = useState([]);
   const [recentPurchases, setRecentPurchases] = useState([]);
@@ -24,9 +25,19 @@ const Home = ({ navigation }) => {
   const isLandscape = width > height;
   const [refreshing, setRefreshing] = useState(false);
   const [currentUser, setCurrentUser] = useState('');
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
+  const [selectedPurchase, setSelectedPurchase] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const fetchPendingPayments = async () => {
+  const months = [
+    'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
+    'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'
+  ];
+
+  const fetchPendingPayments = async (month) => {
     try {
+      setLoading(true); 
       const keys = await AsyncStorage.getAllKeys();
       const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
       const paymentItems = await AsyncStorage.multiGet(paymentKeys);
@@ -36,13 +47,15 @@ const Home = ({ navigation }) => {
 
       parsedData.forEach(payment => {
         const dateTime = payment.saleDate.split(' ')[0];
-        const day = dateTime.split('.')[0]; // Gün değerini almak için split işlemi
+        const [day, month, year] = dateTime.split('.');
         const totalItems = payment.items.reduce((total, item) => total + item.count, 0);
 
-        if (aggregateSales[day]) {
-          aggregateSales[day] += totalItems;
-        } else {
-          aggregateSales[day] = totalItems;
+        if (parseInt(month) - 1 === selectedMonth) {
+          if (aggregateSales[day]) {
+            aggregateSales[day] += totalItems;
+          } else {
+            aggregateSales[day] = totalItems;
+          }
         }
       });
 
@@ -53,13 +66,16 @@ const Home = ({ navigation }) => {
         labels: sortedDays,
         datasets: [{ data }]
       });
+      setLoading(false); 
     } catch (error) {
+      setLoading(false); 
       console.error('Error fetching pending payments:', error);
     }
   };
 
   const fetchProductData = async () => {
     try {
+      setLoading(true); // Veri çekme işlemi başlarken loading true
       const storedProductData = await AsyncStorage.getItem('@productData');
       if (!storedProductData) {
         const response = await axios.get(`${API_URL2}/products/product`);
@@ -78,45 +94,61 @@ const Home = ({ navigation }) => {
       } else {
         setProductData(JSON.parse(storedProductData));
       }
+      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
     } catch (error) {
       console.error('Error fetching product data:', error);
+      setLoading(false); // Hata durumunda loading false
     }
   };
-
+  
   const fetchFavorites = async () => {
     try {
+      setLoading(true); // Veri çekme işlemi başlarken loading true
       const data = await AsyncStorage.getItem('@productData');
       if (data) {
         const products = JSON.parse(data);
         const favoriteProducts = products.filter(product => product.favori === 1);
         setFavorites(favoriteProducts);
       }
+      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
     } catch (error) {
       console.error('Error fetching favorites:', error);
+      setLoading(false); // Hata durumunda loading false
     }
   };
-
+  
   const fetchRecentPurchases = async () => {
     try {
+      setLoading(true); // Veri çekme işlemi başlarken loading true
       const keys = await AsyncStorage.getAllKeys();
       const purchaseKeys = keys.filter(key => key.startsWith('@payment_'));
       const purchaseItems = await AsyncStorage.multiGet(purchaseKeys);
-
-      const purchases = purchaseItems.map(item => JSON.parse(item[1])).slice(0, 5); // Show last 5 purchases
+  
+      const purchases = purchaseItems
+        .map(item => JSON.parse(item[1]))
+        .reverse()
+        .slice(0, 5);
+  
       setRecentPurchases(purchases);
+      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
     } catch (error) {
       console.error('Error fetching recent purchases:', error);
+      setLoading(false); // Hata durumunda loading false
     }
   };
-
+  
   const fetchCurrentUser = async () => {
     try {
+      setLoading(true); // Veri çekme işlemi başlarken loading true
       const user = await AsyncStorage.getItem('@current_user');
       setCurrentUser(user || '');
+      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
     } catch (error) {
       console.error('Error fetching current user:', error);
+      setLoading(false); // Hata durumunda loading false
     }
   };
+  
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -131,19 +163,17 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     fetchProductData();
     fetchFavorites();
-    fetchPendingPayments();
+    fetchPendingPayments(selectedMonth);
     fetchRecentPurchases();
     fetchCurrentUser();
-  }, []);
+  }, [selectedMonth]);
 
   const changeLanguage = (lang) => {
     i18n.changeLanguage(lang);
   };
 
   const getMonthName = (monthNumber) => {
-    const date = new Date();
-    date.setMonth(monthNumber);
-    return date.toLocaleString('tr-TR', { month: 'long' });
+    return months[monthNumber];
   };
 
   return (
@@ -153,61 +183,78 @@ const Home = ({ navigation }) => {
         <RefreshControl
           refreshing={refreshing}
           onRefresh={onRefresh}
-          colors={[theme.primaryColor]} // Temanıza uygun renk
+          colors={[theme.primaryColor]}
         />
       }
     >
-       {/* Başlık ve Hoşgeldiniz Mesajı */}
-       <View style={styles.header}>
+    {loading && (
+      <ActivityIndicator size="large" color={theme.primaryColor} style={styles.activityIndicator} />
+    )}
+      <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
           <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>{t('hello')},</Text>
           <Text style={[styles.userName, { color: theme.textColor }]}>{currentUser}</Text>
+          <View style={styles.serviceStatusContainer}>
+            <View style={[styles.serviceStatusDot, { backgroundColor: serviceStatus ? 'green' : 'red' }]} />
+            <Text style={[styles.serviceStatusText, { color: theme.textColor }]}>
+              {serviceStatus ? t('service_available') : t('service_unavailable')}
+            </Text>
+          </View>
         </View>
       </View>
-       {/* Arama Çubuğu */}
-       <View style={styles.searchContainer}>
-        <Icon name="search" size={20} color={theme.textColor} style={styles.searchIcon} />
-        <TextInput style={[styles.searchBar, { borderColor: theme.secondaryColor }]} placeholder={t('search')} placeholderTextColor={theme.textColor} />
-      </View>
 
-      {/* Grafik */}
-      {chartData.labels.length > 0 ? (
-        <View style={styles.chartContainer}>
-          <View style={styles.chartHeader}>
-            <Text style={[styles.chartTitle, { color: theme.textColor }]}>{getMonthName(new Date().getMonth())}</Text>
-          </View>
-          <LineChart
-            data={chartData}
-            width={width - 40}
-            height={isLandscape ? 180 : 220}
-            chartConfig={{
-              backgroundColor: theme.primaryColor,
-              backgroundGradientFrom: theme.primaryColor,
-              backgroundGradientTo: theme.secondaryColor,
-              decimalPlaces: 0,
-              color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-              style: {
+      <View style={styles.chartWrapper}>
+        <ScrollView horizontal contentContainerStyle={styles.monthsContentContainer}>
+          {months.map((month, index) => (
+            <TouchableOpacity
+              key={index}
+              onPress={() => setSelectedMonth(index)}
+              style={[
+                styles.monthButton,
+                {
+                  backgroundColor: selectedMonth === index ? theme.primaryColor : theme.secondaryColor
+                }
+              ]}
+            >
+              <Text style={{ color: selectedMonth === index ? '#fff' : theme.textColor }}>{month}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        {chartData.labels.length > 0 && (
+          <View style={styles.chartContainer}>
+            <View style={styles.chartHeader}>
+              <Text style={[styles.chartTitle, { color: theme.textColor }]}>{getMonthName(selectedMonth)}</Text>
+            </View>
+            <LineChart
+              data={chartData}
+              width={width - 40}
+              height={isLandscape ? 180 : 220}
+              chartConfig={{
+                backgroundColor: theme.primaryColor,
+                backgroundGradientFrom: theme.primaryColor,
+                backgroundGradientTo: theme.secondaryColor,
+                decimalPlaces: 0,
+                color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+                style: {
+                  borderRadius: 16
+                }
+              }}
+              bezier
+              style={{
+                marginVertical: 8,
                 borderRadius: 16
-              }
-            }}
-            bezier
-            style={{
-              marginVertical: 8,
-              borderRadius: 16
-            }}
-            fromZero={true}
-          />
-          <View style={styles.chartInfoContainer}>
-            <Text style={[styles.chartInfoText, { color: theme.textColor }]}> {t('sales_per_day')} </Text>
+              }}
+              fromZero={true}
+            />
+            <View style={styles.chartInfoContainer}>
+              <Text style={[styles.chartInfoText, { color: theme.textColor }]}>{t('sales_per_day')}</Text>
+            </View>
           </View>
-        </View>
-      ) : (
-        <Text style={[styles.noDataText, { color: theme.textColor }]}>{t('no_data')}</Text>
-      )}
+        )}
+      </View>
 
-      {/* Öne Çıkanlar (Favoriler) */}
       <View style={styles.featuredSection}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('favorites')}</Text>
@@ -227,38 +274,27 @@ const Home = ({ navigation }) => {
         />
       </View>
 
-      {/* Son Alımlar */}
       <View style={styles.recentPurchasesSection}>
         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
           <Text style={[styles.sectionTitle, { color: theme.textColor }]}>{t('recent_purchases')}</Text>
-          
         </View>
-        {recentPurchases.length > 0 ? (
-          <FlatList
-            data={recentPurchases}
-            horizontal={true}
-            keyExtractor={(item, index) => index.toString()}
-            renderItem={({ item: purchase }) => (
-              <View style={[styles.purchaseItem]}>
+        <FlatList
+          data={recentPurchases}
+          horizontal={true}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item: purchase }) => (
+            <TouchableOpacity onPress={() => { setSelectedPurchase(purchase); setModalVisible(true); }}>
+              <View style={[styles.purchaseItem, { backgroundColor: theme.itemBackground }]}>
+                <Image source={{ uri: purchase.items[0].image }} style={styles.purchaseImage} />
                 <Text style={[styles.purchaseText, { color: theme.textColor }]}>
-                  {t('date')}: {purchase.date}
+                  {purchase.items[0].name}
                 </Text>
-                <MyFlatlist
-                  data={purchase.items}
-                  showSearchInput={false}
-                  onItemSelect={() => { }}
-                  onItemRemove={() => { }}
-                  isProductList={false}
-                />
               </View>
-            )}
-          />
-        ) : (
-          <Text style={[styles.noDataText, { color: theme.textColor }]}>{t('no_recent_purchases')}</Text>
-        )}
+            </TouchableOpacity>
+          )}
+        />
       </View>
 
-      {/* Kategoriler */}
       <View style={styles.content}>
         <View style={styles.row}>
           <MyCard navigation={navigation} CardName={t('sales')} CardPage="Sales" CardColor={theme.primaryColor} IconName="cash-register" />
@@ -279,6 +315,35 @@ const Home = ({ navigation }) => {
       </View>
 
       <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundColor }]}>
+            <Text style={[styles.modalTitle, { color: theme.textColor }]}>{t('purchase_details')}</Text>
+            {selectedPurchase && (
+              <>
+                <Text style={[styles.purchaseText, { color: theme.textColor }]}>
+                  {t('date')}: {selectedPurchase.saleDate}
+                </Text>
+                {selectedPurchase.items.map((item, index) => (
+                  <View key={index} style={[styles.itemContainer, { backgroundColor: theme.itemBackground }]}>
+                    <Text style={[styles.itemName, { color: theme.textColor }]}>{item.name}</Text>
+                    <Text style={[styles.itemCount, { color: theme.textColor }]}>{t('count')}: {item.count}</Text>
+                  </View>
+                ))}
+              </>
+            )}
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={[styles.closeButton, { backgroundColor: theme.primaryColor }]}>
+              <Text style={styles.closeButtonText}>{t('close')}</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
         visible={toastVisible}
         transparent={true}
         animationType="fade"
@@ -296,6 +361,20 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
+  },
+  chartWrapper: {
+    marginBottom: 20,
+  },
+  monthsContentContainer: {
+    justifyContent: 'space-between',
+  },
+  monthsContainer: {
+    marginBottom: 10,
+  },
+  monthButton: {
+    padding: 10,
+    borderRadius: 5,
+    marginHorizontal: 5,
   },
   header: {
     flexDirection: 'row',
@@ -387,46 +466,35 @@ const styles = StyleSheet.create({
   },
   recentPurchasesSection: {
     marginBottom: 20,
-  
   },
   purchaseItem: {
-    marginHorizontal: 20, 
     padding: 10,
     borderRadius: 5,
+    marginHorizontal: 5,
     alignItems: 'center',
-    width: 200, 
+  },
+  purchaseImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
   },
   purchaseText: {
-    fontSize: 14, 
+    fontSize: 14,
     fontWeight: 'bold',
-    marginBottom: 5,
-    textAlign: 'center', 
+    marginTop: 5,
+    textAlign: 'center',
   },
-  itemContainerHorizontal: {
-    
+  itemContainer: {
     padding: 10,
     borderRadius: 5,
-    marginRight: 10,
-    alignItems: 'center',
-    width: 150, 
-  },
-  itemImage: {
-    width: 50,
-    height: 50,
-    marginBottom: 5,
+    marginBottom: 10,
   },
   itemName: {
     fontSize: 14,
     fontWeight: 'bold',
-    textAlign: 'center',
-  },
-  itemPrice: {
-    fontSize: 14,
-    textAlign: 'center',
   },
   itemCount: {
     fontSize: 14,
-    textAlign: 'center',
   },
   noDataText: {
     fontSize: 16,
@@ -460,6 +528,47 @@ const styles = StyleSheet.create({
     color: '#fff',
     padding: 10,
     borderRadius: 10,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+  modalContent: {
+    padding: 20,
+    borderRadius: 10,
+    width: '80%',
+    alignItems: 'center',
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  closeButton: {
+    marginTop: 20,
+    padding: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  closeButtonText: {
+    color: '#fff',
+    fontSize: 16,
+  },
+  serviceStatusContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 5,
+  },
+  serviceStatusDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginRight: 5,
+  },
+  serviceStatusText: {
+    fontSize: 14,
   },
 });
 
