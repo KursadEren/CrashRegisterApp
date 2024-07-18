@@ -6,7 +6,7 @@ import { useLandscape } from '../Context/LandSpaceProvider';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
-export default function MyButton({ OnChangeButton, iconname, text, visible, hasError, badge }) {
+export default function MyButton({ OnChangeButton, iconname, text, visible, hasError, setHasError, badge }) {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -21,6 +21,7 @@ export default function MyButton({ OnChangeButton, iconname, text, visible, hasE
   useEffect(() => {
     if (hasError) {
       Vibration.vibrate();
+      setHasError(false); // Hata durumunu sıfırlayın
     }
   }, [hasError]);
 

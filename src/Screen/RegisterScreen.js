@@ -128,7 +128,6 @@ const RegisterScreen = ({ navigation }) => {
       Alert.alert(t('error'), t('failed_to_register_user'));
     }
   };
-  
 
   const panResponder = useRef(
     PanResponder.create({
@@ -178,7 +177,7 @@ const RegisterScreen = ({ navigation }) => {
         <MyTextInput onChangeText={setConfirmPassword} label1={t('confirm_password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton hasError={hasError} visible={true} iconname="account-plus" OnChangeButton={handleRegister} text={t('register')} />
+        <MyButton hasError={hasError} setHasError={setHasError} visible={true} iconname="account-plus" OnChangeButton={handleRegister} text={t('register')} />
       </View>
     </View>
   );

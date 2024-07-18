@@ -1,13 +1,14 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Image, TouchableOpacity, useWindowDimensions, Alert } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../Context/ThemeContext';
 import Icon from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { launchCamera, launchImageLibrary } from 'react-native-image-picker';
-import axios from 'axios';
-import { API_URL2 } from '../GroceryData/Constant'; // Mock servis URL'ini buradan alıyoruz
+import RNFS from 'react-native-fs';
 
 export default function ProfileScreen() {
+  const { t, i18n } = useTranslation();
   const { theme } = useContext(ThemeContext);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -23,11 +24,11 @@ export default function ProfileScreen() {
     const fetchUserData = async () => {
       try {
         const id = await AsyncStorage.getItem('@user_id'); // Kullanıcı ID'sini alıyoruz
-        const username = await AsyncStorage.getItem('@user_username');
+        const username = await AsyncStorage.getItem('@current_user');
         const password = await AsyncStorage.getItem('@user_password');
         const biometricData = await AsyncStorage.getItem('@user_biometricData');
-        const image = await AsyncStorage.getItem('@user_profile_image');
-
+        const image = await AsyncStorage.getItem(`@user_profile_image_${username}`);
+          console.log(username);
         setUserData({
           id: id || '',
           username: username || '',
@@ -36,7 +37,7 @@ export default function ProfileScreen() {
           image: image || 'https://via.placeholder.com/100'
         });
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error(t('errorFetchingData'), error);
       }
     };
 
@@ -46,16 +47,16 @@ export default function ProfileScreen() {
   const handleProfileImageChange = async () => {
     const options = {
       mediaType: 'photo',
-      includeBase64: true,
+      includeBase64: false,
     };
 
     Alert.alert(
-      "Select Image",
-      "Choose the source for the image",
+      t('selectImage'),
+      t('chooseSource'),
       [
-        { text: "Camera", onPress: () => openCamera(options) },
-        { text: "Gallery", onPress: () => openGallery(options) },
-        { text: "Cancel", style: "cancel" }
+        { text: t('camera'), onPress: () => openCamera(options) },
+        { text: t('gallery'), onPress: () => openGallery(options) },
+        { text: t('cancel'), style: "cancel" }
       ]
     );
   };
@@ -72,30 +73,27 @@ export default function ProfileScreen() {
 
   const handleImageResult = async (result) => {
     if (result.didCancel) {
-      console.log('User cancelled image picker');
+      console.log(t('userCancelled'));
     } else if (result.error) {
-      console.log('ImagePicker Error: ', result.error);
+      console.log(t('imagePickerError'), result.error);
     } else {
-      const base64Image = `data:image/jpeg;base64,${result.assets[0].base64}`;
-      setUserData(prevState => ({ ...prevState, image: base64Image }));
-      await AsyncStorage.setItem('@user_profile_image', base64Image);
-      saveProfileImage(base64Image);
+      const uri = result.assets[0].uri;
+      saveImageLocally(uri);
     }
   };
 
-  const saveProfileImage = async (image) => {
+  const saveImageLocally = async (uri) => {
     try {
-      const response = await axios.post(`${API_URL2}/users/updateProfileImage`, {
-        id: userData.id,
-        image: image,
-      });
-      if (response.status === 200) {
-        console.log('Profile image updated successfully');
-      } else {
-        console.log('Error updating profile image');
-      }
+      const fileName = `${userData.username}_profile.jpg`;
+      const destPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
+
+      await RNFS.copyFile(uri, destPath);
+
+      const fileUri = `file://${destPath}`;
+      setUserData(prevState => ({ ...prevState, image: fileUri }));
+      await AsyncStorage.setItem(`@user_profile_image_${userData.username}`, fileUri);
     } catch (error) {
-      console.error('Error saving profile image:', error);
+      console.error('Error saving image locally:', error);
     }
   };
 
@@ -109,30 +107,35 @@ export default function ProfileScreen() {
           />
         </TouchableOpacity>
         <Text style={[styles.name, { color: theme.textColor }]}>{userData.username}</Text>
-        <Text style={[styles.email, { color: theme.textColor }]}>{userData.email}</Text>
       </View>
 
       <View style={styles.infoContainer}>
         <View style={styles.infoRow}>
           <Icon name="person" size={24} color={theme.textColor} />
-          <Text style={[styles.infoText, { color: theme.textColor }]}>Username: {userData.username}</Text>
+          <Text style={[styles.infoText, { color: theme.textColor }]}>
+            {t('username')}: {userData.username}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Icon name="lock-closed" size={24} color={theme.textColor} />
-          <Text style={[styles.infoText, { color: theme.textColor }]}>Password: {userData.password}</Text>
+          <Text style={[styles.infoText, { color: theme.textColor }]}>
+            {t('password')}: {userData.password}
+          </Text>
         </View>
         <View style={styles.infoRow}>
           <Icon name="finger-print" size={24} color={theme.textColor} />
-          <Text style={[styles.infoText, { color: theme.textColor }]}>Biometric Data: {userData.biometricData}</Text>
+          <Text style={[styles.infoText, { color: theme.textColor }]}>
+            {t('biometricData')}: {userData.biometricData}
+          </Text>
         </View>
       </View>
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={[styles.button, { backgroundColor: theme.primaryColor }]}>
-          <Text style={styles.buttonText}>Edit Profile</Text>
+          <Text style={styles.buttonText}>{t('editProfile')}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, { backgroundColor: theme.secondaryColor }]}>
-          <Text style={styles.buttonText}>Settings</Text>
+          <Text style={styles.buttonText}>{t('settings')}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -157,10 +160,6 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: 'bold',
-  },
-  email: {
-    fontSize: 16,
-    color: 'gray',
   },
   infoContainer: {
     marginBottom: 30,
