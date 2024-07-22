@@ -28,7 +28,7 @@ export default function ProfileScreen() {
         const password = await AsyncStorage.getItem('@user_password');
         const biometricData = await AsyncStorage.getItem('@user_biometricData');
         const image = await AsyncStorage.getItem(`@user_profile_image_${username}`);
-          console.log(username);
+        console.log(username);
         setUserData({
           id: id || '',
           username: username || '',
@@ -78,20 +78,30 @@ export default function ProfileScreen() {
       console.log(t('imagePickerError'), result.error);
     } else {
       const uri = result.assets[0].uri;
-      saveImageLocally(uri);
+      // Update the state immediately with the new image URI
+      setUserData(prevState => ({ ...prevState, image: uri }));
+      // Save the new image URI locally
+      await saveImageLocally(uri);
     }
   };
 
   const saveImageLocally = async (uri) => {
     try {
+      // Delete the old image if it exists
+      if (userData.image && userData.image.startsWith('file://')) {
+        const oldImagePath = userData.image.replace('file://', '');
+        await RNFS.unlink(oldImagePath);
+      }
+
       const fileName = `${userData.username}_profile.jpg`;
       const destPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
       await RNFS.copyFile(uri, destPath);
 
       const fileUri = `file://${destPath}`;
-      setUserData(prevState => ({ ...prevState, image: fileUri }));
+      // Update the state with the final URI and save it to AsyncStorage
       await AsyncStorage.setItem(`@user_profile_image_${userData.username}`, fileUri);
+      setUserData(prevState => ({ ...prevState, image: fileUri }));
     } catch (error) {
       console.error('Error saving image locally:', error);
     }

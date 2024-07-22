@@ -12,8 +12,8 @@ import { useEducation } from '../Context/EducationContext';
 import NfcManager, { NfcTech, Ndef } from 'react-native-nfc-manager';
 import axios from 'axios';
 import { API_URL2 } from "../GroceryData/Constant";
-NfcManager.start();
 
+NfcManager.start();
 const { width } = Dimensions.get('window');
 
 function LoginScreen({ navigation }) {
@@ -25,6 +25,7 @@ function LoginScreen({ navigation }) {
   const isLandscape = useLandscape();
   const translateX = useRef(new Animated.Value(0)).current;
 
+  // Check NFC support
   const checkNfcSupport = async () => {
     try {
       const isSupported = await NfcManager.isSupported();
@@ -40,7 +41,6 @@ function LoginScreen({ navigation }) {
       Alert.alert('NFC Error', error.message);
     }
   };
-  
 
   useEffect(() => {
     checkNfcSupport();
@@ -49,6 +49,7 @@ function LoginScreen({ navigation }) {
     };
   }, []);
 
+  // Handle back button press
   useEffect(() => {
     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
       navigation.goBack();
@@ -58,9 +59,9 @@ function LoginScreen({ navigation }) {
     return () => backHandler.remove();
   }, [navigation]);
 
+  // Handle login
   const handleLogin = async () => {
     try {
-      // AsyncStorage'den kullanıcı verisini al
       const userData = await AsyncStorage.getItem('@biometric_user_' + username);
       if (userData) {
         const { password: storedPassword } = JSON.parse(userData);
@@ -70,18 +71,16 @@ function LoginScreen({ navigation }) {
           return;
         }
       }
-  
-      // AsyncStorage'de kullanıcı verisi yoksa mock servisten al
+
       const response = await axios.get(`${API_URL2}/users/users`, {
         params: {
           username: username,
           password: password
         }
       });
-  
-      // response.data'nın doğru yapıda olup olmadığını kontrol et
+
       if (response.status === 200 && response.data && Array.isArray(response.data) && response.data.length > 0) {
-        const user = response.data[0]; // response.data bir dizi olduğundan, ilk öğeyi al
+        const user = response.data[0];
         if (user.username === username && user.password === password) {
           await AsyncStorage.setItem('@biometric_user_' + username, JSON.stringify(user));
           await AsyncStorage.setItem('@current_user', username);
@@ -89,19 +88,15 @@ function LoginScreen({ navigation }) {
           return;
         }
       }
-  
-      // Kullanıcı bulunamazsa hata mesajı göster
+
       Alert.alert(t('error'), t('invalid_username_password'));
     } catch (e) {
       console.log('Error:', e);
       Alert.alert(t('error'), t('failed_login'));
     }
   };
-  
-  
-  
-  
 
+  // Handle biometric authentication
   const handleBiometricAuth = async () => {
     const rnBiometrics = new ReactNativeBiometrics();
 
@@ -132,16 +127,17 @@ function LoginScreen({ navigation }) {
     }
   };
 
+  // Read NFC tag
   const readNfcTag = async () => {
     try {
-      await checkNfcSupport(); // NFC desteğini kontrol edin
+      await checkNfcSupport();
 
       await NfcManager.requestTechnology(NfcTech.Ndef);
       const tag = await NfcManager.getTag();
       if (tag && tag.ndefMessage) {
         const payload = tag.ndefMessage[0].payload;
         const text = Ndef.text.decodePayload(payload);
-        const data = text.slice(3); // Skip language code
+        const data = text.slice(3);
         const [nfcUsername, nfcPassword] = data.split(':');
         if (nfcUsername && nfcPassword) {
           setUsername(nfcUsername);
@@ -158,14 +154,12 @@ function LoginScreen({ navigation }) {
     }
   };
 
+  // PanResponder for swipe gestures
   const panResponder = useRef(
     PanResponder.create({
       onMoveShouldSetPanResponder: () => true,
       onPanResponderMove: Animated.event(
-        [
-          null,
-          { dx: translateX }
-        ],
+        [null, { dx: translateX }],
         { useNativeDriver: false }
       ),
       onPanResponderRelease: (evt, gestureState) => {
@@ -196,8 +190,6 @@ function LoginScreen({ navigation }) {
       }
     })
   ).current;
-
-
 
   return (
     <View style={[styles.container, isLandscape ? styles.containerLandscape : styles.containerPortrait, { backgroundColor: theme.backgroundColor }]}>
@@ -290,7 +282,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     padding: 10,
     borderRadius: 5,
-    
   },
   nfcButtonText: {
     color: '#fff',
