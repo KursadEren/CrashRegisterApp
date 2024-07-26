@@ -17,30 +17,29 @@ export default function ProfileScreen() {
     username: '',
     password: '',
     biometricData: '',
-    image: ''
+    image: 'https://via.placeholder.com/100'
   });
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const id = await AsyncStorage.getItem('@user_id'); // Kullanıcı ID'sini alıyoruz
-        const username = await AsyncStorage.getItem('@current_user');
-        const password = await AsyncStorage.getItem('@user_password');
-        const biometricData = await AsyncStorage.getItem('@user_biometricData');
-        const image = await AsyncStorage.getItem(`@user_profile_image_${username}`);
-        console.log(username);
-        setUserData({
-          id: id || '',
-          username: username || '',
-          password: password || '',
-          biometricData: biometricData || '',
-          image: image || 'https://via.placeholder.com/100'
-        });
-      } catch (error) {
-        console.error(t('errorFetchingData'), error);
-      }
-    };
+  const fetchUserData = async () => {
+    try {
+      const id = await AsyncStorage.getItem('@user_id');
+      const username = await AsyncStorage.getItem('@current_user');
+      const password = await AsyncStorage.getItem('@user_password');
+      const biometricData = await AsyncStorage.getItem('@user_biometricData');
+      const image = await AsyncStorage.getItem(`@user_profile_image_${username}`);
+      setUserData({
+        id: id || '',
+        username: username || '',
+        password: password || '',
+        biometricData: biometricData || '',
+        image: image || 'https://via.placeholder.com/100'
+      });
+    } catch (error) {
+      console.error(t('errorFetchingData'), error);
+    }
+  };
 
+  useEffect(() => {
     fetchUserData();
   }, []);
 
@@ -56,50 +55,60 @@ export default function ProfileScreen() {
       [
         { text: t('camera'), onPress: () => openCamera(options) },
         { text: t('gallery'), onPress: () => openGallery(options) },
-        { text: t('cancel'), style: "cancel" }
+        { text: t('cancel'), style: 'cancel' }
       ]
     );
   };
 
   const openCamera = async (options) => {
     const result = await launchCamera(options);
-    handleImageResult(result);
-  };
-
-  const openGallery = async (options) => {
-    const result = await launchImageLibrary(options);
-    handleImageResult(result);
-  };
-
-  const handleImageResult = async (result) => {
     if (result.didCancel) {
       console.log(t('userCancelled'));
     } else if (result.error) {
       console.log(t('imagePickerError'), result.error);
     } else {
       const uri = result.assets[0].uri;
-      // Update the state immediately with the new image URI
-      setUserData(prevState => ({ ...prevState, image: uri }));
-      // Save the new image URI locally
+      await clearAllImages();
       await saveImageLocally(uri);
+      setUserData(prevState => ({ ...prevState, image: uri }));
+    }
+  };
+
+  const openGallery = async (options) => {
+    const result = await launchImageLibrary(options);
+    if (result.didCancel) {
+      console.log(t('userCancelled'));
+    } else if (result.error) {
+      console.log(t('imagePickerError'), result.error);
+    } else {
+      const uri = result.assets[0].uri;
+      await clearAllImages();
+      await saveImageLocally(uri);
+      setUserData(prevState => ({ ...prevState, image: uri }));
+    }
+  };
+
+  const clearAllImages = async () => {
+    try {
+      const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
+      for (const file of files) {
+        if (file.isFile() && file.name.endsWith('_profile.jpg')) {
+          await RNFS.unlink(file.path);
+        }
+      }
+    } catch (error) {
+      console.error('Error clearing images:', error);
     }
   };
 
   const saveImageLocally = async (uri) => {
     try {
-      // Delete the old image if it exists
-      if (userData.image && userData.image.startsWith('file://')) {
-        const oldImagePath = userData.image.replace('file://', '');
-        await RNFS.unlink(oldImagePath);
-      }
-
       const fileName = `${userData.username}_profile.jpg`;
       const destPath = `${RNFS.DocumentDirectoryPath}/${fileName}`;
 
       await RNFS.copyFile(uri, destPath);
 
       const fileUri = `file://${destPath}`;
-      // Update the state with the final URI and save it to AsyncStorage
       await AsyncStorage.setItem(`@user_profile_image_${userData.username}`, fileUri);
       setUserData(prevState => ({ ...prevState, image: fileUri }));
     } catch (error) {
@@ -121,19 +130,19 @@ export default function ProfileScreen() {
 
       <View style={styles.infoContainer}>
         <View style={styles.infoRow}>
-          <Icon name="person" size={24} color={theme.textColor} />
+          <Icon name='person' size={24} color={theme.textColor} />
           <Text style={[styles.infoText, { color: theme.textColor }]}>
             {t('username')}: {userData.username}
           </Text>
         </View>
         <View style={styles.infoRow}>
-          <Icon name="lock-closed" size={24} color={theme.textColor} />
+          <Icon name='lock-closed' size={24} color={theme.textColor} />
           <Text style={[styles.infoText, { color: theme.textColor }]}>
             {t('password')}: {userData.password}
           </Text>
         </View>
         <View style={styles.infoRow}>
-          <Icon name="finger-print" size={24} color={theme.textColor} />
+          <Icon name='finger-print' size={24} color={theme.textColor} />
           <Text style={[styles.infoText, { color: theme.textColor }]}>
             {t('biometricData')}: {userData.biometricData}
           </Text>
