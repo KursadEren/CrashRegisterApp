@@ -1,5 +1,5 @@
 import React, { useContext, useState, useEffect } from 'react';
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, useWindowDimensions, RefreshControl, FlatList,ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Image, Modal, useWindowDimensions, RefreshControl, FlatList, ActivityIndicator, Vibration } from 'react-native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import MyCard from '../Component/MyCard';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -37,7 +37,7 @@ const Home = ({ navigation }) => {
 
   const fetchPendingPayments = async (month) => {
     try {
-      setLoading(true); 
+      setLoading(true);
       const keys = await AsyncStorage.getAllKeys();
       const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
       const paymentItems = await AsyncStorage.multiGet(paymentKeys);
@@ -66,16 +66,17 @@ const Home = ({ navigation }) => {
         labels: sortedDays,
         datasets: [{ data }]
       });
-      setLoading(false); 
+      setLoading(false);
     } catch (error) {
-      setLoading(false); 
+      setLoading(false);
+      Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching pending payments:', error);
     }
   };
 
   const fetchProductData = async () => {
     try {
-      setLoading(true); // Veri çekme işlemi başlarken loading true
+      setLoading(true);
       const storedProductData = await AsyncStorage.getItem('@productData');
       if (!storedProductData) {
         const response = await axios.get(`${API_URL2}/products/product`);
@@ -94,61 +95,64 @@ const Home = ({ navigation }) => {
       } else {
         setProductData(JSON.parse(storedProductData));
       }
-      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
+      Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching product data:', error);
-      setLoading(false); // Hata durumunda loading false
     }
   };
-  
+
   const fetchFavorites = async () => {
     try {
-      setLoading(true); // Veri çekme işlemi başlarken loading true
+      setLoading(true);
       const data = await AsyncStorage.getItem('@productData');
       if (data) {
         const products = JSON.parse(data);
         const favoriteProducts = products.filter(product => product.favori === 1);
         setFavorites(favoriteProducts);
       }
-      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
+      Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching favorites:', error);
-      setLoading(false); // Hata durumunda loading false
     }
   };
-  
+
   const fetchRecentPurchases = async () => {
     try {
-      setLoading(true); // Veri çekme işlemi başlarken loading true
+      setLoading(true);
       const keys = await AsyncStorage.getAllKeys();
       const purchaseKeys = keys.filter(key => key.startsWith('@payment_'));
       const purchaseItems = await AsyncStorage.multiGet(purchaseKeys);
-  
+
       const purchases = purchaseItems
         .map(item => JSON.parse(item[1]))
         .reverse()
         .slice(0, 5);
-  
+
       setRecentPurchases(purchases);
-      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
+      Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching recent purchases:', error);
-      setLoading(false); // Hata durumunda loading false
     }
   };
-  
+
   const fetchCurrentUser = async () => {
     try {
-      setLoading(true); // Veri çekme işlemi başlarken loading true
+      setLoading(true);
       const user = await AsyncStorage.getItem('@current_user');
       setCurrentUser(user || '');
-      setLoading(false); // Veri çekme işlemi bittikten sonra loading false
+      setLoading(false);
     } catch (error) {
+      setLoading(false);
+      Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching current user:', error);
-      setLoading(false); // Hata durumunda loading false
     }
   };
-  
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -187,9 +191,9 @@ const Home = ({ navigation }) => {
         />
       }
     >
-    {loading && (
-      <ActivityIndicator size="large" color={theme.primaryColor} style={styles.activityIndicator} />
-    )}
+      {loading && (
+        <ActivityIndicator size="large" color={theme.primaryColor} style={styles.activityIndicator} />
+      )}
       <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
@@ -286,7 +290,7 @@ const Home = ({ navigation }) => {
             <TouchableOpacity onPress={() => { setSelectedPurchase(purchase); setModalVisible(true); }}>
               <View style={[styles.purchaseItem, { backgroundColor: theme.itemBackground }]}>
                 <Image source={{ uri: purchase.items[0].image }} style={styles.purchaseImage} />
-                <Text style={[styles.purchaseText, { color: theme.textColor }]}>
+                <Text style={[styles.purchaseText, { color: theme.textColor,alignItems:"center",justifyContent:"center" }]}>
                   {purchase.items[0].name}
                 </Text>
               </View>
@@ -472,6 +476,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     alignItems: 'center',
+    width:220,
+    height:220
   },
   purchaseImage: {
     width: 100,
@@ -482,7 +488,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 5,
-    textAlign: 'center',
+    textAlign:"auto",
+    flexWrap:"wrap"
   },
   itemContainer: {
     padding: 10,
@@ -569,6 +576,9 @@ const styles = StyleSheet.create({
   },
   serviceStatusText: {
     fontSize: 14,
+  },
+  activityIndicator: {
+    marginTop: 20,
   },
 });
 

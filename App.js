@@ -27,6 +27,7 @@ import 'intl/locale-data/jsonp/en'; // İhtiyacınıza göre farklı dilleri de 
 import 'intl-pluralrules';
 import UserListScreen from './src/Screen/UserListScreen';
 import { EducationProvider } from './src/Context/EducationContext';
+import Return from './src/Screen/Return';
 
 
 const Stack = createStackNavigator();
@@ -56,6 +57,7 @@ function App() {
             <Stack.Screen name="AllReports" component={AllReports} options={{ headerShown: false }}/>
             <Stack.Screen name="SalesReport" component={SalesReport} options={{ headerShown: false }}/>
            <Stack.Screen name="UserListScreen" component={UserListScreen} options={{ headerShown: false }}/>
+           <Stack.Screen name="Return" component={Return} options={{ headerShown: false }}/>
           </Stack.Navigator>
         </NavigationContainer>
       </AppProvider>    

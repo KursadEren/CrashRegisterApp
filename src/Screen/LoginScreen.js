@@ -22,6 +22,7 @@ function LoginScreen({ navigation }) {
   const { educationStep, nextStep } = useEducation();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [hasError, setHasError] = useState(false); // Added state for error handling
   const isLandscape = useLandscape();
   const translateX = useRef(new Animated.Value(0)).current;
 
@@ -41,6 +42,7 @@ function LoginScreen({ navigation }) {
       Alert.alert('NFC Error', error.message);
     }
   };
+  
 
   useEffect(() => {
     checkNfcSupport();
@@ -61,6 +63,18 @@ function LoginScreen({ navigation }) {
 
   // Handle login
   const handleLogin = async () => {
+    if (!username || !password) {
+      setHasError(true);
+      Alert.alert(t('error'), t('fill_all_fields'));
+      return;
+    }
+  
+    if (!isValidPassword(password)) {
+      setHasError(true);
+      Alert.alert(t('error'), t('invalid_password'));
+      return;
+    }
+  
     try {
       const userData = await AsyncStorage.getItem('@biometric_user_' + username);
       if (userData) {
@@ -71,14 +85,14 @@ function LoginScreen({ navigation }) {
           return;
         }
       }
-
+  
       const response = await axios.get(`${API_URL2}/users/users`, {
         params: {
           username: username,
           password: password
         }
       });
-
+  
       if (response.status === 200 && response.data && Array.isArray(response.data) && response.data.length > 0) {
         const user = response.data[0];
         if (user.username === username && user.password === password) {
@@ -88,14 +102,21 @@ function LoginScreen({ navigation }) {
           return;
         }
       }
-
+  
+      setHasError(true);
       Alert.alert(t('error'), t('invalid_username_password'));
     } catch (e) {
+      setHasError(true);
       console.log('Error:', e);
       Alert.alert(t('error'), t('failed_login'));
     }
   };
-
+  
+  const isValidPassword = (password) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(password);
+  };
+  
   // Handle biometric authentication
   const handleBiometricAuth = async () => {
     const rnBiometrics = new ReactNativeBiometrics();
@@ -206,7 +227,7 @@ function LoginScreen({ navigation }) {
         <MyTextInput onChangeText={setPassword} value={password} label1={t('password')} secureTextEntry />
       </View>
       <View style={styles.textInputContainer}>
-        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text={t('login')} />
+        <MyButton visible={true} iconname="login" OnChangeButton={handleLogin} text={t('login')} hasError={hasError} setHasError={setHasError} />
       </View>
       <View style={styles.biometricContainer}>
         <Text style={[styles.text, { color: theme.textColor }]}>{t('biometric_authentication')}</Text>

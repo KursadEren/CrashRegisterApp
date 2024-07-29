@@ -108,5 +108,8 @@
   "service_unavailable": "Servis Mevcut Değil", 
   "service_available": "Servis Mevcut",
   "open_service":"Servisi Aç",
-  "close_service":"Servisi Kapat"
+  "close_service":"Servisi Kapat",
+  "buyer_name":"Alıcı Adı",
+  "return_items": "İade Ürünler"
+  
 }

@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, Vibration, BackHandler, useWindowDimensions, ScrollView, Button } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, Vibration, BackHandler, useWindowDimensions } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import MyTextInput from '../Component/MyTextınput';
+import MyButton from '../Component/MyButton'; // MyButton bileşenini ekleyin
 import axios from 'axios';
 import { API_URL2 } from '../GroceryData/Constant';
+
 const Receipt = ({ route }) => {
   const { data2List, bagCount, bagCost } = route.params;
   const { theme } = useContext(ThemeContext);
@@ -22,6 +24,7 @@ const Receipt = ({ route }) => {
   const [sellerName, setSellerName] = useState('');
   const [buyerName, setBuyerName] = useState('');
   const [campaigns, setCampaigns] = useState([]);
+  const [hasError, setHasError] = useState(false); // Hata durumu
   const navigation = useNavigation();
   const { serviceStatus } = useServiceStatus();
   const { width, height } = useWindowDimensions();
@@ -97,6 +100,13 @@ const Receipt = ({ route }) => {
   const { subtotal, total, totalItems, discount } = calculateTotals();
 
   const handlePayment = async () => {
+    if (!buyerName) {
+      setHasError(true); // Hata durumunu ayarla
+      Vibration.vibrate(); // Titreşim ekle
+      alert(t('error_enter_buyer_name'));
+      return;
+    }
+
     const currentDate = new Date();
     const options = { timeZone: 'Europe/Istanbul', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' };
 
@@ -135,7 +145,7 @@ const Receipt = ({ route }) => {
       navigation.navigate('ReceiptPrint', { paymentDetails });
     } else {
       alert(t('error_paid_less_than_total'));
-      Vibration.vibrate();
+      Vibration.vibrate(); // Titreşim ekle
     }
   };
 
@@ -226,14 +236,14 @@ const Receipt = ({ route }) => {
         </View>
       </View>
 
-      <TouchableOpacity
-        style={[styles.paymentButton, { backgroundColor: theme.primaryColor }]}
-        onPress={() => setModalVisible(true)}
-      >
-        <Text style={styles.paymentButtonText}>{t('make_payment')}</Text>
-      </TouchableOpacity>
-
-      
+      <MyButton
+        visible={true}
+        iconname="cash-register"
+        OnChangeButton={() => setModalVisible(true)}
+        text={t('make_payment')}
+        hasError={false}
+        setHasError={setHasError}
+      />
 
       <Modal
         animationType="slide"
@@ -257,64 +267,64 @@ const Receipt = ({ route }) => {
             />
             </View>
             <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'cash' && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
-              onPress={() => setPaymentType('cash')}
+              style={[styles.modalButton, paymentType === t('cash') && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
+              onPress={() => setPaymentType(t('cash'))}
             >
               <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('cash')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'card' && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
-              onPress={() => setPaymentType('card')}
+              style={[styles.modalButton, paymentType === t('card') && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
+              onPress={() => setPaymentType(t('card'))}
             >
               <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('card')}</Text>
             </TouchableOpacity>
 
             <TouchableOpacity
-              style={[styles.modalButton, paymentType === 'both' && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
-              onPress={() => setPaymentType('both')}
+              style={[styles.modalButton, paymentType === t('both') && {borderColor: theme.primaryColor,borderWidth:2}, { backgroundColor: theme.buttonBackground }]}
+              onPress={() => setPaymentType(t('both'))}
             >
               <Text style={[styles.modalButtonText, { color: theme.textColor }]}>{t('both')}</Text>
             </TouchableOpacity>
 
             {paymentType !== '' && (
               <View style={styles.inputContainer}>
-                {paymentType === 'cash' && (
+                {paymentType === t('cash') && (
                   <MyTextInput
                     style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                     placeholder={t('cash_amount')}
                     keyboardType="numeric"
-                    label1={""}
+                    label1={t('cash_amount')}
                     value={cashAmount}
                     onChangeText={setCashAmount}
                     placeholderTextColor={theme.placeholderTextColor}
                   />
                 )}
-                {paymentType === 'card' && (
+                {paymentType === t('card') && (
                   <MyTextInput
                     style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                     placeholder={t('card_amount')}
                     keyboardType="numeric"
-                    label1={""}
+                    label1={t('card_amount')}
                     value={cardAmount}
                     onChangeText={setCardAmount}
                     placeholderTextColor={theme.placeholderTextColor}
                   />
                 )}
-                {paymentType === 'both' && (
+                {paymentType === t('both') && (
                   <View>
                     <MyTextInput
                       style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
                       placeholder={t('cash_amount')}
                       keyboardType="numeric"
-                      label1={""}
+                      label1={t('cash_amount')}
                       value={cashAmount}
                       onChangeText={setCashAmount}
                       placeholderTextColor={theme.placeholderTextColor}
                     />
                     <MyTextInput
                       style={[styles.input, { borderColor: theme.inputBorder, color: theme.textColor, backgroundColor: theme.inputBackground }]}
-                      label1={""}
+                      label1={t('card_amount')}
                       placeholder={t('card_amount')}
                       keyboardType="numeric"
                       value={cardAmount}
@@ -323,19 +333,20 @@ const Receipt = ({ route }) => {
                     />
                   </View>
                 )}
-                <TouchableOpacity
-                  style={[styles.submitButton, { backgroundColor: theme.buttonBackground }]}
-                  onPress={handlePayment}
-                >
-                  <Text style={[styles.submitButtonText, { color: theme.textColor }]}>{t('make_payment')}</Text>
-                </TouchableOpacity>
+                <MyButton
+                  visible={true}
+                  iconname="check-circle"
+                  OnChangeButton={handlePayment}
+                  text={t('make_payment')}
+                  hasError={hasError}
+                  setHasError={setHasError}
+                />
               </View>
             )}
           </View>
         </View>
       </Modal>
 
-      
     </View>
   );
 };
@@ -485,7 +496,6 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  
 });
 
 export default Receipt;

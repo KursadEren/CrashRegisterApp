@@ -132,7 +132,7 @@ const ReceiptPrint = () => {
     <ScrollView style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <ReceiptContent paymentDetails={paymentDetails} />
       <View style={styles.buttonContainer}>
-        <MyButton visible={true} OnChangeButton={handlePrint} text={t('print')} />
+        <MyButton visible={true} iconname="printer-pos" OnChangeButton={handlePrint} text={t('print')} />
         <MyButton visible={true} OnChangeButton={() => navigation.navigate('Home')} text={t('home_page')} />
       </View>
     </ScrollView>
