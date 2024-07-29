@@ -8,6 +8,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import RNBluetoothClassic from 'react-native-bluetooth-classic';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useIsFocused } from '@react-navigation/native';
+import axios from 'axios';
+import { API_URL2 } from '../GroceryData/Constant';
+
 const SettingsScreen = () => {
   const { theme, toggleTheme } = useContext(ThemeContext);
   const { t, i18n } = useTranslation();
@@ -18,15 +21,14 @@ const SettingsScreen = () => {
   const [unsentPaymentsCount, setUnsentPaymentsCount] = useState(0); // Yeni state
   const [isProcessing, setIsProcessing] = useState(false); // İşleme durumunu kontrol etmek için
   const isFocused = useIsFocused();
+
   useEffect(() => {
-    
     loadUnsentPaymentsCount(); // Sayfa açıldığında unsent payments count'u yükle
     if (serviceStatus) {
       sendUnsentPaymentsToCentral();
     }
   }, [isFocused]);
 
-           {/* inactive */}
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
       try {
@@ -173,6 +175,28 @@ const SettingsScreen = () => {
     }
   };
 
+  const handleResetProductData = async () => {
+    try {
+      await AsyncStorage.removeItem('@productData');
+      const response = await axios.get(`${API_URL2}/products/product`);
+      if (response.status === 200) {
+        const products = response.data.map(product => ({
+          objectID: product.objectID,
+          name: product.name,
+          price: product.price,
+          image: product.image,
+          categories: product.categories,
+          favori: 0
+        }));
+        await AsyncStorage.setItem('@productData', JSON.stringify(products));
+        Alert.alert(t('success'), t('product_data_reset_success'));
+      }
+    } catch (error) {
+      console.error('Product data reset error:', error);
+      Alert.alert(t('error'), t('product_data_reset_error'));
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundColor }]}>
       <Text style={[styles.header, { color: theme.textColor }]}>{t('settings')}</Text>
@@ -187,13 +211,16 @@ const SettingsScreen = () => {
           <MyButton visible={true} OnChangeButton={toggleServiceStatus} text={serviceStatus ? t('close_service') : t('open_service')} />
           {unsentPaymentsCount > 0 && (
             <View style={styles.badgeContainer}>
-              <MaterialCommunityIcons name="alert-circle"  style={{height:17,width:17}} color="red" />
+              <MaterialCommunityIcons name="alert-circle" style={{ height: 17, width: 17 }} color="red" />
               <Text style={styles.badgeText}>{unsentPaymentsCount}</Text>
             </View>
           )}
         </View>
         <View style={styles.buttonWrapper}>
           <MyButton visible={true} OnChangeButton={handlePrinterTest} text={t('printer_test')} />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <MyButton visible={true} OnChangeButton={handleResetProductData} text={t('reset_product_data')} />
         </View>
       </View>
       <Modal

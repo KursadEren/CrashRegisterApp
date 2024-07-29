@@ -110,6 +110,7 @@
   "open_service":"Servisi Aç",
   "close_service":"Servisi Kapat",
   "buyer_name":"Alıcı Adı",
-  "return_items": "İade Ürünler"
+  "return_items": "İade Ürünler",
+  "purchase_details":"SatınAlma Detayları"
   
 }

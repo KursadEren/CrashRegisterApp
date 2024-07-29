@@ -118,7 +118,8 @@
   "open_service":"Open Service",
   "close_service":"Close Service",
   "buyer_name":"Buyer Name",
-  "return_items": "Return Items"
+  "return_items": "Return Items",
+  "purchase_details":"Purchase Details"
   
   
 }

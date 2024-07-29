@@ -36976,4 +36976,110 @@
         "rating": 1,
         "objectID": "4452902"
     }
+
+
+
+    ,
+    {
+        "name": "Ubisoft - Xbox One Stereo Headset Adapter - Black",
+        "description": "Plug your favorite compatible headset into the Xbox One Stereo Headset Adapter and hear the action just the way you like it. Easily adjust chat audio without taking your hands off the controller. Add game audio by connecting directly to your controller, console, or TV.",
+        "brand": "Microsoft",
+        "categories": [
+            "Video Games",
+            "Xbox One",
+            "Xbox One Accessories",
+            "Xbox One Headsets"
+        ],
+        "hierarchicalCategories": {
+            "lvl0": "Video Games",
+            "lvl1": "Video Games > Xbox One",
+            "lvl2": "Video Games > Xbox One > Xbox One Accessories",
+            "lvl3": "Video Games > Xbox One > Xbox One Accessories > Xbox One Headsets"
+        },
+        "type": "Xbx1 non gsp",
+        "price": 24.99,
+        "price_range": "1 - 50",
+        "image": "https://cdn-demo.algolia.com/bestbuy/9008243_sb.jpg",
+        "url": "http://www.bestbuy.com/site/microsoft-xbox-one-stereo-headset-adapter-black/9008243.p?id=1219013503686&skuId=9008243&cmp=RMX&ky=1uWSHMdQqBeVJB9cXgEke60s5EjfS6M1W",
+        "free_shipping": false,
+        "popularity": 3305,
+        "rating": 3,
+        "objectID": "9008249"
+    },
+    {
+        "name": "Ubisoft - Xbox One The Lego Movie Videogame Bundle - Black",
+        "description": "Get the ultimate LEGO building experience with the Xbox One The LEGO Movie Videogame bundle, featuring The LEGO Movie Videogame. Play a delightful and surprising mix of over 90 characters from the film, including Batman, Superman, the Green Ninja, Gandalf, and more. Enjoy your Xbox 360 games with the advanced features of Xbox One, like Game DVR and in-home streaming to Windows 10. Play with friends on Xbox Live. And quickly switch between live TV, games, and apps like Netflix and Hulu Plus. With Xbox One, everyone gets to play.",
+        "brand": "Microsoft",
+        "categories": [
+            "Video Games",
+            "Xbox One",
+            "Xbox One Consoles"
+        ],
+        "hierarchicalCategories": {
+            "lvl0": "Video Games",
+            "lvl1": "Video Games > Xbox One",
+            "lvl2": "Video Games > Xbox One > Xbox One Consoles"
+        },
+        "type": "Xbx1 hardware",
+        "price": 349.99,
+        "price_range": "200 - 500",
+        "image": "https://cdn-demo.algolia.com/bestbuy/4452902_sb.jpg",
+        "url": "http://www.bestbuy.com/site/microsoft-xbox-one-the-lego-movie-videogame-bundle-black/4452902.p?id=1219750723305&skuId=4452902&cmp=RMX&ky=1uWSHMdQqBeVJB9cXgEke60s5EjfS6M1W",
+        "free_shipping": false,
+        "popularity": 3304,
+        "rating": 1,
+        "objectID": "4452908"
+    }
+
+    ,
+    {
+        "name": "Zen - Xbox One Stereo Headset Adapter - Black",
+        "description": "Plug your favorite compatible headset into the Xbox One Stereo Headset Adapter and hear the action just the way you like it. Easily adjust chat audio without taking your hands off the controller. Add game audio by connecting directly to your controller, console, or TV.",
+        "brand": "Microsoft",
+        "categories": [
+            "Video Games",
+            "Xbox One",
+            "Xbox One Accessories",
+            "Xbox One Headsets"
+        ],
+        "hierarchicalCategories": {
+            "lvl0": "Video Games",
+            "lvl1": "Video Games > Xbox One",
+            "lvl2": "Video Games > Xbox One > Xbox One Accessories",
+            "lvl3": "Video Games > Xbox One > Xbox One Accessories > Xbox One Headsets"
+        },
+        "type": "Xbx1 non gsp",
+        "price": 24.99,
+        "price_range": "1 - 50",
+        "image": "https://cdn-demo.algolia.com/bestbuy/9008243_sb.jpg",
+        "url": "http://www.bestbuy.com/site/microsoft-xbox-one-stereo-headset-adapter-black/9008243.p?id=1219013503686&skuId=9008243&cmp=RMX&ky=1uWSHMdQqBeVJB9cXgEke60s5EjfS6M1W",
+        "free_shipping": false,
+        "popularity": 3305,
+        "rating": 3,
+        "objectID": "9008247"
+    },
+    {
+        "name": "Zen - Xbox One The Lego Movie Videogame Bundle - Black",
+        "description": "Get the ultimate LEGO building experience with the Xbox One The LEGO Movie Videogame bundle, featuring The LEGO Movie Videogame. Play a delightful and surprising mix of over 90 characters from the film, including Batman, Superman, the Green Ninja, Gandalf, and more. Enjoy your Xbox 360 games with the advanced features of Xbox One, like Game DVR and in-home streaming to Windows 10. Play with friends on Xbox Live. And quickly switch between live TV, games, and apps like Netflix and Hulu Plus. With Xbox One, everyone gets to play.",
+        "brand": "Microsoft",
+        "categories": [
+            "Video Games",
+            "Xbox One",
+            "Xbox One Consoles"
+        ],
+        "hierarchicalCategories": {
+            "lvl0": "Video Games",
+            "lvl1": "Video Games > Xbox One",
+            "lvl2": "Video Games > Xbox One > Xbox One Consoles"
+        },
+        "type": "Xbx1 hardware",
+        "price": 349.99,
+        "price_range": "200 - 500",
+        "image": "https://cdn-demo.algolia.com/bestbuy/4452902_sb.jpg",
+        "url": "http://www.bestbuy.com/site/microsoft-xbox-one-the-lego-movie-videogame-bundle-black/4452902.p?id=1219750723305&skuId=4452902&cmp=RMX&ky=1uWSHMdQqBeVJB9cXgEke60s5EjfS6M1W",
+        "free_shipping": false,
+        "popularity": 3304,
+        "rating": 1,
+        "objectID": "4452903"
+    }
 ]}

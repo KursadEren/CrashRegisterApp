@@ -28,7 +28,7 @@ const Home = ({ navigation }) => {
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedPurchase, setSelectedPurchase] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true); // Başlangıçta true olarak ayarlandı
 
   const months = [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
@@ -37,7 +37,6 @@ const Home = ({ navigation }) => {
 
   const fetchPendingPayments = async (month) => {
     try {
-      setLoading(true);
       const keys = await AsyncStorage.getAllKeys();
       const paymentKeys = keys.filter(key => key.startsWith('@payment_'));
       const paymentItems = await AsyncStorage.multiGet(paymentKeys);
@@ -66,9 +65,7 @@ const Home = ({ navigation }) => {
         labels: sortedDays,
         datasets: [{ data }]
       });
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching pending payments:', error);
     }
@@ -76,7 +73,6 @@ const Home = ({ navigation }) => {
 
   const fetchProductData = async () => {
     try {
-      setLoading(true);
       const storedProductData = await AsyncStorage.getItem('@productData');
       if (!storedProductData) {
         const response = await axios.get(`${API_URL2}/products/product`);
@@ -95,9 +91,7 @@ const Home = ({ navigation }) => {
       } else {
         setProductData(JSON.parse(storedProductData));
       }
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching product data:', error);
     }
@@ -105,16 +99,13 @@ const Home = ({ navigation }) => {
 
   const fetchFavorites = async () => {
     try {
-      setLoading(true);
       const data = await AsyncStorage.getItem('@productData');
       if (data) {
         const products = JSON.parse(data);
         const favoriteProducts = products.filter(product => product.favori === 1);
         setFavorites(favoriteProducts);
       }
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching favorites:', error);
     }
@@ -122,7 +113,6 @@ const Home = ({ navigation }) => {
 
   const fetchRecentPurchases = async () => {
     try {
-      setLoading(true);
       const keys = await AsyncStorage.getAllKeys();
       const purchaseKeys = keys.filter(key => key.startsWith('@payment_'));
       const purchaseItems = await AsyncStorage.multiGet(purchaseKeys);
@@ -133,9 +123,7 @@ const Home = ({ navigation }) => {
         .slice(0, 5);
 
       setRecentPurchases(purchases);
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching recent purchases:', error);
     }
@@ -143,12 +131,9 @@ const Home = ({ navigation }) => {
 
   const fetchCurrentUser = async () => {
     try {
-      setLoading(true);
       const user = await AsyncStorage.getItem('@current_user');
       setCurrentUser(user || '');
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching current user:', error);
     }
@@ -165,11 +150,17 @@ const Home = ({ navigation }) => {
   };
 
   useEffect(() => {
-    fetchProductData();
-    fetchFavorites();
-    fetchPendingPayments(selectedMonth);
-    fetchRecentPurchases();
-    fetchCurrentUser();
+    const fetchData = async () => {
+      setLoading(true);
+      await fetchProductData();
+      await fetchFavorites();
+      await fetchPendingPayments(selectedMonth);
+      await fetchRecentPurchases();
+      await fetchCurrentUser();
+      setLoading(false);
+    };
+
+    fetchData();
   }, [selectedMonth]);
 
   const changeLanguage = (lang) => {
@@ -179,6 +170,14 @@ const Home = ({ navigation }) => {
   const getMonthName = (monthNumber) => {
     return months[monthNumber];
   };
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color={theme.primaryColor} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView
@@ -191,9 +190,6 @@ const Home = ({ navigation }) => {
         />
       }
     >
-      {loading && (
-        <ActivityIndicator size="large" color={theme.primaryColor} style={styles.activityIndicator} />
-      )}
       <View style={styles.header}>
         <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
@@ -290,7 +286,7 @@ const Home = ({ navigation }) => {
             <TouchableOpacity onPress={() => { setSelectedPurchase(purchase); setModalVisible(true); }}>
               <View style={[styles.purchaseItem, { backgroundColor: theme.itemBackground }]}>
                 <Image source={{ uri: purchase.items[0].image }} style={styles.purchaseImage} />
-                <Text style={[styles.purchaseText, { color: theme.textColor,alignItems:"center",justifyContent:"center" }]}>
+                <Text style={[styles.purchaseText, { color: theme.textColor, textAlign: "center", flexWrap: "wrap" }]}>
                   {purchase.items[0].name}
                 </Text>
               </View>
@@ -476,8 +472,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     alignItems: 'center',
-    width:220,
-    height:220
+    width: 220, // Genişliği sınırla
+    height: 220, // Yüksekliği sınırla
   },
   purchaseImage: {
     width: 100,
@@ -488,8 +484,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: 'bold',
     marginTop: 5,
-    textAlign:"auto",
-    flexWrap:"wrap"
+    textAlign: "center",
+    flexWrap: "wrap"
   },
   itemContainer: {
     padding: 10,
@@ -579,6 +575,11 @@ const styles = StyleSheet.create({
   },
   activityIndicator: {
     marginTop: 20,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
