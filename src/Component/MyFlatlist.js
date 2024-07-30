@@ -19,10 +19,9 @@ const MyFlatlist = ({ data, Basket, showSearchInput, users, Touch, onItemSelect,
     setFilteredData(data);
   }, [data]);
 
-  const handleSearch = query => {
-    setSearchQuery(query);
+  const handleSearch = () => {
     const filtered = data.filter(item =>
-      item.username.toLowerCase().includes(query.toLowerCase())
+      item.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
     setFilteredData(filtered);
   };
@@ -135,8 +134,9 @@ const MyFlatlist = ({ data, Basket, showSearchInput, users, Touch, onItemSelect,
           style={[styles.searchInput, { borderColor: theme.secondaryColor, color: theme.textColor, backgroundColor: theme.inputBackground }]}
           placeholder={t('search')}
           value={searchQuery}
-          onChangeText={handleSearch}
+          onChangeText={setSearchQuery}
           placeholderTextColor={theme.placeholderTextColor}
+          onSubmitEditing={handleSearch}
         />
       )}
       <FlatList

@@ -1,22 +1,19 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions, Alert, TouchableOpacity } from 'react-native';
+import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions, TouchableOpacity } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
 import MyButton from '../Component/MyButton';
 import MyTextInput from '../Component/MyTextınput';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
-
 import { BasketContext } from '../Context/BasketContext';
 
 const DATA2 = [];
 
-
-
 const Sales = ({ navigation }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
-  const { basket, setBasket, clearBasket } = useContext(BasketContext);
+  const { basket, clearBasket } = useContext(BasketContext);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [data1List, setData1List] = useState([]);
   const [data2List, setData2List] = useState(DATA2);
@@ -26,7 +23,7 @@ const Sales = ({ navigation }) => {
   const [bagModalVisible, setBagModalVisible] = useState(false);
   const [bagQuantity, setBagQuantity] = useState('');
   const [bagCost, setBagCost] = useState(0);
-
+  const [showFavorites, setShowFavorites] = useState(false);
 
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
@@ -58,7 +55,6 @@ const Sales = ({ navigation }) => {
   }, [data2List]);
 
   useEffect(() => {
-    // BasketContext'teki verileri data2List'e ekleme ve sepeti temizleme
     if (basket.length > 0) {
       setData2List((prevData2List) => {
         const newData2List = [...prevData2List];
@@ -69,7 +65,7 @@ const Sales = ({ navigation }) => {
         });
         return newData2List;
       });
-      clearBasket(); // Sepeti temizleme
+      clearBasket();
     }
   }, [basket, clearBasket]);
 
@@ -133,12 +129,38 @@ const Sales = ({ navigation }) => {
     navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
   };
 
-  
+  const handleToggleFavorites = async () => {
+    setShowFavorites(!showFavorites);
+    if (!showFavorites) {
+      try {
+        const data = await AsyncStorage.getItem('@productData');
+        if (data) {
+          const products = JSON.parse(data);
+          const favoriteProducts = products.filter(product => product.favori === 1);
+          setData1List(favoriteProducts);
+        }
+      } catch (error) {
+        console.error('Error fetching favorites:', error);
+      }
+    } else {
+      const storedData = await AsyncStorage.getItem('@productData');
+      if (storedData) {
+        setData1List(JSON.parse(storedData));
+      }
+    }
+  };
 
   const totalCost = data2List.reduce((total, item) => total + (item.price * item.count), 0) + bagCost;
 
   return (
     <ScrollView style={[styles.scrollView, { padding: width * 0.05, backgroundColor: theme.backgroundColor }]}>
+      <View style={styles.buttonContainer}>
+        <MyButton
+          visible={true}
+          OnChangeButton={handleToggleFavorites}
+          text={showFavorites ? t('show_all') : t('show_favorites')}
+        />
+      </View>
       <MyFlatlist
         data={data1List}
         showSearchInput={true}
@@ -209,7 +231,6 @@ const Sales = ({ navigation }) => {
         </View>
       </Modal>
 
-     
       <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
         <Text style={[styles.totalText, { color: theme.textColor }]}>{t('total_cost')}: ${totalCost.toFixed(2)}</Text>
         <MyButton
@@ -217,7 +238,6 @@ const Sales = ({ navigation }) => {
           OnChangeButton={handleRouteReceipt}
           text={t('go_receipt')}
         />
-       
       </View>
     </ScrollView>
   );
@@ -263,24 +283,6 @@ const styles = StyleSheet.create({
   totalText: {
     fontSize: 18,
     marginBottom: 10,
-  },
-  cameraContainer: {
-    flex: 1,
-  },
-  camera: {
-    width: '100%',
-    height: '80%',
-  },
-  closeButton: {
-    position: 'absolute',
-    bottom: 20,
-    padding: 10,
-    backgroundColor: 'red',
-    borderRadius: 5,
-  },
-  closeButtonText: {
-    color: 'white',
-    fontSize: 16,
   },
 });
 

@@ -119,7 +119,11 @@
   "close_service":"Close Service",
   "buyer_name":"Buyer Name",
   "return_items": "Return Items",
-  "purchase_details":"Purchase Details"
+  "purchase_details":"Purchase Details",
+  "show_all":"Show All",
+   "show_favorites":"Show Favorites",
+   "add_to_cart": "Add To Cart",
+   "Reset_product_data":"Reset Product Data"
   
   
 }

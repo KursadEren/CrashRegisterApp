@@ -117,11 +117,14 @@ const Home = ({ navigation }) => {
       const purchaseKeys = keys.filter(key => key.startsWith('@payment_'));
       const purchaseItems = await AsyncStorage.multiGet(purchaseKeys);
 
-      const purchases = purchaseItems
-        .map(item => JSON.parse(item[1]))
-        .reverse()
-        .slice(0, 5);
+      const uniquePurchases = new Map();
 
+      purchaseItems.forEach(item => {
+        const purchase = JSON.parse(item[1]);
+        uniquePurchases.set(purchase.saleDate, purchase);
+      });
+
+      const purchases = Array.from(uniquePurchases.values()).reverse().slice(0, 5);
       setRecentPurchases(purchases);
     } catch (error) {
       Vibration.vibrate(); // Hata durumunda titreşim

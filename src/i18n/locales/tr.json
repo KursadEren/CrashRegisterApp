@@ -111,6 +111,9 @@
   "close_service":"Servisi Kapat",
   "buyer_name":"Alıcı Adı",
   "return_items": "İade Ürünler",
-  "purchase_details":"SatınAlma Detayları"
-  
+  "purchase_details":"SatınAlma Detayları",
+   "show_all":"Tümünü Göster",
+   "show_favorites":"Fovorileri Göster",
+   "add_to_cart": "Cart Eklw",
+   "Reset_product_data":"Ürün Verilerini Sıfırla"
 }
