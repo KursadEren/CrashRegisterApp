@@ -68,7 +68,7 @@ export default function ProfileScreen() {
       console.log(t('imagePickerError'), result.error);
     } else {
       const uri = result.assets[0].uri;
-      await clearAllImages();
+      await clearUserImages(userData.username);
       await saveImageLocally(uri);
       setUserData(prevState => ({ ...prevState, image: uri }));
     }
@@ -82,17 +82,17 @@ export default function ProfileScreen() {
       console.log(t('imagePickerError'), result.error);
     } else {
       const uri = result.assets[0].uri;
-      await clearAllImages();
+      await clearUserImages(userData.username);
       await saveImageLocally(uri);
       setUserData(prevState => ({ ...prevState, image: uri }));
     }
   };
 
-  const clearAllImages = async () => {
+  const clearUserImages = async (username) => {
     try {
       const files = await RNFS.readDir(RNFS.DocumentDirectoryPath);
       for (const file of files) {
-        if (file.isFile() && file.name.endsWith('_profile.jpg')) {
+        if (file.isFile() && file.name.startsWith(`${username}_profile`)) {
           await RNFS.unlink(file.path);
         }
       }

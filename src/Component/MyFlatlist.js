@@ -1,12 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import { View, FlatList, StyleSheet, Text, TouchableOpacity, TextInput, Image, Modal, Button } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ThemeContext } from '../Context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { BasketContext } from '../Context/BasketContext';
 
-const MyFlatlist = ({ data, Basket, showSearchInput,users, Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
+const MyFlatlist = ({ data, Basket, showSearchInput, users, Touch, onItemSelect, onItemRemove, onAddToCart, favoriteList, isProductList, information }) => {
   const { theme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const { addToBasket } = useContext(BasketContext);
@@ -23,7 +22,7 @@ const MyFlatlist = ({ data, Basket, showSearchInput,users, Touch, onItemSelect, 
   const handleSearch = query => {
     setSearchQuery(query);
     const filtered = data.filter(item =>
-      item.name.toLowerCase().includes(query.toLowerCase())
+      item.username.toLowerCase().includes(query.toLowerCase())
     );
     setFilteredData(filtered);
   };
@@ -69,8 +68,8 @@ const MyFlatlist = ({ data, Basket, showSearchInput,users, Touch, onItemSelect, 
   const renderItem = ({ item }) => {
     if (users) {
       return (
-        <View style={[styles.card, { backgroundColor: theme.primaryColor , alignItems:"center",justifyContent:"center"}]}>
-           <Image source={require('../../Image/logo2.png')} style={styles.logo} />
+        <View style={[styles.card, { backgroundColor: theme.primaryColor, alignItems: "center", justifyContent: "center" }]}>
+          <Image source={{ uri: item.image }} style={styles.logo} />
           <Text style={[styles.name, { color: theme.textColor }]}>{item.username}</Text>
         </View>
       );
@@ -128,7 +127,6 @@ const MyFlatlist = ({ data, Basket, showSearchInput,users, Touch, onItemSelect, 
       );
     }
   };
-  
 
   return (
     <View style={isProductList ? styles.FovoriContainer : styles.container}>

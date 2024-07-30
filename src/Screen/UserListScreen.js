@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
 import axios from 'axios';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import MyFlatlist from "../Component/MyFlatlist";
 import { API_URL2 } from "../GroceryData/Constant";
 
@@ -12,24 +13,29 @@ const UserListScreen = () => {
     const fetchUsers = async () => {
       try {
         const response = await axios.get(`${API_URL2}/users/users`);
-        setUsers(response.data);
+        const usersWithImages = await addImagesToUsers(response.data);
+        setUsers(usersWithImages);
         setLoading(false);
       } catch (error) {
         console.error("Error fetching data:", error.message);
-        if (error.response) {
-          console.error("Response data:", error.response.data);
-          console.error("Response status:", error.response.status);
-        } else if (error.request) {
-          console.error("Request data:", error.request);
-        } else {
-          console.error("Error message:", error.message);
-        }
         setLoading(false);
       }
     };
-
+  
     fetchUsers();
   }, []);
+  
+  const addImagesToUsers = async (users) => {
+    const usersWithImages = [];
+    for (const user of users) {
+      const image = await AsyncStorage.getItem(`@user_profile_image_${user.username}`);
+      usersWithImages.push({ ...user, image: image || 'https://via.placeholder.com/100' });
+    }
+    return usersWithImages;
+  };
+  
+
+  
 
   if (loading) {
     return (
