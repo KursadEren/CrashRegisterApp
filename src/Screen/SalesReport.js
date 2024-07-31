@@ -186,6 +186,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginVertical: 5,
     alignSelf: 'flex-start', 
+    paddingHorizontal:10,
+    margin:10
   },
   colorBox: {
     width: 20,

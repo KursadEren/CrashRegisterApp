@@ -123,7 +123,14 @@
   "show_all":"Show All",
    "show_favorites":"Show Favorites",
    "add_to_cart": "Add To Cart",
-   "Reset_product_data":"Reset Product Data"
+   "Reset_product_data":"Reset Product Data",
+   "select_misc_item":"Select Misc Item",
+   "add_misc_item":"Add Misc Item",
+   "reset_product_data":"Reset Product Data",
+  "no_printer_found":"No Printer Found",
+  "product_data_reset_success":"Product Data Reset Success",
+  "product_data_reset_Error":"Product Data Reset Error"
+  
   
   
 }

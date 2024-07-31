@@ -55,6 +55,7 @@ const SettingsScreen = () => {
       }
     }
   };
+  
 
   const loadUnsentPaymentsCount = async () => {
     try {
@@ -129,15 +130,18 @@ const SettingsScreen = () => {
   };
 
   const handlePrinterTest = async () => {
+   
+    await requestPermissions();
+  
     try {
       const enabled = await RNBluetoothClassic.isBluetoothEnabled();
       if (!enabled) {
         await RNBluetoothClassic.requestEnable();
       }
-
+  
       const bondedDevices = await RNBluetoothClassic.getBondedDevices();
       setDevices(bondedDevices);
-
+  
       if (bondedDevices.length > 0) {
         connectToDevice(bondedDevices[0]);
       } else {
@@ -148,7 +152,7 @@ const SettingsScreen = () => {
       console.error(error);
     }
   };
-
+  
   const connectToDevice = async (device) => {
     try {
       const connected = await RNBluetoothClassic.connectToDevice(device.address);

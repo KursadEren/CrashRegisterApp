@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, Vibration, BackHandler, useWindowDimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, Modal, TouchableOpacity, Vibration, BackHandler, useWindowDimensions, ScrollView } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useServiceStatus } from '../Context/ServiceStatusContext';
@@ -251,6 +251,7 @@ const Receipt = ({ route }) => {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}
       >
+        <ScrollView  >
         <View style={[styles.modalOverlay, { backgroundColor: theme.backgroundColor}]}>
           <View style={[styles.modalContent, { backgroundColor: theme.modalBackground}]}>
             <Text style={[styles.modalTitle, { color: theme.textColor }]}>{t('select_payment_method')}</Text>
@@ -260,7 +261,7 @@ const Receipt = ({ route }) => {
             <MyTextInput
               style={[,styles.input, styles.buyerNameInput, { borderColor: theme.primaryColor, color: theme.textColor, backgroundColor: theme.inputBackground ,flex:1}]}
               placeholder={t('enter_buyer_name')}
-              label1="'buyer_name'"
+              label1="buyer_name"
               value={buyerName}
               onChangeText={setBuyerName}
               placeholderTextColor={theme.placeholderTextColor}
@@ -345,6 +346,7 @@ const Receipt = ({ route }) => {
             )}
           </View>
         </View>
+        </ScrollView>
       </Modal>
 
     </View>
@@ -434,6 +436,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   modalOverlay: {
+    marginVertical:40,
     flex: 1,
     justifyContent: "center",
     alignItems: "center",

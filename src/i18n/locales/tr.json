@@ -115,5 +115,12 @@
    "show_all":"Tümünü Göster",
    "show_favorites":"Fovorileri Göster",
    "add_to_cart": "Cart Eklw",
-   "Reset_product_data":"Ürün Verilerini Sıfırla"
+   "Reset_product_data":"Ürün Verilerini Sıfırla",
+   "select_misc_item":"Çeşitli Öğeleri Seç",
+   "add_misc_item":"Çeşitli Öğleri Ekle",
+   "reset_product_data":"Ürün Verilerini Sıfırla",
+   "no_printer_found":"Yazıcı Bulunamadı",
+   "printer_test":"Yazıcı Testi",
+   "product_data_reset_success":"Ürün verileri Sıfırlandı",
+  "product_data_reset_Error":"Ürün verileri Sıfırlanamadı"
 }
