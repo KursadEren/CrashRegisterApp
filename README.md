@@ -81,7 +81,7 @@ Cash Register App is a mobile platform application designed to manage shopping a
    npm run ios     # For iOS
 
 
-   ```bash
+  
    cd src/GroceryData
    json-server --watch users.json --port 3002
    json-server --watch e-commerce-data-set.json --port 3001
@@ -98,17 +98,24 @@ Usage
 
 <img src="./Image/loginscreen.png" alt="Login Screen" width="300"/>
 
+<img src="./Image/LoginScreen.gif" alt="Login Screen" width="300"/>
+
 
 2. **Home Screen**
 - Displays a welcome message with the logged-in user's name.
 - Provides quick access to various functionalities such as the product catalog, sales, and reports.
 <img src="./Image/HomeScreen.png" alt="Home Screen" width="300"/>
+
 <img src="./Image/HomeScreen2.png" alt="Home Screen2" width="300"/>
+
+<img src="./Image/HomeScreen.gif" alt="Login Screen" width="300"/>
 
 3. **Product Catalog**
 - Lists all available products with details.
 - Users can check prices and add products to the cart.
 <img src="./Image/Product.png" alt="Product" width="300"/>
+
+<img src="./Image/ProductScreen.gif" alt="Login Screen" width="300"/>
 
 
 
@@ -116,6 +123,8 @@ Usage
 - Facilitates the sales process, including adding items to the basket and completing transactions.
 - Supports return operations with proper validation.
 <img src="./Image/Sales.png" alt="Sales" width="300"/>
+
+<img src="./Image/SalesScreen.gif" alt="Sales" width="300"/>
 
 
 
@@ -129,11 +138,15 @@ Usage
 
 <img src="./Image/GraphicReport.png" alt="GraphicReport" width="300"/>
 
+<img src="./Image/ReportScreen.gif" alt="GraphicReport" width="300"/>
+
 
 
 6. **Settings**
 - Allows users to change application settings, including theme and language preferences.
 <img src="./Image/Settings.png" alt="Settings" width="300"/>
+
+<img src="./Image/SettingsScreen.gif" alt="GraphicReport" width="300"/>
 
 
 
