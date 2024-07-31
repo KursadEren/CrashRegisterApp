@@ -25,10 +25,11 @@ const Home = ({ navigation }) => {
   const isLandscape = width > height;
   const [refreshing, setRefreshing] = useState(false);
   const [currentUser, setCurrentUser] = useState('');
+  const [currentUserImage, setCurrentUserImage] = useState('https://via.placeholder.com/50');
   const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth());
   const [selectedPurchase, setSelectedPurchase] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [loading, setLoading] = useState(true); // Başlangıçta true olarak ayarlandı
+  const [loading, setLoading] = useState(true);
 
   const months = [
     'Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 
@@ -135,7 +136,9 @@ const Home = ({ navigation }) => {
   const fetchCurrentUser = async () => {
     try {
       const user = await AsyncStorage.getItem('@current_user');
+      const image = await AsyncStorage.getItem(`@user_profile_image_${user}`);
       setCurrentUser(user || '');
+      setCurrentUserImage(image || 'https://via.placeholder.com/50');
     } catch (error) {
       Vibration.vibrate(); // Hata durumunda titreşim
       console.error('Error fetching current user:', error);
@@ -194,7 +197,7 @@ const Home = ({ navigation }) => {
       }
     >
       <View style={styles.header}>
-        <Image source={{ uri: 'https://via.placeholder.com/50' }} style={styles.avatar} />
+        <Image source={{ uri: currentUserImage }} style={styles.avatar} />
         <View style={styles.headerTextContainer}>
           <Text style={[styles.welcomeMessage, { color: theme.textColor }]}>{t('hello')},</Text>
           <Text style={[styles.userName, { color: theme.textColor }]}>{currentUser}</Text>
@@ -475,8 +478,8 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginHorizontal: 5,
     alignItems: 'center',
-    width: 220, // Genişliği sınırla
-    height: 220, // Yüksekliği sınırla
+    width: 220,
+    height: 220,
   },
   purchaseImage: {
     width: 100,
