@@ -122,7 +122,6 @@ Usage
 4.  **Sales and Return Processing**
 - Facilitates the sales process, including adding items to the basket and completing transactions.
 - Supports return operations with proper validation.
-<img src="./Image/Sales.png" alt="Sales" width="300"/>
 
 <img src="./Image/SalesScreen.gif" alt="Sales" width="300"/>
 
@@ -144,7 +143,6 @@ Usage
 
 6. **Settings**
 - Allows users to change application settings, including theme and language preferences.
-<img src="./Image/Settings.png" alt="Settings" width="300"/>
 
 <img src="./Image/SettingsScreen.gif" alt="GraphicReport" width="300"/>
 
