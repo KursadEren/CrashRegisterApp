@@ -24,36 +24,30 @@ const SalesReport = () => {
         const paymentItems = await AsyncStorage.multiGet(paymentKeys);
         
         const sales = {};
-        const salesOverTime = {};
 
         paymentItems.forEach(item => {
           const payment = JSON.parse(item[1]);
-          const date = new Date(payment.date).toLocaleDateString();
           payment.items.forEach(product => {
             if (sales[product.name]) {
               sales[product.name] += product.count;
             } else {
               sales[product.name] = product.count;
             }
-
-            if (salesOverTime[date]) {
-              salesOverTime[date] += product.count;
-            } else {
-              salesOverTime[date] = product.count;
-            }
           });
         });
 
+        const totalSalesCount = Object.values(sales).reduce((sum, value) => sum + value, 0);
         const data = Object.keys(sales).map((key) => ({
-          name: key.length > 10 ? key.substring(0, 10) + '...' : key,
+          name: key,
           count: sales[key],
           color: getRandomColor(),
           legendFontColor: theme.textColor,
           legendFontSize: 15,
+          percentage: ((sales[key] / totalSalesCount) * 100).toFixed(2)
         }));
 
         const barData = {
-          labels: Object.keys(sales).map(key => key.length > 10 ? key.substring(0, 10) + '...' : key),
+          labels: Object.keys(sales),
           datasets: [
             {
               data: Object.values(sales)
@@ -61,21 +55,10 @@ const SalesReport = () => {
           ]
         };
 
-        const sortedDates = Object.keys(salesOverTime).sort((a, b) => new Date(a) - new Date(b));
-        const lineData = {
-          labels: sortedDates,
-          datasets: [
-            {
-              data: sortedDates.map(date => salesOverTime[date])
-            }
-          ]
-        };
-
-        setTotalSales(Object.values(sales).reduce((sum, value) => sum + value, 0));
+        setTotalSales(totalSalesCount);
         setTopProduct(Object.keys(sales).reduce((a, b) => sales[a] > sales[b] ? a : b));
         setPieChartData(data);
         setBarChartData(barData);
-        setLineChartData(lineData);
         setLoading(false);
       } catch (error) {
         console.error('Error fetching sales data:', error);
@@ -110,44 +93,57 @@ const SalesReport = () => {
       <Text style={[styles.info, { color: theme.textColor }]}>{t('top_product')}: {topProduct}</Text>
 
       <Text style={[styles.subHeader, { color: theme.primaryColor }]}>{t('pie_chart')}</Text>
-      <PieChart
-        data={pieChartData}
-        width={width - 40}
-        height={220}
-        chartConfig={{
-          backgroundColor: theme.primaryColor,
-          backgroundGradientFrom: theme.primaryColor,
-          backgroundGradientTo: theme.secondaryColor,
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
-            borderRadius: 16
-          }
-        }}
-        accessor="count"
-        backgroundColor="transparent"
-        paddingLeft="15"
-        absolute
-      />
+      <ScrollView horizontal>
+        <PieChart
+          data={pieChartData}
+          width={width * 3}
+          height={220}
+          chartConfig={{
+            backgroundColor: theme.primaryColor,
+            backgroundGradientFrom: theme.primaryColor,
+            backgroundGradientTo: theme.secondaryColor,
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16
+            }
+          }}
+          accessor="count"
+          backgroundColor="transparent"
+          paddingLeft={"15"}
+          center={[-120, 0]}
+          absolute
+        />
+      </ScrollView>
+      {pieChartData.map((data, index) => (
+        <View key={index} style={styles.dataContainer}>
+          <View style={[styles.colorBox, { backgroundColor: data.color }]} />
+          <Text style={[styles.productInfo, { color: theme.textColor }]}>
+            {data.name} - {data.count} ({data.percentage}%)
+          </Text>
+        </View>
+      ))}
 
       <Text style={[styles.subHeader, { color: theme.primaryColor }]}>{t('bar_chart')}</Text>
-      <BarChart
-        data={barChartData}
-        width={width - 40}
-        height={300}
-        yAxisLabel=""
-        chartConfig={{
-          backgroundColor: theme.primaryColor,
-          backgroundGradientFrom: theme.primaryColor,
-          backgroundGradientTo: theme.secondaryColor,
-          color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
-          style: {
-            borderRadius: 16
-          }
-        }}
-        verticalLabelRotation={30}
-      />
+      <ScrollView horizontal>
+        <BarChart
+          data={barChartData}
+          width={barChartData.labels.length * 60} // Adjust width dynamically based on the number of labels
+          height={300}
+          yAxisLabel=""
+          chartConfig={{
+            backgroundColor: theme.primaryColor,
+            backgroundGradientFrom: theme.primaryColor,
+            backgroundGradientTo: theme.secondaryColor,
+            color: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            labelColor: (opacity = 1) => `rgba(255, 255, 255, ${opacity})`,
+            style: {
+              borderRadius: 16
+            }
+          }}
+          verticalLabelRotation={30}
+        />
+      </ScrollView>
     </ScrollView>
   );
 };
@@ -155,30 +151,46 @@ const SalesReport = () => {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    padding: 20,
+    padding: 10,
     alignItems: 'center',
   },
   header: {
     fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 10,
     textAlign: 'center',
   },
   subHeader: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginTop: 20,
-    marginBottom: 10,
+    marginTop: 10,
+    marginBottom: 5,
     textAlign: 'center',
   },
   info: {
     fontSize: 16,
-    marginBottom: 10,
+    marginBottom: 5,
+  },
+  productInfo: {
+    fontSize: 14,
+    marginVertical: 1,
+    textAlign: 'left', 
   },
   centered: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  dataContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 5,
+    alignSelf: 'flex-start', 
+  },
+  colorBox: {
+    width: 20,
+    height: 20,
+    marginRight: 10,
   },
 });
 

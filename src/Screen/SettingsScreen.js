@@ -18,16 +18,18 @@ const SettingsScreen = () => {
   const [devices, setDevices] = useState([]);
   const [toastVisible, setToastVisible] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
-  const [unsentPaymentsCount, setUnsentPaymentsCount] = useState(0); // Yeni state
-  const [isProcessing, setIsProcessing] = useState(false); // İşleme durumunu kontrol etmek için
+  const [unsentPaymentsCount, setUnsentPaymentsCount] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    loadUnsentPaymentsCount(); // Sayfa açıldığında unsent payments count'u yükle
-    if (serviceStatus) {
-      sendUnsentPaymentsToCentral();
+    if (isFocused) {
+      loadUnsentPaymentsCount();
+      if (serviceStatus) {
+        sendUnsentPaymentsToCentral();
+      }
     }
-  }, [isFocused]);
+  }, [isFocused, serviceStatus]);
 
   const requestPermissions = async () => {
     if (Platform.OS === 'android') {
@@ -63,7 +65,7 @@ const SettingsScreen = () => {
         .map(item => [item[0], JSON.parse(item[1])])
         .filter(([key, payment]) => !payment.sentToCentral);
 
-      setUnsentPaymentsCount(unsentPayments.length); // Unsent payments count'u güncelle
+      setUnsentPaymentsCount(unsentPayments.length);
     } catch (e) {
       console.log('Unsent payments count yüklenirken hata:', e);
     }
@@ -85,9 +87,9 @@ const SettingsScreen = () => {
 
   const sendUnsentPaymentsToCentral = async () => {
     if (isProcessing) {
-      return; // Eğer işlem halindeyse tekrar çalıştırma
+      return;
     }
-    setIsProcessing(true); // İşlem başladığında durumu güncelle
+    setIsProcessing(true);
 
     try {
       const keys = await AsyncStorage.getAllKeys();
@@ -114,12 +116,11 @@ const SettingsScreen = () => {
       setTimeout(() => setToastVisible(false), 2000);
       console.log(t('all_payments_sent'));
 
-      // Unsent payments count'u güncelle
       loadUnsentPaymentsCount();
     } catch (e) {
       console.log('Ödemeleri gönderme hatası:', e);
     } finally {
-      setIsProcessing(false); // İşlem tamamlandığında durumu sıfırla
+      setIsProcessing(false);
     }
   };
 
@@ -255,7 +256,7 @@ const styles = StyleSheet.create({
   buttonWrapper: {
     marginBottom: 10,
     width: '100%',
-    position: 'relative', // Badge için konumlandırma
+    position: 'relative',
   },
   badgeContainer: {
     position: 'absolute',

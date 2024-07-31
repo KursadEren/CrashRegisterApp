@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, useWindowDimensions, TouchableOpacity } from 'react-native';
+import { View, Modal, StyleSheet, Text, ScrollView, BackHandler, TouchableOpacity, useWindowDimensions, Alert } from 'react-native';
 import MyFlatlist from '../Component/MyFlatlist';
 import MyButton from '../Component/MyButton';
 import MyTextInput from '../Component/MyTextınput';
@@ -23,6 +23,8 @@ const Sales = ({ navigation }) => {
   const [bagModalVisible, setBagModalVisible] = useState(false);
   const [bagQuantity, setBagQuantity] = useState('');
   const [bagCost, setBagCost] = useState(0);
+  const [miscItemModalVisible, setMiscItemModalVisible] = useState(false);
+  const [miscItem, setMiscItem] = useState(null);
   const [showFavorites, setShowFavorites] = useState(false);
 
   const { width, height } = useWindowDimensions();
@@ -34,6 +36,10 @@ const Sales = ({ navigation }) => {
         const storedData = await AsyncStorage.getItem('@productData');
         if (storedData) {
           setData1List(JSON.parse(storedData));
+        }
+        const storedMiscItem = await AsyncStorage.getItem('@miscItem');
+        if (storedMiscItem) {
+          setMiscItem(JSON.parse(storedMiscItem));
         }
       } catch (error) {
         console.error("AsyncStorage'den veri alırken hata:", error);
@@ -129,6 +135,30 @@ const Sales = ({ navigation }) => {
     navigation.navigate("Receipt", { data2List: updatedData2List, bagCount, bagCost });
   };
 
+  const handleMiscItemSelect = async (item) => {
+    try {
+      await AsyncStorage.setItem('@miscItem', JSON.stringify(item));
+      setMiscItem(item);
+      setMiscItemModalVisible(false);
+      Alert.alert('Başarılı', 'Misc item başarıyla seçildi.');
+    } catch (error) {
+      console.error('Error saving misc item:', error);
+    }
+  };
+
+  const handleAddMiscItem = async () => {
+    try {
+      if (miscItem) {
+        setData2List((prevData2List) => [...prevData2List, { ...miscItem, count: 1 }]);
+        Alert.alert('Başarılı', 'Misc item başarıyla eklendi.');
+      } else {
+        Alert.alert('Hata', 'Lütfen önce bir misc item seçin.');
+      }
+    } catch (error) {
+      console.error('Error adding misc item:', error);
+    }
+  };
+
   const handleToggleFavorites = async () => {
     setShowFavorites(!showFavorites);
     if (!showFavorites) {
@@ -155,11 +185,27 @@ const Sales = ({ navigation }) => {
   return (
     <ScrollView style={[styles.scrollView, { padding: width * 0.05, backgroundColor: theme.backgroundColor }]}>
       <View style={styles.buttonContainer}>
-        <MyButton
-          visible={true}
-          OnChangeButton={handleToggleFavorites}
-          text={showFavorites ? t('show_all') : t('show_favorites')}
-        />
+        <View style={styles.buttonWrapper}>
+          <MyButton
+            visible={true}
+            OnChangeButton={handleToggleFavorites}
+            text={showFavorites ? t('show_all') : t('show_favorites')}
+          />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <MyButton
+            visible={true}
+            OnChangeButton={() => setMiscItemModalVisible(true)}
+            text={t('select_misc_item')}
+          />
+        </View>
+        <View style={styles.buttonWrapper}>
+          <MyButton
+            visible={true}
+            OnChangeButton={handleAddMiscItem}
+            text={t('add_misc_item')}
+          />
+        </View>
       </View>
       <MyFlatlist
         data={data1List}
@@ -231,7 +277,30 @@ const Sales = ({ navigation }) => {
         </View>
       </Modal>
 
-      <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 10 }]}>
+      <Modal
+        visible={miscItemModalVisible}
+        animationType="slide"
+        transparent={true}
+      >
+        <View style={styles.modalContainer}>
+          <View style={[styles.modalContent, isLandscape ? styles.modalContentLandscape : styles.modalContentPortrait, { backgroundColor: theme.modalBackground }]}>
+            <Text style={[styles.modalText, { color: theme.textColor }]}>{t('select_misc_item')}:</Text>
+            <MyFlatlist
+              data={data1List}
+              showSearchInput={true}
+              onItemSelect={handleMiscItemSelect}
+              information={"select"}
+            />
+            <View style={styles.modalButtonContainer}>
+              <View>
+                <MyButton visible={true} OnChangeButton={() => setMiscItemModalVisible(false)} text={t('close')} />
+              </View>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <View style={[styles.buttonContainer, { marginBottom: isLandscape ? 50 : 50 }]}>
         <Text style={[styles.totalText, { color: theme.textColor }]}>{t('total_cost')}: ${totalCost.toFixed(2)}</Text>
         <MyButton
           visible={!isItemListEmpty}
@@ -275,14 +344,23 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
+   
   },
   buttonContainer: {
-    marginTop: 20,
-    alignItems: 'center',
+    flexDirection: 'column',
+    justifyContent: "space-evenly",
+    marginVertical: 30,
+    width: '100%',
+  },
+  buttonWrapper: {
+    flex: 1,
+    marginHorizontal: 10,
+    marginVertical: 3,
   },
   totalText: {
     fontSize: 18,
-    marginBottom: 10,
+    marginBottom: 40,
+    textAlign:"center"
   },
 });
 
