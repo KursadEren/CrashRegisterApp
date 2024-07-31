@@ -80,6 +80,16 @@ Cash Register App is a mobile platform application designed to manage shopping a
    npm run android # For Android
    npm run ios     # For iOS
 
+
+   ```bash
+   cd src/GroceryData
+   json-server --watch users.json --port 3002
+   json-server --watch e-commerce-data-set.json --port 3001
+   node server.js
+   
+<img src="./Image/UserServer.gif" alt="Login Screen" width="300"/>
+<img src="./Image/ProductServer.gif" alt="Login Screen" width="300"/>
+<img src="./Image/Server.gif" alt="Login Screen" width="300"/>
 Usage
 
 1. **Login Screen**
