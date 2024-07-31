@@ -23,7 +23,7 @@ import { I18nextProvider } from 'react-i18next';
 import i18n from './src/i18n/i18n'; 
 
 import 'intl';
-import 'intl/locale-data/jsonp/en'; // İhtiyacınıza göre farklı dilleri de ekleyebilirsiniz
+import 'intl/locale-data/jsonp/en'; 
 import 'intl-pluralrules';
 import UserListScreen from './src/Screen/UserListScreen';
 import { EducationProvider } from './src/Context/EducationContext';

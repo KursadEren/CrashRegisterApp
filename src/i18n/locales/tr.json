@@ -122,5 +122,6 @@
    "no_printer_found":"Yazıcı Bulunamadı",
    "printer_test":"Yazıcı Testi",
    "product_data_reset_success":"Ürün verileri Sıfırlandı",
-  "product_data_reset_Error":"Ürün verileri Sıfırlanamadı"
+  "product_data_reset_Error":"Ürün verileri Sıfırlanamadı",
+  "payment_methods":"Ödeme Yöntemi"
 }

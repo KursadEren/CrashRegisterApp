@@ -168,6 +168,9 @@ const Receipt = ({ route }) => {
                 } else if (campaign.id === 2) {
                   setCampaignDiscount(calculateTotals().discount);
                 }
+                else if (campaign.id === 3) {
+                  setCampaignDiscount(calculateTotals().discount);
+                }
               }}
             >
               <Text style={styles.campaignButtonText}>{campaign.name} - {campaign.discount}</Text>

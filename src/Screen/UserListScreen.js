@@ -49,7 +49,7 @@ const UserListScreen = () => {
     <View style={styles.container}>
       <MyFlatlist
         data={users}
-        showSearchInput={true}
+
         users={true}
         onItemSelect={(item) => console.log('Selected:', item)}
         onItemRemove={(item) => console.log('Removed:', item)}

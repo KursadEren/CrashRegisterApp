@@ -129,7 +129,8 @@
    "reset_product_data":"Reset Product Data",
   "no_printer_found":"No Printer Found",
   "product_data_reset_success":"Product Data Reset Success",
-  "product_data_reset_Error":"Product Data Reset Error"
+  "product_data_reset_Error":"Product Data Reset Error",
+  "payment_methods":"Payment Method"
   
   
   
